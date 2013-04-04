@@ -19,6 +19,10 @@ const Logger = function(name){
         self.log("DEBUG", message);    
     }
 
+    self.warn = function(message){
+        self.log("WARN", message);    
+    }
+
     self.getLogger = function(clazz){
         return new Logger(self.base + "[" + clazz + "]");
     }

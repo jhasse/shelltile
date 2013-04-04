@@ -1,13 +1,15 @@
 const Main = imports.ui.main;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
-var Logger = Extension.imports.logger.Logger;
-Logger = Logger.getLogger("shelltide");
+const Window = Extension.imports.window.Window;
+const Workspace = Extension.imports.workspace.Workspace;
+const Log = Extension.imports.logger.Logger.getLogger("shelltide");
+
 
 const Ext = function Ext(){
 	let self = this;
 	self.enabled = false;
-    self.logger = Logger.getLogger("Ext");
+    self.log = Log.getLogger("Ext");
 	
 	var Bounds = function(monitor) {
 		this.monitor = monitor;
@@ -46,19 +48,32 @@ const Ext = function Ext(){
 		let workspace = self.workspaces[meta_workspace];
 
     	if(typeof(workspace) == "undefined") {
-
-			//var state = new Tiling.LayoutState(self.bounds);
-			workspace = self.workspaces[meta_workspace] = meta_workspace;//new Workspace(meta_workspace, state, self);
+			workspace = self.workspaces[meta_workspace] = new Workspace(meta_workspace, self);
 		}
 		return workspace;
 	};
 	
-	self.remove_workspace = function(meta_workspace) {
+	self.remove_workspace = function(screen, index) {
+		var removed_meta = null;
+		var removed_ws = null;
+		for(let k in self.workspaces){
+			let v = self.workspaces[k];
+			var found = false;
+			for(let i=0; i<screen.get_n_workspaces();i++){
+				var meta_workspace = screen.get_workspace_by_index(i);
+				if(meta_workspace.toString() == k) found = true;
+			}
 
-		var ws = self.workspaces[meta_workspace];
-		if(ws != null) {
-			//self._do(function() {ws._disable();}, 'disable workspace');
-			delete self.workspaces[meta_workspace];
+			if(!found){
+				removed_meta = k;
+				removed_ws = v;
+				break;
+			}
+		}
+		
+		if(removed_ws != null) {
+			removed_ws._disable();
+			delete self.workspaces[removed_meta];
 		}
 	};
 	
@@ -67,13 +82,12 @@ const Ext = function Ext(){
 			create_if_necessary = true;
 		}
 		if(!meta_window) {
-			// self.log.debug("bad window: " + meta_window);
 			return null;
 		}
-		//var id = Window.GetId(meta_window);
+		var id = Window.GetId(meta_window);
 		var win = self.windows[id];
 		if(typeof(win) == "undefined" && create_if_necessary) {
-			//win = self.windows[id] = new Window(meta_window, self);
+			win = self.windows[id] = new Window(meta_window, self);
 		}
 		return win;
 	};	
@@ -138,10 +152,11 @@ const Ext = function Ext(){
             var monitorIdx = screen.get_primary_monitor();
             self.monitor = screen.get_monitor_geometry(monitorIdx);
             self.bounds = new Bounds(self.monitor);
+            self._init_workspaces();
             
-            self.logger.debug("enableeeee");
+            self.log.debug("enableeeee");
         } catch(e){
-            self.logger.error(e);    
+            self.log.error(e);    
         }
 	}
 
@@ -152,10 +167,10 @@ const Ext = function Ext(){
             self._disconnect_workspaces();
 		    self.disconnect_tracked_signals(self);
 		    self._reset_state();
-            self.logger.debug("disableeeee");
+            self.log.debug("disableeeee");
 
         } catch(e){
-            self.logger.error(e);    
+            self.log.error(e);    
         }
 	}
 };
