@@ -1,4 +1,5 @@
 const Main = imports.ui.main;
+const Meta = imports.gi.Meta;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
 const Window = Extension.imports.window.Window;
@@ -12,9 +13,34 @@ const DefaultTilingStrategy = function(ext){
 	this.log = Log.getLogger("DefaultTilingStrategy");
 	
 	this.on_window_moved = function(win){
+		/*var window_under = this.get_window_under(win);
+		if(window_under){
+			this.log.debug("window under " + window_under);
+		}*/
+	}
+	
+	this.get_window_under = function(win){
 		var workspace = win.get_workspace();
 		var workspace_windows = workspace.meta_windows();
-		this.log.debug("window moved " + workspace_windows);
+		
+		var win_rect = Meta.rect(win.xpos(), win.ypos(), 1, 1);
+		
+		var z = undefined;
+		var topmost = undefined;
+		
+		for(let i=0; i<workspace_windows.length; i++){
+			let win1 =  workspace_windows[i];
+			win1 = self.extension.get_window(win1, true);
+			let actor = win1.get_actor();
+			
+			if(win1.outer_rect().contains_rect(win_rect)){
+				if(z === undefined || actor.z_position > z){
+					topmost = win1;					
+				}				
+			}
+			
+		}
+		return topmost;
 	}
 	
 };

@@ -146,12 +146,16 @@ Window.prototype = {
 		return this.extension.get_workspace(this.meta_window.get_workspace());
 	}
 	
+	,get_actor: function(){
+		return this.meta_window.get_compositor_private();
+	}
+	
 	// dimensions
-	,width: function() { return this._outer_rect().width; }
-	,height: function() { return this._outer_rect().height; }
-	,xpos: function() { return this._outer_rect().x; }
-	,ypos: function() { return this._outer_rect().y; }
-	,_outer_rect: function() { return this.meta_window.get_outer_rect(); }
+	,width: function() { return this.outer_rect().width; }
+	,height: function() { return this.outer_rect().height; }
+	,xpos: function() { return this.outer_rect().x; }
+	,ypos: function() { return this.outer_rect().y; }
+	,outer_rect: function() { return this.meta_window.get_outer_rect(); }
 };
 
 Window.GetId = function(w) {
