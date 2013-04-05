@@ -6,6 +6,14 @@ const Workspace = Extension.imports.workspace.Workspace;
 const Log = Extension.imports.logger.Logger.getLogger("shelltide");
 
 
+const DefaultTilingStrategy = function(){
+	
+	
+	
+	
+};
+
+
 const Ext = function Ext(){
 	let self = this;
 	self.enabled = false;
