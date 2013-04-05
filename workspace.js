@@ -70,24 +70,11 @@ Workspace.prototype = {
 		win.workspace_signals = [];
 		
 		let bind_to_window_change = Lang.bind(this, function(event_name, relevant_grabs, cb) {
-			// we only care about events *after* at least one relevant grab_op,
-			// this flag keeps track of that
-			let change_pending = false;
+
 			let signal_handler = Lang.bind(this, function() {
 				let grab_op = global.screen.get_display().get_grab_op();
 				if(relevant_grabs.indexOf(grab_op) != -1) {
-					//wait for the operation to end...
-					change_pending = true;
-					Mainloop.idle_add(signal_handler);
-				} else {
-					let change_happened = change_pending;
-					// it's critical that this flag be reset before cb() happens, otherwise the
-					// callback will (frequently) trigger a stream of feedback events.
-					change_pending = false;
-					if(grab_op == Meta.GrabOp.NONE && change_happened) {
-						this.log.debug("change event [" + event_name + "] happened for window " + win);
-						cb(win);
-					}
+					cb(win);					
 				}
 				return false;
 			});
