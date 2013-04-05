@@ -108,7 +108,7 @@ Workspace.prototype = {
 	},
 
 	on_window_move:  function(win) {
-		this.log.debug("window move");
+		this.log.debug("window move " + win.xpos() + "," + win.ypos());
 	},
 	
 	on_window_resize: function(win) { 
