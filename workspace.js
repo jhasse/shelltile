@@ -69,17 +69,7 @@ Workspace.prototype = {
 		this.log.debug("on_window_create for " + win);
 		win.workspace_signals = [];
 		
-		let bind_to_window_change = Lang.bind(this, function(event_name, relevant_grabs, cb) {
-
-			let signal_handler = Lang.bind(this, function() {
-				let grab_op = global.screen.get_display().get_grab_op();
-				if(relevant_grabs.indexOf(grab_op) != -1) {
-					cb(win);					
-				}
-				return false;
-			});
-			this.extension.connect_and_track(win, actor, event_name + '-changed', signal_handler);
-		});		
+		let bind_to_window_change = this.bind_to_window_change(win, actor);
 
 		let move_ops = [Meta.GrabOp.MOVING];
 		let resize_ops = [
@@ -92,14 +82,61 @@ Workspace.prototype = {
 				Meta.GrabOp.RESIZING_W,
 				Meta.GrabOp.RESIZING_E
 		];
-		bind_to_window_change('position', move_ops,     Lang.bind(this, this.on_window_moved));
-		bind_to_window_change('size',     resize_ops,   Lang.bind(this, this.on_window_resized));
+		bind_to_window_change('position', move_ops, Lang.bind(this, this.on_window_move),  Lang.bind(this, this.on_window_moved));
+		bind_to_window_change('size',     resize_ops, Lang.bind(this, this.on_window_resize), Lang.bind(this, this.on_window_resized));
 		this.extension.connect_and_track(win, meta_window, 'notify::minimized', Lang.bind(this, this.on_window_minimize_changed));	
 	},
+	
+	
+	bind_to_window_change: function(win, actor){
+		return Lang.bind(this, function(event_name, relevant_grabs, cb, cb_final) {
+	
+			let change_pending = false;
+			
+			let signal_handler_idle = Lang.bind(this, function() {
+				let grab_op = global.screen.get_display().get_grab_op();
+	
+				if(relevant_grabs.indexOf(grab_op) == -1) {
+	
+					if(grab_op == Meta.GrabOp.NONE && change_pending) {
+						change_pending = false;
+						if(cb_final) cb_final(win);
+					}
+	
+				} else {
+					// try again
+					Mainloop.idle_add(signal_handler_idle);
+				}				
+				return false;
+			});
+			
+			let signal_handler_changed = Lang.bind(this, function() {
+				let grab_op = global.screen.get_display().get_grab_op();
+				if(relevant_grabs.indexOf(grab_op) != -1) {
+	
+					change_pending = true;
+					if(cb) cb(win);
+					Mainloop.idle_add(signal_handler_idle);
+	
+				}
+				return false;
+			});
+			this.extension.connect_and_track(win, actor, event_name + '-changed', signal_handler_changed);
+		});
+	},
 
+	on_window_move:  function(win) {
+		this.log.debug("window move");
+	},
+	
+	on_window_resize: function(win) { 
+		this.log.debug("window resize");
+	},
+	
 	on_window_moved:  function(win) {
 		this.log.debug("window moved");
 	},
+	
 	on_window_resized: function(win) { 
 		this.log.debug("window resized");
 	},
