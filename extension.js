@@ -6,10 +6,14 @@ const Workspace = Extension.imports.workspace.Workspace;
 const Log = Extension.imports.logger.Logger.getLogger("shelltide");
 
 
-const DefaultTilingStrategy = function(){
+const DefaultTilingStrategy = function(ext){
 	
+	this.extension = ext;
+	this.log = Log.getLogger("DefaultTilingStrategy");
 	
-	
+	this.on_window_moved = function(win){
+		this.log.debug("window moved");
+	}
 	
 };
 
@@ -56,7 +60,8 @@ const Ext = function Ext(){
 		let workspace = self.workspaces[meta_workspace];
 
     	if(typeof(workspace) == "undefined") {
-			workspace = self.workspaces[meta_workspace] = new Workspace(meta_workspace, self);
+    		var strategy = new DefaultTilingStrategy(self);
+			workspace = self.workspaces[meta_workspace] = new Workspace(meta_workspace, self, strategy);
 		}
 		return workspace;
 	};

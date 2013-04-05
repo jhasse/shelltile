@@ -9,11 +9,12 @@ function Workspace() {
 }
 Workspace.prototype = {
 
-	_init : function(meta_workspace, ext) {
+	_init : function(meta_workspace, ext, strategy) {
 		this._shellwm =  global.window_manager;
 		this.log = Log.getLogger("Workspace");
 		this.meta_workspace = meta_workspace;
 		this.extension = ext;
+		this.strategy = strategy
 
 		this.extension.connect_and_track(this, this.meta_workspace, 'window-added', Lang.bind(this, this.on_window_create));
 		this.extension.connect_and_track(this, this.meta_workspace, 'window-removed', Lang.bind(this, this.on_window_remove));
@@ -116,6 +117,7 @@ Workspace.prototype = {
 	},
 	
 	on_window_moved:  function(win) {
+		if(this.strategy && this.strategy.on_window_moved) this.strategy.on_window_moved(win);
 		this.log.debug("window moved");
 	},
 	
