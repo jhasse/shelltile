@@ -142,6 +142,10 @@ Window.prototype = {
 		return eq;
 	}
 
+	,get_workspace: function(){
+		return this.extension.get_workspace(this.meta_window.get_workspace());
+	}
+	
 	// dimensions
 	,width: function() { return this._outer_rect().width; }
 	,height: function() { return this._outer_rect().height; }

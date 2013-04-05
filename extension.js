@@ -12,7 +12,9 @@ const DefaultTilingStrategy = function(ext){
 	this.log = Log.getLogger("DefaultTilingStrategy");
 	
 	this.on_window_moved = function(win){
-		this.log.debug("window moved");
+		var workspace = win.get_workspace();
+		var workspace_windows = workspace.meta_windows();
+		this.log.debug("window moved " + workspace_windows);
 	}
 	
 };
