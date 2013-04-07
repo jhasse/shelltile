@@ -150,6 +150,10 @@ Window.prototype = {
 		return this.meta_window.get_compositor_private();
 	}
 	
+	,is_minimized: function(){
+		return this.meta_window.minimized;		
+	}
+	
 	// dimensions
 	,width: function() { return this.outer_rect().width; }
 	,height: function() { return this.outer_rect().height; }
