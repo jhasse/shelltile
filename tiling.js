@@ -55,6 +55,43 @@ const WindowGroup = function(first, second, type, splitPercent){
 		return new Meta.Rectangle({ x: x, y: y, width: width, height: height});
 	}
 	
+	
+	this.update_geometry = function(win){
+		var bounds = this.outer_rect();
+		var delta = win.get_delta();
+		var first_last = this.first.get_last();
+		var second_last = this.second.get_last();
+		var splitPercent = this.splitPercent;
+		
+		if(win == this.first){
+			
+			if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
+				bounds.width = first_last.width + second_last.width;
+				splitPercent = (first_last.width + delta[2]) / bounds.width;
+				
+			} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
+				bounds.height = first_last.height + second_last.height;
+				splitPercent = (first_last.height + delta[3]) / bounds.height;
+			}
+			this.splitPercent = splitPercent;
+
+		}/* else if(win == this.second){
+			
+			if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
+				bounds.width = first_last.width + second_last.width;
+				this.log.debug("bounds.width: " + bounds.width);
+				splitPercent = 1 - ((second_last.width + delta[2]*2) / bounds.width);
+				
+			} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
+				bounds.height = first_last.height + second_last.height;
+				splitPercent = 1 - ((second_last.height + delta[3]*2) / bounds.height);
+			}
+			this.splitPercent = splitPercent;
+			
+		}*/
+		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
+	}
+	
 	this.move_resize = function(x, y, width, height){
 		if(x===undefined || y===undefined || width===undefined || height===undefined){
 
@@ -75,12 +112,12 @@ const WindowGroup = function(first, second, type, splitPercent){
 		
 		
 		if(this.type == WindowGroup.HORIZONTAL_GROUP){
-			first_width = Math.floor(width * this.splitPercent);
+			first_width = Math.round(width * this.splitPercent);
 			second_width = width - first_width;
 			second_x = first_x + first_width;
 			
 		} else if(this.type == WindowGroup.VERTICAL_GROUP){
-			first_height = Math.floor(height * this.splitPercent);
+			first_height = Math.round(height * this.splitPercent);
 			second_height = height - first_height;
 			second_y = first_y + first_height;
 		}

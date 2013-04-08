@@ -153,6 +153,10 @@ Window.prototype = {
 	,is_minimized: function(){
 		return this.meta_window.minimized;		
 	}
+
+	,get_last: function(){
+		return this.last_rect;
+	}
 	
 	,save_last: function(){
 		this.last_rect = this.outer_rect();
@@ -160,7 +164,7 @@ Window.prototype = {
 	
 	,update_geometry: function(){
 		if(this.group){
-			this.group.move_resize();
+			this.group.update_geometry(this);
 		}
 	}
 	
@@ -169,7 +173,7 @@ Window.prototype = {
 		else {
 			var last = this.last_rect;
 			var current = this.outer_rect();
-			return [current.x - last.x, current.y - last-y, current.width - last.width, current.height - last.height];
+			return [current.x - last.x, current.y - last.y, current.width - last.width, current.height - last.height];
 		}
 	}
 	

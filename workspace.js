@@ -150,6 +150,7 @@ Workspace.prototype = {
 		var workspace_num = actor.get_workspace()
 		if(workspace_num != this.meta_workspace.index()) return;
 		
+		if(this.strategy && this.strategy.on_window_maximize) this.strategy.on_window_maximize(win);
 		this.log.debug("window maximized " + actor + " " + this.meta_workspace);
 	},
 	
@@ -157,6 +158,7 @@ Workspace.prototype = {
 		var workspace_num = actor.get_workspace()
 		if(workspace_num != this.meta_workspace.index()) return;
 
+		if(this.strategy && this.strategy.on_window_unmaximize) this.strategy.on_window_unmaximize(win);
 		this.log.debug("window unmaximized " + actor + " " + this.meta_workspace);
 	},		
 
