@@ -18,10 +18,47 @@ const WindowGroup = function(first, second, type, splitPercent){
 		return "WindowGroup(first=" + this.first + ",second="+ this.second + ",type=" + this.type + ")";
 	}
 	
+	this.get_maximized_bounds = function(){
+		var works = this.first.get_workspace();
+		return works.get_bounds();
+	}
+	
+	this.maximize = function(){
+		var bounds = this.get_maximized_bounds();
+		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
+	}
+	
+	this.save_last = function(){
+		this.first.save_last();
+		this.second.save_last();
+	}
+	
+	this.outer_rect = function(){
+		var first_rect = this.first.outer_rect();
+		var second_rect = this.second.outer_rect();
+		var x = first_rect.x;
+		var y = first_rect.y;
+		if(this.type == WindowGroup.HORIZONTAL_GROUP){
+			var width = first_rect.width + second_rect.width;
+			var height = first_rect.height;
+		} else {
+			var height = first_rect.height + second_rect.height;
+			var width = first_rect.width;
+		}
+		
+		var maximized_bounds = this.get_maximized_bounds();
+		if(x < maximized_bounds.x) x = maximized_bounds.x;
+		if(y < maximized_bounds.y) y = maximized_bounds.y;
+		if(width > maximized_bounds.width) width = maximized_bounds.width;
+		if(height > maximized_bounds.width) height = maximized_bounds.height;
+		
+		return new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+	}
+	
 	this.move_resize = function(x, y, width, height){
 		if(x===undefined || y===undefined || width===undefined || height===undefined){
-			var works = this.first.get_workspace();
-			var bounds = works.get_bounds();
+
+			var bounds = this.outer_rect();
 			
 			this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 			return;
@@ -50,12 +87,14 @@ const WindowGroup = function(first, second, type, splitPercent){
 		
 		this.first.move_resize(first_x, first_y, first_width, first_height);
 		this.second.move_resize(second_x, second_y, second_width, second_height);
-		
+		this.first.save_last();
+		this.second.save_last();
 	}
 	
 	this.commit = function(){
 		this.first.group = this;
 		this.second.group = this;
+		this.maximize();
 		this.move_resize();
 	}
 }
@@ -71,12 +110,17 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.on_window_move = function(win){
 		var window_under = this.get_window_under(win);
+		this.log.debug(window_under);
 		if(window_under){
 			
 			var groupPreview = this.get_window_group_preview(window_under, win);
 			
-			this.log.debug("preview: " + groupPreview);
+			if(groupPreview) this.log.debug("preview: " + groupPreview);
+			else {
+				win.update_geometry();
+			}
 		}
+		win.save_last();
 	}
 	
 	this.on_window_moved = function(win){
@@ -90,6 +134,15 @@ const DefaultTilingStrategy = function(ext){
 				
 			}
 		}
+	}
+	
+	this.on_window_resize = function(win){
+		win.update_geometry();
+		win.save_last();
+	}
+	
+	this.on_window_resized = function(win){
+		
 	}
 	
 	this.get_window_group_preview = function(below, above){

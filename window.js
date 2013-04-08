@@ -154,6 +154,25 @@ Window.prototype = {
 		return this.meta_window.minimized;		
 	}
 	
+	,save_last: function(){
+		this.last_rect = this.outer_rect();
+	}
+	
+	,update_geometry: function(){
+		if(this.group){
+			this.group.move_resize();
+		}
+	}
+	
+	,get_delta: function(){
+		if(!this.last_rect) [0,0,0,0];
+		else {
+			var last = this.last_rect;
+			var current = this.outer_rect();
+			return [current.x - last.x, current.y - last-y, current.width - last.width, current.height - last.height];
+		}
+	}
+	
 	// dimensions
 	,width: function() { return this.outer_rect().width; }
 	,height: function() { return this.outer_rect().height; }

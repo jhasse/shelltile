@@ -81,6 +81,7 @@ Workspace.prototype = {
 		bind_to_window_change('position', move_ops, Lang.bind(this, this.on_window_move),  Lang.bind(this, this.on_window_moved));
 		bind_to_window_change('size',     resize_ops, Lang.bind(this, this.on_window_resize), Lang.bind(this, this.on_window_resized));
 		this.extension.connect_and_track(win, meta_window, 'notify::minimized', Lang.bind(this, this.on_window_minimize_changed));	
+		win.save_last();
 	},
 	
 	
@@ -126,7 +127,8 @@ Workspace.prototype = {
 		this.log.debug("window move " + win.xpos() + "," + win.ypos());
 	},
 	
-	on_window_resize: function(win) { 
+	on_window_resize: function(win) {
+		if(this.strategy && this.strategy.on_window_resize) this.strategy.on_window_resize(win);
 		this.log.debug("window resize");
 	},
 	
@@ -135,7 +137,8 @@ Workspace.prototype = {
 		this.log.debug("window moved");
 	},
 	
-	on_window_resized: function(win) { 
+	on_window_resized: function(win) {
+		if(this.strategy && this.strategy.on_window_resized) this.strategy.on_window_resized(win);
 		this.log.debug("window resized");
 	},
 
