@@ -149,10 +149,6 @@ Window.prototype = {
 	,get_actor: function(){
 		return this.meta_window.get_compositor_private();
 	}
-	
-	,is_minimized: function(){
-		return this.meta_window.minimized;		
-	}
 
 	,get_last: function(){
 		return this.last_rect;
@@ -160,6 +156,7 @@ Window.prototype = {
 	
 	,save_last: function(){
 		this.last_rect = this.outer_rect();
+		//this.log.debug("save_last: " + this + " " + [this.last_rect.x, this.last_rect.y, this.last_rect.width, this.last_rect.height]);
 	}
 	
 	,update_geometry: function(){
@@ -169,7 +166,7 @@ Window.prototype = {
 	}
 	
 	,get_delta: function(){
-		if(!this.last_rect) [0,0,0,0];
+		if(!this.last_rect) return [0,0,0,0];
 		else {
 			var last = this.last_rect;
 			var current = this.outer_rect();

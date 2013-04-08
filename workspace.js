@@ -150,16 +150,20 @@ Workspace.prototype = {
 		var workspace_num = actor.get_workspace()
 		if(workspace_num != this.meta_workspace.index()) return;
 		
+		var win = actor.get_meta_window();
+		win = this.extension.get_window(win);
 		if(this.strategy && this.strategy.on_window_maximize) this.strategy.on_window_maximize(win);
-		this.log.debug("window maximized " + actor + " " + this.meta_workspace);
+		this.log.debug("window maximized " + win);
 	},
 	
 	on_window_unmaximize: function(shellwm, actor) {
 		var workspace_num = actor.get_workspace()
 		if(workspace_num != this.meta_workspace.index()) return;
 
+		var win = actor.get_meta_window();
+		win = this.extension.get_window(win);
 		if(this.strategy && this.strategy.on_window_unmaximize) this.strategy.on_window_unmaximize(win);
-		this.log.debug("window unmaximized " + actor + " " + this.meta_workspace);
+		this.log.debug("window unmaximized " + win);
 	},		
 
 	on_window_remove: function(workspace, meta_window) {
