@@ -52,6 +52,12 @@ const WindowGroup = function(first, second, type, splitPercent){
 		this.second.move_resize(second_x, second_y, second_width, second_height);
 		
 	}
+	
+	this.commit = function(){
+		this.first.group = this;
+		this.second.group = this;
+		this.move_resize();
+	}
 }
 WindowGroup.HORIZONTAL_GROUP = "horizontal";
 WindowGroup.VERTICAL_GROUP = "vertical";
@@ -80,7 +86,7 @@ const DefaultTilingStrategy = function(ext){
 			var group_preview = this.get_window_group_preview(window_under, win);
 			if(group_preview){
 				
-				group_preview.move_resize();
+				group_preview.commit();
 				
 			}
 		}
