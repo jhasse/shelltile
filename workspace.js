@@ -1,6 +1,7 @@
 const Mainloop = imports.mainloop;
 const Lang = imports.lang;
 const Meta = imports.gi.Meta;
+const Main = imports.ui.main;
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const Log = Extension.imports.logger.Logger.getLogger("shelltile");
 
@@ -34,6 +35,18 @@ Workspace.prototype = {
 	toString: function() {
 		return "<# Workspace at idx " + this.meta_workspace.index() + ">";
 	},
+	
+	get_geometry: function(){
+		let screen = this.meta_workspace.get_screen();
+		let monitor = screen.get_current_monitor()
+		return screen.get_monitor_geometry(monitor);
+	},
+	
+	get_bounds: function(){
+		var geometry = this.get_geometry();
+		let panel_height = Main.panel.actor.height;
+		return new Meta.Rectangle({ x: geometry.x, y: geometry.y + panel_height, width: geometry.width, height: geometry.height - panel_height});
+	},	
 
 	on_window_create: function(workspace, meta_window) {
 		let actor = meta_window.get_compositor_private();
@@ -109,6 +122,7 @@ Workspace.prototype = {
 	},
 
 	on_window_move:  function(win) {
+		if(this.strategy && this.strategy.on_window_move) this.strategy.on_window_move(win);
 		this.log.debug("window move " + win.xpos() + "," + win.ypos());
 	},
 	

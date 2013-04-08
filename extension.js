@@ -4,49 +4,8 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
 const Window = Extension.imports.window.Window;
 const Workspace = Extension.imports.workspace.Workspace;
+const DefaultTilingStrategy = Extension.imports.tiling.DefaultTilingStrategy;
 const Log = Extension.imports.logger.Logger.getLogger("shelltide");
-
-
-const DefaultTilingStrategy = function(ext){
-	
-	this.extension = ext;
-	this.log = Log.getLogger("DefaultTilingStrategy");
-	
-	this.on_window_moved = function(win){
-		var window_under = this.get_window_under(win);
-		if(window_under){
-			this.log.debug("window under " + window_under);
-		}
-	}
-	
-	this.get_window_under = function(win){
-		var workspace = win.get_workspace();
-		var workspace_windows = workspace.meta_windows();
-		
-		var win_rect = new Meta.Rectangle({ x: win.xpos(), y: win.ypos(), width: 1, height: 1});
-
-		var topmost = undefined;
-		
-		for(let i=0; i<workspace_windows.length; i++){
-			let win1 =  workspace_windows[i];
-			
-			win1 = this.extension.get_window(win1, true);
-			if(win1.can_be_tiled() && !win1.is_minimized() && win1.meta_window !== win.meta_window){
-			
-				let actor = win1.get_actor();
-
-				if(win1.outer_rect().contains_rect(win_rect)){
-					
-					topmost = win1;
-					break;
-				}
-				
-			}			
-		}
-		return topmost;
-	}
-	
-};
 
 
 const Ext = function Ext(){
