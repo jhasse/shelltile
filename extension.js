@@ -174,7 +174,7 @@ const Ext = function Ext(){
 		var edge_tiling = self.settings.get_boolean("edge-tiling");
 		if(edge_tiling){
 			if(Extension.uuid){
-				ExtensionSystem.disableExtension(Extension.uuid);
+				//ExtensionSystem.disableExtension(Extension.uuid);
 			}
 		}
 	}
