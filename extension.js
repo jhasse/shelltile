@@ -1,7 +1,10 @@
 const Main = imports.ui.main;
 const Meta = imports.gi.Meta;
+const Gio = imports.gi.Gio;
+const Lang = imports.lang;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
+const ExtensionSystem = imports.ui.extensionSystem;
 const Window = Extension.imports.window.Window;
 const Workspace = Extension.imports.workspace.Workspace;
 const DefaultTilingStrategy = Extension.imports.tiling.DefaultTilingStrategy;
@@ -10,9 +13,13 @@ const Log = Extension.imports.logger.Logger.getLogger("shelltide");
 
 const Ext = function Ext(){
 	let self = this;
+	let OVERRIDE_SCHEMA = "org.gnome.shell.overrides";
+
+	
 	self.enabled = false;
     self.log = Log.getLogger("Ext");
-	
+    self.settings = new Gio.Settings({ schema: OVERRIDE_SCHEMA });
+    
 	var Bounds = function(monitor) {
 		this.monitor = monitor;
 		this.update();
@@ -157,10 +164,21 @@ const Ext = function Ext(){
             self.bounds = new Bounds(self.monitor);
             self._init_workspaces();
             
+            self.settings.set_boolean("edge-tiling", false);
+            self.settings.connect('changed::edge-tiling', Lang.bind(this, this.on_edge_tiling_changed));
             self.log.debug("enableeeee");
         } catch(e){
             self.log.error(e);    
         }
+	}
+	
+	self.on_edge_tiling_changed = function(){
+		var edge_tiling = self.settings.get_boolean("edge-tiling");
+		if(edge_tiling){
+			if(Extension.uuid){
+				ExtensionSystem.disableExtension(Extension.uuid);
+			}
+		}
 	}
 
 	self.disable = function(){

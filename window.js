@@ -50,10 +50,6 @@ Window.prototype = {
 		this.meta_window.minimize();
 	}
 	
-	,unminimize: function() {
-		this.meta_window.unminimize();
-	}
-	
 	,maximize: function(){
 		this.meta_window.maximize(Meta.MaximizeFlags.VERTICAL | Meta.MaximizeFlags.HORIZONTAL);
 	}
