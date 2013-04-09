@@ -47,10 +47,10 @@ const WindowGroup = function(first, second, type, splitPercent){
 		var y = first_rect.y;
 		if(this.type == WindowGroup.HORIZONTAL_GROUP){
 			var width = first_rect.width + second_rect.width;
-			var height = first_rect.height;
+			var height = first_rect.height > second_rect.height ? first_rect.height : second_rect.height;
 		} else {
 			var height = first_rect.height + second_rect.height;
-			var width = first_rect.width;
+			var width = first_rect.width > second_rect.width ? first_rect.width : second_rect.width;
 		}
 		
 		var maximized_bounds = this.get_maximized_bounds();
