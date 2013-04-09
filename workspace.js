@@ -81,6 +81,7 @@ Workspace.prototype = {
 		bind_to_window_change('position', move_ops, Lang.bind(this, this.on_window_move),  Lang.bind(this, this.on_window_moved));
 		bind_to_window_change('size',     resize_ops, Lang.bind(this, this.on_window_resize), Lang.bind(this, this.on_window_resized));
 		this.extension.connect_and_track(win, meta_window, 'notify::minimized', Lang.bind(this, this.on_window_minimize_changed));	
+		this.extension.connect_and_track(win, meta_window, 'raised', Lang.bind(this, this.on_window_raised));
 		win.save_last();
 	},
 	
@@ -122,6 +123,19 @@ Workspace.prototype = {
 		});
 	},
 
+	on_window_raised: function(win){
+		if(this.on_window_raised.calling === true) return;
+		
+		this.on_window_raised.calling = true;
+		try {
+			win = this.extension.get_window(win);
+			if(this.strategy && this.strategy.on_window_raised) this.strategy.on_window_raised(win);
+			this.log.debug("window raised " + win);
+		} finally {
+			this.on_window_raised.calling = false;
+		}
+	},
+	
 	on_window_move:  function(win) {
 		if(this.strategy && this.strategy.on_window_move) this.strategy.on_window_move(win);
 		this.log.debug("window move " + win.xpos() + "," + win.ypos());

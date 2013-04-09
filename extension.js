@@ -109,14 +109,14 @@ const Ext = function Ext(){
 		}
 
 		var display = self.current_display();
-		self.connect_and_track(self, display, 'notify::focus-window', function(display, meta_window) {
+		/*self.connect_and_track(self, display, 'notify::focus-window', function(display, meta_window) {
 
 			var new_focused = self.get_window(display['focus-window'], false);
 			if(new_focused) {
 				self.focus_window = new_focused;
 			}
 
-		});
+		});*/
 	};
 
 	self._disconnect_workspaces = function() {

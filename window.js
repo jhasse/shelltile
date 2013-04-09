@@ -186,6 +186,10 @@ Window.prototype = {
 		}
 	}
 	
+	,raise: function(){
+		this.meta_window.raise();
+	}
+	
 	// dimensions
 	,width: function() { return this.outer_rect().width; }
 	,height: function() { return this.outer_rect().height; }

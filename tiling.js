@@ -131,6 +131,11 @@ const WindowGroup = function(first, second, type, splitPercent){
 		this.second.save_last();
 	}
 	
+	this.raise = function(){
+		this.first.raise();
+		this.second.raise();
+	}
+	
 	this.attach = function(){
 		this.first.group = this;
 		this.second.group = this;
@@ -223,7 +228,11 @@ const DefaultTilingStrategy = function(ext){
 		}
 	}
 	
-	
+	this.on_window_raised = function(win){
+		if(win.group){
+			win.group.raise();			
+		}
+	}
 	
 	this.get_window_group_preview = function(below, above){
 		
