@@ -22,6 +22,10 @@ const WindowGroup = function(first, second, type, splitPercent){
 		return Window.get_maximized_bounds(this.first);
 	}
 	
+	this.get_workspace = function(){
+		return this.first.get_workspace();
+	}
+	
 	this.maximize_size = function(){
 		var bounds = this.get_maximized_bounds();
 		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
@@ -61,38 +65,43 @@ const WindowGroup = function(first, second, type, splitPercent){
 	
 	this.update_geometry = function(win){
 		var bounds = this.outer_rect();
+		this.log.debug([bounds.x, bounds.y, bounds.width, bounds.height]);
 		var last_bounds = this.last_rect;
 		
-		var delta = win.get_delta();
-		var first_last = this.first.get_last();
-		var second_last = this.second.get_last();
-
-		var splitPercent = this.splitPercent;
 		
-		if(win == this.first){
-			
-			if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
-				bounds.width = last_bounds.width;
-				splitPercent = (first_last.width + delta[2]) / bounds.width;
-				
-			} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
-				bounds.height = last_bounds.height;
-				splitPercent = (first_last.height + delta[3]) / bounds.height;
-			}
-			this.splitPercent = splitPercent;
+		if(win){
 
-		} else if(win == this.second){
+			var delta = win.get_delta();
+			var first_last = this.first.get_last();
+			var second_last = this.second.get_last();
 			
-			if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
-				bounds.width = last_bounds.width;
-				splitPercent = 1 - ((second_last.width + delta[2]) / bounds.width);
+			var splitPercent = this.splitPercent;
+			
+			if(win == this.first){
 				
-			} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
-				bounds.height = last_bounds.height;
-				splitPercent = 1 - ((second_last.height + delta[3]) / bounds.height);
+				if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
+					bounds.width = last_bounds.width;
+					splitPercent = (first_last.width + delta[2]) / bounds.width;
+					
+				} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
+					bounds.height = last_bounds.height;
+					splitPercent = (first_last.height + delta[3]) / bounds.height;
+				}
+				this.splitPercent = splitPercent;
+	
+			} else if(win == this.second){
+				
+				if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
+					bounds.width = last_bounds.width;
+					splitPercent = 1 - ((second_last.width + delta[2]) / bounds.width);
+					
+				} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
+					bounds.height = last_bounds.height;
+					splitPercent = 1 - ((second_last.height + delta[3]) / bounds.height);
+				}
+				this.splitPercent = splitPercent;
+				
 			}
-			this.splitPercent = splitPercent;
-			
 		}
 		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 		this.last_bounds = this.outer_rect();
