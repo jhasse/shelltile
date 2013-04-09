@@ -142,7 +142,7 @@ Workspace.prototype = {
 	
 	on_window_move:  function(win) {
 		if(this.strategy && this.strategy.on_window_move) this.strategy.on_window_move(win);
-		this.log.debug("window move " + win.xpos() + "," + win.ypos());
+		//this.log.debug("window move " + win.xpos() + "," + win.ypos());
 	},
 	
 	on_window_resize: function(win) {
@@ -152,7 +152,7 @@ Workspace.prototype = {
 		this_func.calling = true;
 		try {
 			if(this.strategy && this.strategy.on_window_resize) this.strategy.on_window_resize(win);
-			this.log.debug("window resize");
+			//this.log.debug("window resize");
 		} finally {
 			this_func.calling = false;
 		}
