@@ -18,25 +18,7 @@ const Ext = function Ext(){
 	
 	self.enabled = false;
     self.log = Log.getLogger("Ext");
-    self.settings = new Gio.Settings({ schema: OVERRIDE_SCHEMA });
-    
-	var Bounds = function(monitor) {
-		this.monitor = monitor;
-		this.update();
-	};
-
-	Bounds.prototype.update = function()
-	{
-		let panel_height = Main.panel.actor.height;
-		this.pos = {
-			x: this.monitor.x,
-			y: this.monitor.y + panel_height
-		};
-		this.size = {
-			x: this.monitor.width,
-			y: this.monitor.height - panel_height
-		};
-	};	
+    self.settings = new Gio.Settings({ schema: OVERRIDE_SCHEMA });	
 	
 	self.connect_and_track = function(owner, subject, name, cb) {
 		if (!owner.hasOwnProperty('_bound_signals')) {
@@ -144,7 +126,6 @@ const Ext = function Ext(){
 		self.enabled = false;
 		self.workspaces = {};
 		self.windows = {};
-		self.bounds = {};
 		self._bound_keybindings = {};
 	};
 
@@ -159,7 +140,6 @@ const Ext = function Ext(){
             
             var monitorIdx = screen.get_primary_monitor();
             self.monitor = screen.get_monitor_geometry(monitorIdx);
-            self.bounds = new Bounds(self.monitor);
             self._init_workspaces();
             
             self.settings.set_boolean("edge-tiling", false);
