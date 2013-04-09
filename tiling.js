@@ -241,6 +241,12 @@ const DefaultTilingStrategy = function(ext){
 		}
 	}
 	
+	this.on_window_remove = function(win){
+		if(win.group){
+			win.group.detach(win);			
+		}
+	}
+	
 	this.on_window_minimize = function(win){
 		if(win.group){
 			win.group.minimize(true);			

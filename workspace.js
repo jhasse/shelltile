@@ -204,8 +204,9 @@ Workspace.prototype = {
 
 	on_window_remove: function(workspace, meta_window) {
 		var win = this.extension.get_window(meta_window);
+		if(this.strategy && this.strategy.on_window_remove) this.strategy.on_window_remove(win);
+		
 		if(win) win._disable();
-
 		this.log.debug("window removed");
 	},
 
