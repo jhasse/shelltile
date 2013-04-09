@@ -273,19 +273,19 @@ const DefaultTilingStrategy = function(ext){
 		
 		if(topleft.contains_rect(cursor_rect)){
 			
-			ret = new WindowGroup(above, below, WindowGroup.HORIZONTAL_GROUP);
+			ret = new WindowGroup(above, below, WindowGroup.VERTICAL_GROUP);
 			
 		} else if(topright.contains_rect(cursor_rect)){
 			
-			ret = new WindowGroup(above, below, WindowGroup.VERTICAL_GROUP);
+			ret = new WindowGroup(below, above, WindowGroup.HORIZONTAL_GROUP);
 						
 		} else if(bottomleft.contains_rect(cursor_rect)){
 			
-			ret = new WindowGroup(below, above, WindowGroup.VERTICAL_GROUP);
+			ret = new WindowGroup(above, below, WindowGroup.HORIZONTAL_GROUP);
 						
 		} else if(bottomright.contains_rect(cursor_rect)){
 			
-			ret = new WindowGroup(below, above, WindowGroup.HORIZONTAL_GROUP);
+			ret = new WindowGroup(below, above, WindowGroup.VERTICAL_GROUP);
 			
 		}
 		if(ret) ret.extension = this.extension;
