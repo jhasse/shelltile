@@ -223,7 +223,13 @@ const WindowGroup = function(first, second, type, splitPercent){
 			}
 			
 			delete win.group;
-			this.group.update_geometry();
+			var group = this.group;
+			while(group.group){
+				group = group.group;
+				var bounds = group.outer_rect();
+				group.last_rect = bounds;				
+			}
+			group.update_geometry();
 			delete this.group;
 
 		} else {
