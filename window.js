@@ -49,9 +49,15 @@ Window.prototype = {
 	,minimize: function() {
 		this.meta_window.minimize();
 	}
+	
+	,maximize: function(){
+		this.meta_window.maximize(Meta.MaximizeFlags.VERTICAL | Meta.MaximizeFlags.HORIZONTAL);
+	}
+	
 	,unminimize: function() {
 		this.meta_window.unminimize();
 	}
+	
 	,before_redraw: function(func) {
 		//TODO: idle seems to be the only LaterType that reliably works; but
 		// it causes a visual flash. before_redraw would be better, but that
@@ -159,6 +165,12 @@ Window.prototype = {
 		//this.log.debug("save_last: " + this + " " + [this.last_rect.x, this.last_rect.y, this.last_rect.width, this.last_rect.height]);
 	}
 	
+	,maximize_size: function(){
+		var bounds = Window.get_maximized_bounds(this);
+		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
+		this.maximize();
+	}
+	
 	,update_geometry: function(){
 		if(this.group){
 			this.group.update_geometry(this);
@@ -187,4 +199,9 @@ Window.GetId = function(w) {
 		Log.getLogger("shellshape.window").error("Non-window object: " + w);
 	}
 	return w.get_stable_sequence();
+}
+
+Window.get_maximized_bounds = function(win){
+	var works = win.get_workspace();
+	return works.get_bounds();
 }

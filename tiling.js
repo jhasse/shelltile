@@ -2,7 +2,7 @@ const Meta = imports.gi.Meta;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
 const Log = Extension.imports.logger.Logger.getLogger("shelltide");
-
+const Window = Extension.imports.window.Window;
 
 const WindowGroup = function(first, second, type, splitPercent){
 	
@@ -19,11 +19,10 @@ const WindowGroup = function(first, second, type, splitPercent){
 	}
 	
 	this.get_maximized_bounds = function(){
-		var works = this.first.get_workspace();
-		return works.get_bounds();
+		return Window.get_maximized_bounds(this.first);
 	}
 	
-	this.maximize = function(){
+	this.maximize_size = function(){
 		var bounds = this.get_maximized_bounds();
 		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 	}
@@ -132,34 +131,43 @@ const WindowGroup = function(first, second, type, splitPercent){
 		this.second.save_last();
 	}
 	
-	this.commit = function(){
+	this.attach = function(){
 		this.first.group = this;
 		this.second.group = this;
-		this.maximize();
+		this.maximize_size();
 		this.move_resize();
 	}
 	
 	this.detach = function(win){
+		
+		delete this.first.group;
+		delete this.second.group;
+		
 		if(this.group){
-			if(this.group.left === this){
-				if(this.left === win){
-					this.group.left = this.right;
+			if(this.group.first === this){
+				if(this.first === win){
+					this.group.first = this.second;
+					this.second.group = this.group;
 				} else {
-					this.group.left = this.left;
+					this.group.first = this.first;
+					this.first.group = this.group;
 				}
-			} else if(this.group.right === this){
-				if(this.left === win){
-					this.group.right = this.right;
+			} else if(this.group.second === this){
+				if(this.first === win){
+					this.group.second = this.second;
+					this.second.group = this.group;
 				} else {
-					this.group.right = this.left;
+					this.group.second = this.first;
+					this.first.group = this.group;
 				}
 			}
-			win.group = this.group;
+
 		} else {
-			win.group = undefined;
+			if(win === this.first) this.second.maximize_size();
+			else this.first.maximize_size();
 		}
-		this.left = undefined;
-		this.right = undefined;
+		delete this.first;
+		delete this.second;
 	}
 }
 WindowGroup.HORIZONTAL_GROUP = "horizontal";
@@ -194,7 +202,7 @@ const DefaultTilingStrategy = function(ext){
 			var group_preview = this.get_window_group_preview(window_under, win);
 			if(group_preview){
 				
-				group_preview.commit();
+				group_preview.attach();
 				
 			}
 		}
@@ -208,8 +216,10 @@ const DefaultTilingStrategy = function(ext){
 	this.on_window_resized = function(win){}
 	
 	this.on_window_maximize = function(win){
+		this.log.debug("maximize");
 		if(win.group){
 			win.group.detach(win);
+			win.maximize_size();
 		}
 	}
 	
