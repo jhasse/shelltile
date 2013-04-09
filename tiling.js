@@ -131,9 +131,23 @@ const WindowGroup = function(first, second, type, splitPercent){
 		this.second.save_last();
 	}
 	
-	this.raise = function(){
-		this.first.raise();
-		this.second.raise();
+	this.raise = function(ascending){
+		this.log.debug("raise " + ascending);
+		if(this.group && ascending){
+			this.group.raise(true);
+		} else {
+			this.first.raise();
+			this.second.raise();
+		}
+	}
+	
+	this.minimize = function(ascending){
+		if(this.group && ascending){
+			this.group.minimize(true);
+		} else {	
+			this.first.minimize();
+			this.second.minimize();
+		}
 	}
 	
 	this.attach = function(){
@@ -221,16 +235,21 @@ const DefaultTilingStrategy = function(ext){
 	this.on_window_resized = function(win){}
 	
 	this.on_window_maximize = function(win){
-		this.log.debug("maximize");
 		if(win.group){
 			win.group.detach(win);
 			win.maximize_size();
 		}
 	}
 	
+	this.on_window_minimize = function(win){
+		if(win.group){
+			win.group.minimize(true);			
+		}
+	}
+	
 	this.on_window_raised = function(win){
 		if(win.group){
-			win.group.raise();			
+			win.group.raise(true);			
 		}
 	}
 	
