@@ -63,7 +63,7 @@ const Ext = function Ext(){
 		return workspace;
 	};
 	
-	self.remove_workspace = function(screen, index) {
+	self.on_remove_workspace = function(screen, index) {
 		var removed_meta = null;
 		var removed_ws = null;
 		for(let k in self.workspaces){
@@ -81,8 +81,14 @@ const Ext = function Ext(){
 			}
 		}
 		
-		if(removed_ws != null) {
-			removed_ws._disable();
+		if(removed_meta != null) {
+			self.remove_workspace(removed_meta);
+		}
+	};
+	
+	self.remove_workspace = function(removed_meta) {	
+		if(removed_meta != null && self.workspaces[removed_meta]) {
+			self.workspaces[removed_meta]._disable();
 			delete self.workspaces[removed_meta];
 		}
 	};
@@ -109,21 +115,12 @@ const Ext = function Ext(){
 		};
 
 		self.connect_and_track(self, self.screen, 'workspace-added', function(screen, i) { _init_workspace(i); });
-		self.connect_and_track(self, self.screen, 'workspace-removed', self.remove_workspace);
+		self.connect_and_track(self, self.screen, 'workspace-removed', self.on_remove_workspace);
 
 		for (var i = 0; i < self.screen.n_workspaces; i++) {
 			_init_workspace(i);
 		}
 
-		var display = self.current_display();
-		/*self.connect_and_track(self, display, 'notify::focus-window', function(display, meta_window) {
-
-			var new_focused = self.get_window(display['focus-window'], false);
-			if(new_focused) {
-				self.focus_window = new_focused;
-			}
-
-		});*/
 	};
 
 	self._disconnect_workspaces = function() {
@@ -153,6 +150,7 @@ const Ext = function Ext(){
 
 	self.enable = function(){
 	    try {
+	    	self.log.debug("enabliiing");
 		    self._reset_state();
 	
             self.enabled = true;
@@ -165,7 +163,7 @@ const Ext = function Ext(){
             self._init_workspaces();
             
             self.settings.set_boolean("edge-tiling", false);
-            self.settings.connect('changed::edge-tiling', Lang.bind(this, this.on_edge_tiling_changed));
+            self.connect_and_track(self, self.settings, 'changed::edge-tiling', Lang.bind(this, this.on_edge_tiling_changed));
             self.log.debug("enableeeee");
         } catch(e){
             self.log.error(e);    
