@@ -141,8 +141,9 @@ const WindowGroup = function(first, second, type, splitPercent){
 		
 		this.first.move_resize(first_x, first_y, first_width, first_height);
 		var first_rect = this.first.outer_rect();
+
 		if(first_rect.width > first_width || first_rect.height > first_height){
-			this.log.debug("first");
+
 			var diff_w = first_rect.width - first_width;
 			var diff_h = first_rect.height - first_height;
 			second_x += diff_w;
@@ -153,23 +154,24 @@ const WindowGroup = function(first, second, type, splitPercent){
 		
 		this.second.move_resize(second_x, second_y, second_width, second_height);
 		var second_rect = this.second.outer_rect();
+
 		if(second_rect.width > second_width || second_rect.height > second_height){
-			this.log.debug("second");
+			
 			var diff_w = second_rect.width - second_width;
 			var diff_h = second_rect.height - second_height;
+			
 			first_width -= diff_w;
 			first_height -= diff_h;
 			second_x -= diff_w;
 			second_y -= diff_h;
-			this.log.debug("third");
+		
 			this.first.move_resize(first_x, first_y, first_width, first_height);
 			this.second.move_resize(second_x, second_y, second_width, second_height);
 		}		
 		
 		var first_rect = this.first.outer_rect();
 		var second_rect = this.second.outer_rect();
-		this.log.debug("first: " + [first_rect.x, first_rect.y, first_rect.width, first_rect.height]);
-		this.log.debug("second: " + [second_rect.x, second_rect.y, second_rect.width, second_rect.height]);
+
 		this.first.save_last();
 		this.second.save_last();
 	}
@@ -319,7 +321,9 @@ const DefaultTilingStrategy = function(ext){
 		win.save_last();
 	}
 	
-	this.on_window_resized = function(win){}
+	this.on_window_resized = function(win){
+		this.on_window_resize(win);
+	}
 	
 	this.on_window_maximize = function(win){
 		if(win.group){

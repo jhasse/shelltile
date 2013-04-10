@@ -75,7 +75,7 @@ Window.prototype = {
 	}
 	,move_resize: function(x, y, w, h) {
 		this.meta_window.unmaximize(Meta.MaximizeFlags.VERTICAL | Meta.MaximizeFlags.HORIZONTAL);
-		this.meta_window.move_resize_frame(false, x, y, w, h);
+		this.meta_window.move_resize_frame(true, x, y, w, h);
 	}
 	,set_tile_preference: function(new_pref) {
 		this.log.debug("window adopting tile preference of " + new_pref + " - " + this);

@@ -164,13 +164,18 @@ Workspace.prototype = {
 	},
 	
 	on_window_resized: function(win) {
-		if(this.strategy && this.strategy.on_window_resized) this.strategy.on_window_resized(win);
-		this.log.debug("window resized");
+		var this_func = this.on_window_resize;
+		if(this_func.calling === true) return;
+		
+		this_func.calling = true;
+		try {
+			if(this.strategy && this.strategy.on_window_resized) this.strategy.on_window_resized(win);
+			this.log.debug("window resized");
+		} finally {
+			this_func.calling = false;
+		}
 	},
 
-	/*on_window_minimize_changed: function(meta_window) {
-		this.log.debug("window minimization state changed for window " + meta_window);
-	},*/
 	on_window_minimize: function(shellwm, actor) {
 		var workspace_num = actor.get_workspace()
 		if(workspace_num != this.meta_workspace.index()) return;
