@@ -208,5 +208,8 @@ Window.GetId = function(w) {
 
 Window.get_maximized_bounds = function(win){
 	var works = win.get_workspace();
-	return works.get_bounds();
+	var ret = works.get_bounds();
+	ret.width = 500;
+	ret.height = 500;
+	return ret;
 }

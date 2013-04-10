@@ -7,6 +7,7 @@ const Window = Extension.imports.window.Window;
 const WindowGroup = function(first, second, type, splitPercent){
 	
 	if(!splitPercent) splitPercent = 0.5;
+	const DIVISION_SIZE = 10;
 	
 	this.first = first;
 	this.second = second;
@@ -38,7 +39,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 	
 	this.get_last = function(){
 		return this.last_rect;
-	}	
+	}
 	
 	this.outer_rect = function(){
 		var first_rect = this.first.outer_rect();
@@ -46,10 +47,10 @@ const WindowGroup = function(first, second, type, splitPercent){
 		var x = first_rect.x;
 		var y = first_rect.y;
 		if(this.type == WindowGroup.HORIZONTAL_GROUP){
-			var width = first_rect.width + second_rect.width;
+			var width = first_rect.width + second_rect.width + DIVISION_SIZE;
 			var height = first_rect.height > second_rect.height ? first_rect.height : second_rect.height;
 		} else {
-			var height = first_rect.height + second_rect.height;
+			var height = first_rect.height + second_rect.height + DIVISION_SIZE;
 			var width = first_rect.width > second_rect.width ? first_rect.width : second_rect.width;
 		}
 		
@@ -93,11 +94,11 @@ const WindowGroup = function(first, second, type, splitPercent){
 				
 				if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
 					bounds.width = last_bounds.width;
-					splitPercent = 1 - ((second_last.width + delta[2]) / bounds.width);
+					splitPercent = 1 - ((second_last.width + delta[2] + DIVISION_SIZE) / bounds.width);
 					
 				} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
 					bounds.height = last_bounds.height;
-					splitPercent = 1 - ((second_last.height + delta[3]) / bounds.height);
+					splitPercent = 1 - ((second_last.height + delta[3] + DIVISION_SIZE) / bounds.height);
 				}
 				this.splitPercent = splitPercent;
 				
@@ -129,17 +130,46 @@ const WindowGroup = function(first, second, type, splitPercent){
 		
 		if(this.type == WindowGroup.HORIZONTAL_GROUP){
 			first_width = Math.round(width * this.splitPercent);
-			second_width = width - first_width;
-			second_x = first_x + first_width;
+			second_width = width - first_width - DIVISION_SIZE;
+			second_x = first_x + first_width + DIVISION_SIZE;
 			
 		} else if(this.type == WindowGroup.VERTICAL_GROUP){
 			first_height = Math.round(height * this.splitPercent);
-			second_height = height - first_height;
-			second_y = first_y + first_height;
+			second_height = height - first_height - DIVISION_SIZE;
+			second_y = first_y + first_height + DIVISION_SIZE;
 		}
 		
 		this.first.move_resize(first_x, first_y, first_width, first_height);
+		var first_rect = this.first.outer_rect();
+		if(first_rect.width > first_width || first_rect.height > first_height){
+			this.log.debug("first");
+			var diff_w = first_rect.width - first_width;
+			var diff_h = first_rect.height - first_height;
+			second_x += diff_w;
+			second_width -= diff_w;
+			second_y += diff_h;
+			second_height -= diff_h;
+		}
+		
 		this.second.move_resize(second_x, second_y, second_width, second_height);
+		var second_rect = this.second.outer_rect();
+		if(second_rect.width > second_width || second_rect.height > second_height){
+			this.log.debug("second");
+			var diff_w = second_rect.width - second_width;
+			var diff_h = second_rect.height - second_height;
+			first_width -= diff_w;
+			first_height -= diff_h;
+			second_x -= diff_w;
+			second_y -= diff_h;
+			this.log.debug("third");
+			this.first.move_resize(first_x, first_y, first_width, first_height);
+			this.second.move_resize(second_x, second_y, second_width, second_height);
+		}		
+		
+		var first_rect = this.first.outer_rect();
+		var second_rect = this.second.outer_rect();
+		this.log.debug("first: " + [first_rect.x, first_rect.y, first_rect.width, first_rect.height]);
+		this.log.debug("second: " + [second_rect.x, second_rect.y, second_rect.width, second_rect.height]);
 		this.first.save_last();
 		this.second.save_last();
 	}
