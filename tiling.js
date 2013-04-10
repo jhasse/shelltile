@@ -105,7 +105,6 @@ const WindowGroup = function(first, second, type, splitPercent){
 			}
 		}
 		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
-		this.last_bounds = this.outer_rect();
 	}
 	
 	this.move_resize = function(x, y, width, height){
