@@ -17,13 +17,18 @@ Workspace.prototype = {
 		this.extension = ext;
 		this.strategy = strategy
 
-		this.extension.connect_and_track(this, this.meta_workspace, 'window-added', Lang.bind(this, this.on_window_create));
-		this.extension.connect_and_track(this, this.meta_workspace, 'window-removed', Lang.bind(this, this.on_window_remove));
-		this.extension.connect_and_track(this, this._shellwm, 'maximize', Lang.bind(this, this.on_window_maximize));
-		this.extension.connect_and_track(this, this._shellwm, 'unmaximize', Lang.bind(this, this.on_window_unmaximize));
-		this.extension.connect_and_track(this, this._shellwm, 'minimize', Lang.bind(this, this.on_window_minimize));
+		var on_window_create = this.break_loops(this.on_window_create);
+		var on_window_remove = this.break_loops(this.on_window_remove);
+		var on_window_maximize = this.break_loops(this.on_window_maximize);
+		var on_window_unmaximize = this.break_loops(this.on_window_unmaximize);
+		var on_window_minimize = this.break_loops(this.on_window_minimize);
 		
-		this.meta_windows().map(Lang.bind(this, function(win) { this.on_window_create(null, win); }));
+		this.extension.connect_and_track(this, this.meta_workspace, 'window-added', Lang.bind(this, on_window_create));
+		this.extension.connect_and_track(this, this.meta_workspace, 'window-removed', Lang.bind(this, on_window_remove));
+		this.extension.connect_and_track(this, this._shellwm, 'maximize', Lang.bind(this, on_window_maximize));
+		this.extension.connect_and_track(this, this._shellwm, 'unmaximize', Lang.bind(this, on_window_unmaximize));
+		this.extension.connect_and_track(this, this._shellwm, 'minimize', Lang.bind(this, on_window_minimize));
+		//this.meta_windows().map(Lang.bind(this, function(win) { this.on_window_create(null, win); }));
 	},
 
 	_disable: function() {
@@ -79,13 +84,31 @@ Workspace.prototype = {
 				Meta.GrabOp.RESIZING_W,
 				Meta.GrabOp.RESIZING_E
 		];
-		bind_to_window_change('position', move_ops, Lang.bind(this, this.on_window_move),  Lang.bind(this, this.on_window_moved));
-		bind_to_window_change('size',     resize_ops, Lang.bind(this, this.on_window_resize), Lang.bind(this, this.on_window_resized));
-		//this.extension.connect_and_track(win, meta_window, 'notify::minimized', Lang.bind(this, this.on_window_minimize_changed));	
-		this.extension.connect_and_track(this, meta_window, 'raised', Lang.bind(this, this.on_window_raised));
+		var on_window_move = this.break_loops(this.on_window_move);
+		var on_window_moved = this.break_loops(this.on_window_moved);
+		var on_window_resize = this.break_loops(this.on_window_resize);
+		var on_window_resized = this.break_loops(this.on_window_resized);
+		var on_window_raised = this.break_loops(this.on_window_raised);
+		
+		
+		bind_to_window_change('position', move_ops, Lang.bind(this, on_window_move),  Lang.bind(this, on_window_moved));
+		bind_to_window_change('size',     resize_ops, Lang.bind(this, on_window_resize), Lang.bind(this, on_window_resized));
+		this.extension.connect_and_track(this, meta_window, 'raised', Lang.bind(this, on_window_raised));
 		win.save_last();
 	},
 	
+	break_loops: function(func){
+		return function(){
+			if(this.calling === true) return;
+			
+			this.calling = true;
+			try {
+				func.apply(this, arguments);
+			} finally {
+				this.calling = false;
+			}
+		}
+	},
 	
 	bind_to_window_change: function(win, actor){
 		return Lang.bind(this, function(event_name, relevant_grabs, cb, cb_final) {
@@ -125,19 +148,9 @@ Workspace.prototype = {
 	},
 
 	on_window_raised: function(win){
-		var this_func = this.on_window_raised;
-		if(this_func.calling === true) return;
-		
-		this_func.calling = true;
-		try {
-			win = this.extension.get_window(win);
-			if(this.strategy && this.strategy.on_window_raised) this.strategy.on_window_raised(win);
-			this.log.debug("window raised " + win);
-		} catch(e){
-			this.log.error(e);
-		} finally {
-			this_func.calling = false;
-		}
+		win = this.extension.get_window(win);
+		if(this.strategy && this.strategy.on_window_raised) this.strategy.on_window_raised(win);
+		this.log.debug("window raised " + win);
 	},
 	
 	on_window_move:  function(win) {
@@ -146,16 +159,8 @@ Workspace.prototype = {
 	},
 	
 	on_window_resize: function(win) {
-		var this_func = this.on_window_resize;
-		if(this_func.calling === true) return;
-		
-		this_func.calling = true;
-		try {
-			if(this.strategy && this.strategy.on_window_resize) this.strategy.on_window_resize(win);
-			//this.log.debug("window resize");
-		} finally {
-			this_func.calling = false;
-		}
+		if(this.strategy && this.strategy.on_window_resize) this.strategy.on_window_resize(win);
+		//this.log.debug("window resize");
 	},
 	
 	on_window_moved:  function(win) {
@@ -164,16 +169,8 @@ Workspace.prototype = {
 	},
 	
 	on_window_resized: function(win) {
-		var this_func = this.on_window_resize;
-		if(this_func.calling === true) return;
-		
-		this_func.calling = true;
-		try {
-			if(this.strategy && this.strategy.on_window_resized) this.strategy.on_window_resized(win);
-			this.log.debug("window resized");
-		} finally {
-			this_func.calling = false;
-		}
+		if(this.strategy && this.strategy.on_window_resized) this.strategy.on_window_resized(win);
+		this.log.debug("window resized");
 	},
 
 	on_window_minimize: function(shellwm, actor) {

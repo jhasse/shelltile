@@ -54,6 +54,10 @@ Window.prototype = {
 		this.meta_window.maximize(Meta.MaximizeFlags.VERTICAL | Meta.MaximizeFlags.HORIZONTAL);
 	}
 	
+	,unmaximize: function(){
+		this.meta_window.unmaximize(Meta.MaximizeFlags.VERTICAL | Meta.MaximizeFlags.HORIZONTAL);
+	}
+	
 	,unminimize: function() {
 		this.meta_window.unminimize();
 	}

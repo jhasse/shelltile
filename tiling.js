@@ -108,12 +108,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 		this.last_bounds = this.outer_rect();
 	}
 	
-	this.move_resize = function(x, y, width, height, ascending){
-		if(ascending && this.group){
-			this.group.move_resize(x,y,width,height,true);
-			return;
-		}
-		
+	this.move_resize = function(x, y, width, height){
 		if(x===undefined || y===undefined || width===undefined || height===undefined){
 			return;
 		}
@@ -139,6 +134,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 			second_y = first_y + first_height + DIVISION_SIZE;
 		}
 		
+		this.log.debug("first: " + [first_x, first_y, first_width, first_height])
 		this.first.move_resize(first_x, first_y, first_width, first_height);
 		var first_rect = this.first.outer_rect();
 
@@ -152,6 +148,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 			second_height -= diff_h;
 		}
 		
+		this.log.debug("second: " + [second_x, second_y, second_width, second_height])
 		this.second.move_resize(second_x, second_y, second_width, second_height);
 		var second_rect = this.second.outer_rect();
 
@@ -164,8 +161,14 @@ const WindowGroup = function(first, second, type, splitPercent){
 			first_height -= diff_h;
 			second_x -= diff_w;
 			second_y -= diff_h;
+			if(first_width<=0) first_width=1;
+			if(first_height<=0) first_height=1;
+			if(second_x<=0) second_x=0;
+			if(second_y<=0) second_y=0;
 		
+			this.log.debug("first1: " + [first_x, first_y, first_width, first_height])
 			this.first.move_resize(first_x, first_y, first_width, first_height);
+			this.log.debug("second1: " + [second_x, second_y, second_width, second_height])
 			this.second.move_resize(second_x, second_y, second_width, second_height);
 		}		
 		
@@ -288,8 +291,9 @@ const DefaultTilingStrategy = function(ext){
 	this.log = Log.getLogger("DefaultTilingStrategy");
 	
 	this.on_window_move = function(win){
+		win.unmaximize();
 		var window_under = this.get_window_under(win);
-		this.log.debug(window_under);
+		this.log.debug("window_under: " + window_under);
 		if(window_under){
 			
 			var groupPreview = this.get_window_group_preview(window_under, win);
