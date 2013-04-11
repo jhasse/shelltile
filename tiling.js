@@ -124,19 +124,19 @@ const WindowGroup = function(first, second, type, splitPercent){
 			
 			var saved_position = this.saved_position;
 			var saved_size = this.saved_size;
-			var outer_rect = this.outer_rect();
+			var bounds = this.outer_rect();
 			
 			if(saved_position){
-				outer_rect.x = saved_position.x;
-				outer_rect.y = saved_position.y;
+				bounds.x = saved_position.x;
+				bounds.y = saved_position.y;
 			}
 			
 			if(saved_size){
-				outer_rect.width = saved_size.width;
-				outer_rect.height = saved_size.height;
+				bounds.width = saved_size.width;
+				bounds.height = saved_size.height;
 			}
 
-			this.move_resize(outer_rect.x, outer_rect.y, outer_rect.width, outer_rect.height);
+			this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 		}
 	}
 	
