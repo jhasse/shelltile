@@ -94,7 +94,6 @@ Workspace.prototype = {
 		bind_to_window_change('position', move_ops, Lang.bind(this, on_window_move),  Lang.bind(this, on_window_moved));
 		bind_to_window_change('size',     resize_ops, Lang.bind(this, on_window_resize), Lang.bind(this, on_window_resized));
 		this.extension.connect_and_track(this, meta_window, 'raised', Lang.bind(this, on_window_raised));
-		win.save_last();
 	},
 	
 	break_loops: function(func){
