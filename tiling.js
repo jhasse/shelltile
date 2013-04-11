@@ -43,22 +43,30 @@ const WindowGroup = function(first, second, type, splitPercent){
 	
 	this.save_size = function(){
 		this.saved_size = this.outer_rect();
-		if(this.first.save_size) this.first.save_size();
-		if(this.second.save_size) this.second.save_size();
 	}
 	
 	this.outer_rect = function(){
 		var first_rect = this.first.outer_rect();
 		var second_rect = this.second.outer_rect();
-		var x = first_rect.x;
-		var y = first_rect.y;
-		if(this.type == WindowGroup.HORIZONTAL_GROUP){
-			var width = first_rect.width + second_rect.width + DIVISION_SIZE;
-			var height = first_rect.height > second_rect.height ? first_rect.height : second_rect.height;
+		var xleft = first_rect.x < second_rect.x ? first_rect.x : second_rect.x;
+		var yleft = first_rect.y < second_rect.y ? first_rect.y : second_rect.y;
+		
+		if((first_rect.x + first_rect.width) > (second_rect.x + second_rect.width)){
+			var xright = first_rect.x + first_rect.width;
 		} else {
-			var height = first_rect.height + second_rect.height + DIVISION_SIZE;
-			var width = first_rect.width > second_rect.width ? first_rect.width : second_rect.width;
+			var xright = second_rect.x + second_rect.width;
 		}
+		
+		if((first_rect.y + first_rect.height) > (second_rect.y + second_rect.height)){
+			var yright = first_rect.y + first_rect.height;
+		} else {
+			var yright = second_rect.y + second_rect.height;
+		}
+		
+		var x = xleft;
+		var y = yleft;
+		var width = xright - xleft;
+		var height = yright - yleft;
 		
 		var maximized_bounds = this.get_maximized_bounds();
 		if(x < maximized_bounds.x) x = maximized_bounds.x;
@@ -77,6 +85,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 		
 		if(win){
 			var bounds = this.outer_rect();
+			
 			this.log.debug("update_geometry: " + [bounds.x, bounds.y, bounds.width, bounds.height]);		
 
 			var other_win = win === this.first ? this.second : this.first;
@@ -116,10 +125,13 @@ const WindowGroup = function(first, second, type, splitPercent){
 			}
 			
 			if(this.type == WindowGroup.HORIZONTAL_GROUP){
-				other_win.move_resize(other_rect.x, other_rect.y, other_rect.width, win_rect.height); 
+				bounds.height = win_rect.height;
 			} else if(this.type == WindowGroup.VERTICAL_GROUP){
-				other_win.move_resize(other_rect.x, other_rect.y, win_rect.width, other_rect.height);
+				bounds.width = win_rect.width;
 			}
+			
+			this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
+		
 		}
 		if(this.group) this.group.update_geometry(this);
 		else {
@@ -340,11 +352,13 @@ const DefaultTilingStrategy = function(ext){
 	}
 	
 	this.on_window_resize = function(win){
-		win.update_geometry();
+		win.raise();
+		//win.update_geometry();
 		//win.save_last();
 	}
 	
 	this.on_window_resized = function(win){
+		win.update_geometry();
 		this.on_window_resize(win);
 	}
 	
