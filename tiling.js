@@ -29,12 +29,26 @@ const WindowGroup = function(first, second, type, splitPercent){
 	
 	this.maximize_size = function(){
 		var bounds = this.get_maximized_bounds();
+		//bounds.width = 500;
+		//bounds.height = 500;
 		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 	}
 	
-	this.save_last = function(){
-		this.first.save_last();
-		this.second.save_last();
+	this.get_delta = function(){
+		if(!this.last_rect) return [0,0,0,0];
+		else {
+			var last = this.last_rect;
+			var current = this.outer_rect();
+			return [current.x - last.x, current.y - last.y, current.width - last.width, current.height - last.height];
+		}
+	}
+	
+	this.save_last = function(force){
+		this.first.save_last(force);
+		this.second.save_last(force);
+		if(force){
+			this.last_rect = this.outer_rect();
+		}
 	}
 	
 	this.get_last = function(){
@@ -73,38 +87,35 @@ const WindowGroup = function(first, second, type, splitPercent){
 		if(win){
 
 			var delta = win.get_delta();
-			var first_last = this.first.get_last();
-			var second_last = this.second.get_last();
+			var first_rect = this.first.outer_rect();
+			var second_rect = this.second.outer_rect();
 			
 			var splitPercent = this.splitPercent;
 			
 			if(win == this.first){
 				
 				if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
-					bounds.width = last_bounds.width;
-					splitPercent = (first_last.width + delta[2]) / bounds.width;
+					splitPercent = first_rect.width / bounds.width;
 					
 				} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
-					bounds.height = last_bounds.height;
-					splitPercent = (first_last.height + delta[3]) / bounds.height;
+					splitPercent = first_rect.height / bounds.height;
 				}
 				this.splitPercent = splitPercent;
 	
 			} else if(win == this.second){
 				
 				if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
-					bounds.width = last_bounds.width;
-					splitPercent = 1 - ((second_last.width + delta[2] + DIVISION_SIZE) / bounds.width);
+					splitPercent = 1 - ((second_rect.width + DIVISION_SIZE) / bounds.width);
 					
 				} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
-					bounds.height = last_bounds.height;
-					splitPercent = 1 - ((second_last.height + delta[3] + DIVISION_SIZE) / bounds.height);
+					splitPercent = 1 - ((second_rect.height + DIVISION_SIZE) / bounds.height);
 				}
 				this.splitPercent = splitPercent;
 				
 			}
 		}
-		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
+		this.move_resize(last_bounds.x, last_bounds.y, last_bounds.width, last_bounds.height);
+		this.save_last();
 	}
 	
 	this.move_resize = function(x, y, width, height){
@@ -121,6 +132,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 		let first_y = y;
 		let second_y = y;		
 		
+		this.log.debug(this);
 		
 		if(this.type == WindowGroup.HORIZONTAL_GROUP){
 			first_width = Math.round(width * this.splitPercent);
@@ -169,13 +181,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 			this.first.move_resize(first_x, first_y, first_width, first_height);
 			this.log.debug("second1: " + [second_x, second_y, second_width, second_height])
 			this.second.move_resize(second_x, second_y, second_width, second_height);
-		}		
-		
-		var first_rect = this.first.outer_rect();
-		var second_rect = this.second.outer_rect();
-
-		this.first.save_last();
-		this.second.save_last();
+		}
 	}
 	
 	this.raise = function(ascending){
@@ -218,20 +224,15 @@ const WindowGroup = function(first, second, type, splitPercent){
 		this.second.group = this;
 		this.first.group = this;
 
+
 		var group = this;
-		var bounds = group.outer_rect();
-		group.last_rect = bounds;
-		
-		this.log.debug(group);
 		while(group.group){ 
 			group = group.group; 
-			var bounds = group.outer_rect();
-			group.last_rect = bounds;
-			this.log.debug(group);
 		}
+		group.maximize_size();
+		group.save_last(true);
 		//var bounds = group.outer_rect();
 		//group.update_geometry();
-		group.maximize_size();
 	}
 	
 	this.detach = function(win){
@@ -259,9 +260,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 			delete win.group;
 			var group = this.group;
 			while(group.group){
-				group = group.group;
-				var bounds = group.outer_rect();
-				group.last_rect = bounds;				
+				group = group.group;				
 			}
 			group.update_geometry();
 			delete this.group;
@@ -298,11 +297,8 @@ const DefaultTilingStrategy = function(ext){
 			var groupPreview = this.get_window_group_preview(window_under, win);
 			
 			if(groupPreview) this.log.debug("preview: " + groupPreview);
-			else {
-				win.update_geometry();
-			}
 		}
-		win.save_last();
+		win.update_geometry();
 	}
 	
 	this.on_window_moved = function(win){
