@@ -221,8 +221,8 @@ const WindowGroup = function(first, second, type, splitPercent){
 			this.group = prevGroup;
 		}
 
-		this.second.group = this;
 		this.first.group = this;
+		this.second.group = this;
 
 
 		var group = this;
@@ -317,7 +317,7 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.on_window_resize = function(win){
 		win.update_geometry();
-		win.save_last();
+		//win.save_last();
 	}
 	
 	this.on_window_resized = function(win){
