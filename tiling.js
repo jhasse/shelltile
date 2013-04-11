@@ -266,9 +266,9 @@ const WindowGroup = function(first, second, type, splitPercent){
 			group = group.group; 
 		}
 		group.maximize_size();
+		group.raise();
 		group.save_bounds();
-		//var bounds = group.outer_rect();
-		//group.update_geometry();
+
 	}
 	
 	this.detach = function(win){
