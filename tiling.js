@@ -77,45 +77,64 @@ const WindowGroup = function(first, second, type, splitPercent){
 		return new Meta.Rectangle({ x: x, y: y, width: width, height: height});
 	}
 	
+	this.width = function() { return this.outer_rect().width; }
+	this.height = function() { return this.outer_rect().height; }	
+	
 	
 	this.update_geometry = function(win){
-		var bounds = this.outer_rect();
-		this.log.debug([bounds.x, bounds.y, bounds.width, bounds.height]);
-		var last_bounds = this.last_rect;
-		
 		
 		if(win){
+			var bounds = this.outer_rect();
+			this.log.debug("update_geometry: " + [bounds.x, bounds.y, bounds.width, bounds.height]);		
 
 			var delta = win.get_delta();
+			var win_rect = win.outer_rect();
 			var first_rect = this.first.outer_rect();
 			var second_rect = this.second.outer_rect();
 			
 			var splitPercent = this.splitPercent;
 			
-			if(win == this.first){
+			var other_win = win === this.first ? this.second : this.first;
+			var other_rect = other_win.outer_rect();
+			
+			if(win === this.first){
 				
 				if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
+					this.log.debug("horizontal split changed " + delta[2]);
 					splitPercent = first_rect.width / bounds.width;
 					
 				} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
+					this.log.debug("vertical split changed " + delta[3]);
 					splitPercent = first_rect.height / bounds.height;
 				}
 				this.splitPercent = splitPercent;
 	
-			} else if(win == this.second){
+			} else if(win === this.second){
 				
 				if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
+					this.log.debug("horizontal split changed " + delta[2]);
 					splitPercent = 1 - ((second_rect.width + DIVISION_SIZE) / bounds.width);
 					
 				} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
+					this.log.debug("vertical split changed " + delta[3]);
 					splitPercent = 1 - ((second_rect.height + DIVISION_SIZE) / bounds.height);
 				}
 				this.splitPercent = splitPercent;
 				
 			}
+			
+			if(this.type == WindowGroup.HORIZONTAL_GROUP){
+				other_win.move_resize(other_rect.x, other_rect.y, other_rect.width, win_rect.height); 
+			} else if(this.type == WindowGroup.VERTICAL_GROUP){
+				other_win.move_resize(other_rect.x, other_rect.y, win_rect.width, other_rect.height);
+			}
 		}
-		this.move_resize(last_bounds.x, last_bounds.y, last_bounds.width, last_bounds.height);
-		this.save_last();
+		if(this.group) this.group.update_geometry(this);
+		else {
+			var last_bounds = this.last_rect;
+			this.move_resize(last_bounds.x, last_bounds.y, last_bounds.width, last_bounds.height);
+		}
+		//this.save_last();
 	}
 	
 	this.move_resize = function(x, y, width, height){
