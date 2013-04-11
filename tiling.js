@@ -43,6 +43,8 @@ const WindowGroup = function(first, second, type, splitPercent){
 	
 	this.save_size = function(){
 		this.saved_size = this.outer_rect();
+		if(this.first.save_size) this.first.save_size();
+		if(this.second.save_size) this.second.save_size();
 	}
 	
 	this.outer_rect = function(){
