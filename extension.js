@@ -82,7 +82,7 @@ const Ext = function Ext(){
 		if(!meta_window) {
 			return null;
 		}
-		var id = Window.GetId(meta_window);
+		var id = Window.get_id(meta_window);
 		var win = self.windows[id];
 		if(typeof(win) == "undefined" && create_if_necessary) {
 			win = self.windows[id] = new Window(meta_window, self);

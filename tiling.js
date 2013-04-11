@@ -29,30 +29,20 @@ const WindowGroup = function(first, second, type, splitPercent){
 	
 	this.maximize_size = function(){
 		var bounds = this.get_maximized_bounds();
-		//bounds.width = 500;
-		//bounds.height = 500;
 		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 	}
 	
-	this.get_delta = function(){
-		if(!this.last_rect) return [0,0,0,0];
-		else {
-			var last = this.last_rect;
-			var current = this.outer_rect();
-			return [current.x - last.x, current.y - last.y, current.width - last.width, current.height - last.height];
-		}
+	this.save_bounds = function(){
+		this.save_position();
+		this.save_size();
 	}
 	
-	this.save_last = function(force){
-		this.first.save_last(force);
-		this.second.save_last(force);
-		if(force){
-			this.last_rect = this.outer_rect();
-		}
+	this.save_position = function(){
+		this.saved_position = this.outer_rect();
 	}
 	
-	this.get_last = function(){
-		return this.last_rect;
+	this.save_size = function(){
+		this.saved_size = this.outer_rect();
 	}
 	
 	this.outer_rect = function(){
@@ -87,36 +77,36 @@ const WindowGroup = function(first, second, type, splitPercent){
 			var bounds = this.outer_rect();
 			this.log.debug("update_geometry: " + [bounds.x, bounds.y, bounds.width, bounds.height]);		
 
-			var delta = win.get_delta();
+			var other_win = win === this.first ? this.second : this.first;
 			var win_rect = win.outer_rect();
+			var other_rect = other_win.outer_rect();
+
 			var first_rect = this.first.outer_rect();
 			var second_rect = this.second.outer_rect();
 			
 			var splitPercent = this.splitPercent;
 			
-			var other_win = win === this.first ? this.second : this.first;
-			var other_rect = other_win.outer_rect();
 			
 			if(win === this.first){
 				
-				if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
-					this.log.debug("horizontal split changed " + delta[2]);
+				if(this.type == WindowGroup.HORIZONTAL_GROUP){
+					this.log.debug("horizontal split changed");
 					splitPercent = first_rect.width / bounds.width;
 					
-				} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
-					this.log.debug("vertical split changed " + delta[3]);
+				} else if(this.type == WindowGroup.VERTICAL_GROUP){
+					this.log.debug("vertical split changed");
 					splitPercent = first_rect.height / bounds.height;
 				}
 				this.splitPercent = splitPercent;
 	
 			} else if(win === this.second){
 				
-				if(this.type == WindowGroup.HORIZONTAL_GROUP && delta[2] != 0){
-					this.log.debug("horizontal split changed " + delta[2]);
+				if(this.type == WindowGroup.HORIZONTAL_GROUP){
+					this.log.debug("horizontal split changed");
 					splitPercent = 1 - ((second_rect.width + DIVISION_SIZE) / bounds.width);
 					
-				} else if(this.type == WindowGroup.VERTICAL_GROUP && delta[3] != 0){
-					this.log.debug("vertical split changed " + delta[3]);
+				} else if(this.type == WindowGroup.VERTICAL_GROUP ){
+					this.log.debug("vertical split changed");
 					splitPercent = 1 - ((second_rect.height + DIVISION_SIZE) / bounds.height);
 				}
 				this.splitPercent = splitPercent;
@@ -131,10 +121,23 @@ const WindowGroup = function(first, second, type, splitPercent){
 		}
 		if(this.group) this.group.update_geometry(this);
 		else {
-			var last_bounds = this.last_rect;
-			this.move_resize(last_bounds.x, last_bounds.y, last_bounds.width, last_bounds.height);
+			
+			var saved_position = this.saved_position;
+			var saved_size = this.saved_size;
+			var outer_rect = this.outer_rect();
+			
+			if(saved_position){
+				outer_rect.x = saved_position.x;
+				outer_rect.y = saved_position.y;
+			}
+			
+			if(saved_size){
+				outer_rect.width = saved_size.width;
+				outer_rect.height = saved_size.height;
+			}
+
+			this.move_resize(outer_rect.x, outer_rect.y, outer_rect.width, outer_rect.height);
 		}
-		//this.save_last();
 	}
 	
 	this.move_resize = function(x, y, width, height){
@@ -249,7 +252,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 			group = group.group; 
 		}
 		group.maximize_size();
-		group.save_last(true);
+		group.save_bounds();
 		//var bounds = group.outer_rect();
 		//group.update_geometry();
 	}

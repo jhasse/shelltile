@@ -27,7 +27,6 @@ Window.prototype = {
 		this.meta_window = meta_window;
 		this.extension = ext;
 		this.log = Log.getLogger("Window");
-		this.tile_preference = null;
 	}
 
 	,_disable: function() {
@@ -74,17 +73,16 @@ Window.prototype = {
 			null //notify
 		)
 	}
+	
 	,move_to_workspace: function(new_index) {
 		this.meta_window.change_workspace_by_index(new_index, false, global.get_current_time());
 	}
+	
 	,move_resize: function(x, y, w, h) {
 		this.meta_window.unmaximize(Meta.MaximizeFlags.VERTICAL | Meta.MaximizeFlags.HORIZONTAL);
 		this.meta_window.move_resize_frame(true, x, y, w, h);
 	}
-	,set_tile_preference: function(new_pref) {
-		this.log.debug("window adopting tile preference of " + new_pref + " - " + this);
-		this.tile_preference = new_pref;
-	}
+	
 	,get_title: function() {
 		return this.meta_window.get_title();
 	}
@@ -92,11 +90,10 @@ Window.prototype = {
 		return ("<#Window with MetaWindow: " + this.get_title() + ">");
 	}
 
-	// functions for determining whether the window should
-	// be tiled by default, or can be tiled at all.
 	,is_resizeable: function() {
 		return this.meta_window.resizeable;
 	}
+	
 	,window_type: function() {
 		try {
 			return this.meta_window['window-type'];
@@ -138,12 +135,13 @@ Window.prototype = {
 
 		var window_type = this.window_type();
 		var result = Window.tileable_window_types.indexOf(window_type) != -1;
-		// this.log.debug("window " + this + " with type == " + window_type + " can" + (result ? "" : " NOT") + " be tiled");
 		return result;
 	}
+	
 	,id: function() {
-		return Window.GetId(this.meta_window);
+		return Window.get_id(this.meta_window);
 	}
+	
 	,eq: function(other) {
 		let eq = this.id() == other.id();
 		if(eq && (this != other)) {
@@ -160,15 +158,6 @@ Window.prototype = {
 		return this.meta_window.get_compositor_private();
 	}
 
-	,get_last: function(){
-		return this.last_rect;
-	}
-	
-	,save_last: function(){
-		this.last_rect = this.outer_rect();
-		//this.log.debug("save_last: " + this + " " + [this.last_rect.x, this.last_rect.y, this.last_rect.width, this.last_rect.height]);
-	}
-	
 	,maximize_size: function(){
 		var bounds = Window.get_maximized_bounds(this);
 		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
@@ -178,15 +167,6 @@ Window.prototype = {
 	,update_geometry: function(){
 		if(this.group){
 			this.group.update_geometry(this);
-		}
-	}
-	
-	,get_delta: function(){
-		if(!this.last_rect) return [0,0,0,0];
-		else {
-			var last = this.last_rect;
-			var current = this.outer_rect();
-			return [current.x - last.x, current.y - last.y, current.width - last.width, current.height - last.height];
 		}
 	}
 	
@@ -203,7 +183,7 @@ Window.prototype = {
 	,outer_rect: function() { return this.meta_window.get_outer_rect(); }
 };
 
-Window.GetId = function(w) {
+Window.get_id = function(w) {
 	if(!w || !w.get_stable_sequence) {
 		Log.getLogger("shellshape.window").error("Non-window object: " + w);
 	}
