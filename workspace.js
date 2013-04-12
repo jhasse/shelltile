@@ -71,7 +71,7 @@ Workspace.prototype = {
 		this.log.debug("on_window_create " + win + " " + meta_window);
 		win.workspace_signals = [];
 		
-		let bind_to_window_change = Lang.bind(this, this.bind_to_window_change));
+		let bind_to_window_change = this.bind_to_window_change(win, actor);
 
 		let move_ops = [Meta.GrabOp.MOVING];
 		let resize_ops = [
