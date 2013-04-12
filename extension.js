@@ -24,7 +24,7 @@ const Ext = function Ext(){
 		if (!owner.hasOwnProperty('_bound_signals')) {
 			owner._bound_signals = [];
 		}
-		owner._bound_signals.push([subject, subject.connect(name, cb)]);
+		owner._bound_signals.push([subject, name, subject.connect(name, cb)]);
 	};
 	
 	self.current_display = function current_display() {
@@ -119,7 +119,8 @@ const Ext = function Ext(){
 		for(var i=0; i<owner._bound_signals.length; i++) {
 			var sig = owner._bound_signals[i];
 			if(object === undefined || sig[0] === object){
-				sig[0].disconnect(sig[1]);
+				this.log.debug("disconnect owner: " + owner + " sig[0]:" + sig[0] + " sig[1]:" + sig[1]);
+				sig[0].disconnect(sig[2]);
 			}
 		}
 		delete owner._bound_signals;

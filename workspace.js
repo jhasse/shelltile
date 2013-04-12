@@ -16,6 +16,8 @@ Workspace.prototype = {
 		this.meta_workspace = meta_workspace;
 		this.extension = ext;
 		this.strategy = strategy
+		
+		this.log.debug("this._shellwm " + this._shellwm);
 
 		var on_window_create = this.break_loops(this.on_window_create);
 		var on_window_remove = this.break_loops(this.on_window_remove);
@@ -194,8 +196,10 @@ Workspace.prototype = {
 	},	
 	
 	on_window_maximize: function(shellwm, actor) {
+		this.log.debug([shellwm, actor, actor.get_workspace()]);
 		var workspace_num = actor.get_workspace()
-		if(!this.meta_workspace || workspace_num != this.meta_workspace.index()) return;
+		this.log.debug(this);
+		if(workspace_num != this.meta_workspace.index()) return;
 		
 		var win = actor.get_meta_window();
 		win = this.extension.get_window(win);
