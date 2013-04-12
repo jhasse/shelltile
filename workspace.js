@@ -68,10 +68,10 @@ Workspace.prototype = {
 		if(!win.can_be_tiled()) {
 			return;
 		}
-		this.log.debug("on_window_create for " + win);
+		this.log.debug("on_window_create " + win + " " + meta_window);
 		win.workspace_signals = [];
 		
-		let bind_to_window_change = this.bind_to_window_change(win, actor);
+		let bind_to_window_change = Lang.bind(this, this.bind_to_window_change));
 
 		let move_ops = [Meta.GrabOp.MOVING];
 		let resize_ops = [
@@ -89,11 +89,13 @@ Workspace.prototype = {
 		var on_window_resize = this.break_loops(this.on_window_resize);
 		var on_window_resized = this.break_loops(this.on_window_resized);
 		var on_window_raised = this.break_loops(this.on_window_raised);
+		var on_workspace_changed = this.break_loops(this.on_workspace_changed);
 		
 		
 		bind_to_window_change('position', move_ops, Lang.bind(this, on_window_move),  Lang.bind(this, on_window_moved));
 		bind_to_window_change('size',     resize_ops, Lang.bind(this, on_window_resize), Lang.bind(this, on_window_resized));
 		this.extension.connect_and_track(this, meta_window, 'raised', Lang.bind(this, on_window_raised));
+		this.extension.connect_and_track(this, meta_window, "workspace_changed", Lang.bind(this, on_workspace_changed));
 	},
 	
 	break_loops: function(func){
@@ -146,6 +148,10 @@ Workspace.prototype = {
 		});
 	},
 
+	on_workspace_changed: function(win, obj){
+		this.log.debug("on_workspace_changed " + this + " " + win + " " + obj);
+	},
+	
 	on_window_raised: function(win){
 		win = this.extension.get_window(win);
 		if(this.strategy && this.strategy.on_window_raised) this.strategy.on_window_raised(win);
@@ -208,7 +214,7 @@ Workspace.prototype = {
 		if(this.strategy && this.strategy.on_window_remove) this.strategy.on_window_remove(win);
 		
 		if(win) win._disable();
-		this.log.debug("window removed");
+		this.log.debug("window removed " + meta_window);
 	},
 
 	meta_windows: function() {
