@@ -52,8 +52,8 @@ Workspace.prototype = {
 		var geometry = this.get_geometry();
 		let panel_height = Main.panel.actor.height;
 		return new Meta.Rectangle({ x: geometry.x, y: geometry.y + panel_height, width: geometry.width, height: geometry.height - panel_height});
-	},	
-
+	},
+	
 	on_window_create: function(workspace, meta_window) {
 		let actor = meta_window.get_compositor_private();
 		if(!actor){
@@ -149,7 +149,11 @@ Workspace.prototype = {
 	},
 
 	on_workspace_changed: function(win, obj){
-		this.log.debug("on_workspace_changed " + this + " " + win + " " + obj);
+		win = this.extension.get_window(win);
+		if(win.get_workspace() === this){
+			this.log.debug("workspace_changed");
+			win.on_move_to_workspace(this);
+		}
 	},
 	
 	on_window_raised: function(win){
@@ -201,7 +205,7 @@ Workspace.prototype = {
 	
 	on_window_unmaximize: function(shellwm, actor) {
 		var workspace_num = actor.get_workspace()
-		if(workspace_num != this.meta_workspace.index()) return;
+		if(!this.meta_workspace || workspace_num != this.meta_workspace.index()) return;
 
 		var win = actor.get_meta_window();
 		win = this.extension.get_window(win);
@@ -211,7 +215,11 @@ Workspace.prototype = {
 
 	on_window_remove: function(workspace, meta_window) {
 		var win = this.extension.get_window(meta_window);
-		if(this.strategy && this.strategy.on_window_remove) this.strategy.on_window_remove(win);
+		
+		Mainloop.idle_add(Lang.bind(this, function () {
+			if(this.strategy && this.strategy.on_window_remove) this.strategy.on_window_remove(win);
+			return false;
+		}));
 		
 		if(win) win._disable();
 		this.extension.disconnect_tracked_signals(this, meta_window);

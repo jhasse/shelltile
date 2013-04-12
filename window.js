@@ -74,8 +74,18 @@ Window.prototype = {
 		)
 	}
 	
-	,move_to_workspace: function(new_index) {
-		this.meta_window.change_workspace_by_index(new_index, false, global.get_current_time());
+	,on_move_to_workspace: function(workspace) {
+		if(this.group){
+			this.group.move_to_workspace(workspace);
+			var group = this.group.get_topmost_group();
+			group.maximize_size();
+			group.raise();
+			group.save_bounds();			
+		}
+	}
+	
+	,move_to_workspace: function(workspace){
+		this.meta_window.change_workspace(workspace.meta_workspace);
 	}
 	
 	,move_resize: function(x, y, w, h) {
@@ -151,7 +161,10 @@ Window.prototype = {
 	}
 
 	,get_workspace: function(){
-		return this.extension.get_workspace(this.meta_window.get_workspace());
+		var meta_workspace = this.meta_window.get_workspace();
+		if(meta_workspace){
+			return this.extension.get_workspace(meta_workspace);
+		} else return null;
 	}
 	
 	,get_actor: function(){
