@@ -245,6 +245,24 @@ const WindowGroup = function(first, second, type, splitPercent){
 		}
 	}
 	
+	this.move_to_workspace = function(workspace, descending){
+		if(!descending && this.group){
+			this.group.move_to_workspace(workspace);
+		}
+		
+		if(this.first.get_workspace && this.first.get_workspace() !== workspace){
+			this.first.move_to_workspace(workspace);
+		} else {
+			this.first.move_to_workspace(workspace, true);
+		}
+		
+		if(this.second.get_workspace && this.second.get_workspace() !== workspace){
+			this.second.move_to_workspace(workspace);
+		} else {
+			this.second.move_to_workspace(workspace, true);
+		}
+	}
+	
 	this.raise = function(ascending){
 		this.log.debug("raise " + ascending);
 		if(this.group && ascending){
@@ -286,14 +304,19 @@ const WindowGroup = function(first, second, type, splitPercent){
 		this.second.group = this;
 
 
-		var group = this;
-		while(group.group){ 
-			group = group.group; 
-		}
+		var group = this.get_topmost_group();
 		group.maximize_size();
 		group.raise();
 		group.save_bounds();
 
+	}
+	
+	this.get_topmost_group = function(){
+		var group = this;
+		while(group.group){ 
+			group = group.group; 
+		}
+		return group;
 	}
 	
 	this.detach = function(win){
@@ -319,10 +342,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 			}
 			
 			delete win.group;
-			var group = this.group;
-			while(group.group){
-				group = group.group;				
-			}
+			var group = this.get_topmost_group();
 			group.update_geometry();
 			delete this.group;
 
@@ -395,9 +415,12 @@ const DefaultTilingStrategy = function(ext){
 	}
 	
 	this.on_window_remove = function(win){
-		if(win.group){
-			win.group.detach(win);			
-		}
+		if(!win.get_workspace()){
+			this.log.debug("detach window");
+			if(win.group){
+				win.group.detach(win);			
+			}
+		}	
 	}
 	
 	this.on_window_minimize = function(win){
