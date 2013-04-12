@@ -191,7 +191,7 @@ Workspace.prototype = {
 	
 	on_window_maximize: function(shellwm, actor) {
 		var workspace_num = actor.get_workspace()
-		if(workspace_num != this.meta_workspace.index()) return;
+		if(!this.meta_workspace || workspace_num != this.meta_workspace.index()) return;
 		
 		var win = actor.get_meta_window();
 		win = this.extension.get_window(win);
@@ -214,6 +214,7 @@ Workspace.prototype = {
 		if(this.strategy && this.strategy.on_window_remove) this.strategy.on_window_remove(win);
 		
 		if(win) win._disable();
+		this.extension.disconnect_tracked_signals(this, meta_window);
 		this.log.debug("window removed " + meta_window);
 	},
 

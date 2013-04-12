@@ -113,11 +113,13 @@ const Ext = function Ext(){
 		}
 	};
 
-	self.disconnect_tracked_signals = function(owner) {
+	self.disconnect_tracked_signals = function(owner, object) {
 		if(owner._bound_signals == null) return;
 		for(var i=0; i<owner._bound_signals.length; i++) {
 			var sig = owner._bound_signals[i];
-			sig[0].disconnect(sig[1]);
+			if(object === undefined || sig[0] === object){
+				sig[0].disconnect(sig[1]);
+			}
 		}
 		delete owner._bound_signals;
 	};
