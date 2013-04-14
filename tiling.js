@@ -123,13 +123,15 @@ const WindowGroup = function(first, second, type, splitPercent){
 			var win_rect = win.outer_rect();
 			var bounds = this.outer_rect();
 			
-			this.update_split_percent(bounds, win);			
-			
 			if(this.type == WindowGroup.HORIZONTAL_GROUP){
 				bounds.height = win_rect.height;
+				bounds.y = win_rect.y;
 			} else if(this.type == WindowGroup.VERTICAL_GROUP){
 				bounds.width = win_rect.width;
+				bounds.x = win_rect.x;
 			}
+			
+			this.update_split_percent(bounds, win);			
 			
 			this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 			
