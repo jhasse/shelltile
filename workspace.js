@@ -56,23 +56,13 @@ Workspace.prototype = {
 		return new Meta.Rectangle({ x: geometry.x, y: geometry.y + panel_height, width: geometry.width, height: geometry.height - panel_height});
 	},
 	
-	on_window_create: function(workspace, meta_window) {
-		let actor = meta_window.get_compositor_private();
-		if(!actor){
-			Mainloop.idle_add(Lang.bind(this, function () {
-				this.on_window_create(workspace, meta_window);
-				return false;
-			}));
-			return;
-		}
-
-		var win = this.extension.get_window(meta_window);
+	connect_window: function(win){
 		if(!win.can_be_tiled()) {
 			return;
 		}
-		this.log.debug("on_window_create " + win + " " + meta_window);
-		win.workspace_signals = [];
 		
+		var actor = win.get_actor();
+		var meta_window = win.meta_window;
 		let bind_to_window_change = this.bind_to_window_change(win, actor);
 
 		let move_ops = [Meta.GrabOp.MOVING];
@@ -98,6 +88,26 @@ Workspace.prototype = {
 		bind_to_window_change('size',     resize_ops, Lang.bind(this, on_window_resize), Lang.bind(this, on_window_resized));
 		this.extension.connect_and_track(this, meta_window, 'raised', Lang.bind(this, on_window_raised));
 		this.extension.connect_and_track(this, meta_window, "workspace_changed", Lang.bind(this, on_workspace_changed));
+		
+	},
+	
+	disconnect_window: function(win){
+		this.extension.disconnect_tracked_signals(this, win.meta_window);
+	},
+	
+	on_window_create: function(workspace, meta_window) {
+		let actor = meta_window.get_compositor_private();
+		if(!actor){
+			Mainloop.idle_add(Lang.bind(this, function () {
+				this.on_window_create(workspace, meta_window);
+				return false;
+			}));
+			return;
+		}
+
+		var win = this.extension.get_window(meta_window);
+		this.connect_window(win);
+
 	},
 	
 	break_loops: function(func){
@@ -154,6 +164,7 @@ Workspace.prototype = {
 		win = this.extension.get_window(win);
 		if(win.get_workspace() === this){
 			this.log.debug("workspace_changed");
+			this.connect_window(win);
 			win.on_move_to_workspace(this);
 		}
 	},
@@ -225,8 +236,9 @@ Workspace.prototype = {
 			return false;
 		}));
 		
-		if(win) win._disable();
-		this.extension.disconnect_tracked_signals(this, meta_window);
+		if(win){
+			this.disconnect_window(win);
+		}
 		this.log.debug("window removed " + meta_window);
 	},
 
