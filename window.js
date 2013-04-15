@@ -29,10 +29,6 @@ Window.prototype = {
 		this.log = Log.getLogger("Window");
 	}
 
-	,_disable: function() {
-		this.extension.disconnect_tracked_signals(this);
-	}
-
 	,bring_to_front: function() {
 		// NOOP (TODO: remove)
 	}
