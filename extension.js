@@ -116,14 +116,18 @@ const Ext = function Ext(){
 
 	self.disconnect_tracked_signals = function(owner, object) {
 		if(owner._bound_signals == null) return;
+		
+		var bound_signals1 = [];
 		for(var i=0; i<owner._bound_signals.length; i++) {
 			var sig = owner._bound_signals[i];
 			if(object === undefined || sig[0] === object){
 				this.log.debug("disconnect owner: " + owner + " sig[0]:" + sig[0] + " sig[1]:" + sig[1]);
 				sig[0].disconnect(sig[2]);
+			} else {
+				bound_signals1.push(sig);
 			}
 		}
-		delete owner._bound_signals;
+		owner._bound_signals = bound_signals1;
 	};
 	
 	self._reset_state = function() {
