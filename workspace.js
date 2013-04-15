@@ -35,7 +35,7 @@ Workspace.prototype = {
 
 	_disable: function() {
 		var self = this;
-		this.extension.disconnect_tracked_signals(this, this._shellwm);
+		this.extension.disconnect_tracked_signals(this);
 		this.meta_workspace = null;
 		this.extension = null;
 	},
