@@ -2,6 +2,7 @@ const Main = imports.ui.main;
 const Meta = imports.gi.Meta;
 const Gio = imports.gi.Gio;
 const Lang = imports.lang;
+const Mainloop = imports.mainloop;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
 const ExtensionSystem = imports.ui.extensionSystem;
@@ -37,7 +38,7 @@ const Ext = function Ext(){
 	
 	self.get_workspace = function get_workspace(meta_workspace) {
 		let workspace = self.workspaces[meta_workspace];
-
+		
     	if(typeof(workspace) == "undefined") {
     		var strategy = new DefaultTilingStrategy(self);
 			workspace = self.workspaces[meta_workspace] = new Workspace(meta_workspace, self, strategy);
@@ -46,26 +47,33 @@ const Ext = function Ext(){
 	};
 	
 	self.on_remove_workspace = function(screen, index) {
-		var removed_meta = null;
-		var removed_ws = null;
-		for(let k in self.workspaces){
-			let v = self.workspaces[k];
-			var found = false;
-			for(let i=0; i<screen.get_n_workspaces();i++){
-				var meta_workspace = screen.get_workspace_by_index(i);
-				if(meta_workspace.toString() == k) found = true;
-			}
+		Mainloop.idle_add(Lang.bind(this, function () {
+		   
+		    var removed_meta = null;
+		    var removed_ws = null;
+		    for(let k in self.workspaces){
+			    let v = self.workspaces[k];
+			    var found = false;
+			    for(let i=0; i<screen.get_n_workspaces();i++){
+				    var meta_workspace = screen.get_workspace_by_index(i);
+				    if(meta_workspace.toString() == k) found = true;
+			    }
 
-			if(!found){
-				removed_meta = k;
-				removed_ws = v;
-				break;
-			}
-		}
+			    if(!found){
+				    removed_meta = k;
+				    removed_ws = v;
+				    break;
+			    }
+		    }
 		
-		if(removed_meta != null) {
-			self.remove_workspace(removed_meta);
-		}
+		    if(removed_meta != null) {
+			    self.remove_workspace(removed_meta);
+		    }
+			return false;
+		
+        }));
+
+
 	};
 	
 	self.remove_workspace = function(removed_meta) {	
@@ -121,7 +129,6 @@ const Ext = function Ext(){
 		for(var i=0; i<owner._bound_signals.length; i++) {
 			var sig = owner._bound_signals[i];
 			if(object === undefined || sig[0] === object){
-				this.log.debug("disconnect owner: " + owner + " sig[0]:" + sig[0] + " sig[1]:" + sig[1]);
 				sig[0].disconnect(sig[2]);
 			} else {
 				bound_signals1.push(sig);
@@ -146,8 +153,6 @@ const Ext = function Ext(){
             self.screen = global.screen;
             let screen = self.screen;
             
-            var monitorIdx = screen.get_primary_monitor();
-            self.monitor = screen.get_monitor_geometry(monitorIdx);
             self._init_workspaces();
             
             self.settings.set_boolean("edge-tiling", false);
