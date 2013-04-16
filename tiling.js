@@ -393,12 +393,13 @@ const WindowGroup = function(first, second, type, splitPercent){
 		
 		if(win === this.first){
 			var corner = this.type == WindowGroup.VERTICAL_GROUP ? 0 : 3;
+			var win_rect = this.second.outer_rect();
 			
 		} else if(win === this.second){
 			var corner = this.type == WindowGroup.VERTICAL_GROUP ? 2 : 1;
+			var win_rect = this.first.outer_rect();
 		}
 		
-		var win_rect = this.outer_rect();
 		var currentpreview = preview[corner];
 		
 		var preview_x = win_rect.x + currentpreview[0] * win_rect.width;
