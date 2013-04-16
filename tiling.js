@@ -436,7 +436,7 @@ const DefaultTilingStrategy = function(ext){
 		win.raise();
 
 		var currTime = new Date().getTime();
-		if(!this.lastTime || (currTime - this.lastTime) > 200){ 
+		if(!win.group && (!this.lastTime || (currTime - this.lastTime) > 200)){ 
 			this.lastTime = currTime;
 			
 			var preview_rect = null;
