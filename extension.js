@@ -9,7 +9,7 @@ const ExtensionSystem = imports.ui.extensionSystem;
 const Window = Extension.imports.window.Window;
 const Workspace = Extension.imports.workspace.Workspace;
 const DefaultTilingStrategy = Extension.imports.tiling.DefaultTilingStrategy;
-const Log = Extension.imports.logger.Logger.getLogger("shelltide");
+const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
 
 
 const Ext = function Ext(){
