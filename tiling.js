@@ -507,6 +507,7 @@ const DefaultTilingStrategy = function(ext){
 		if(win.group){
 			win.group.detach(win);
 			win.maximize_size();
+			win.raise();
 		}
 	}
 	
