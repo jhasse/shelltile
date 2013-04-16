@@ -3,7 +3,7 @@ const Lang = imports.lang;
 const Meta = imports.gi.Meta;
 const Main = imports.ui.main;
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
-const Log = Extension.imports.logger.Logger.getLogger("shelltile");
+const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
 
 function Workspace() {
 	this._init.apply(this, arguments)
