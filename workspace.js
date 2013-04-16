@@ -30,7 +30,7 @@ Workspace.prototype = {
 		this.extension.connect_and_track(this, this._shellwm, 'maximize', Lang.bind(this, on_window_maximize));
 		this.extension.connect_and_track(this, this._shellwm, 'unmaximize', Lang.bind(this, on_window_unmaximize));
 		this.extension.connect_and_track(this, this._shellwm, 'minimize', Lang.bind(this, on_window_minimize));
-		//this.meta_windows().map(Lang.bind(this, function(win) { this.on_window_create(null, win); }));
+		this.meta_windows().map(Lang.bind(this, function(win) { this.on_window_create(null, win); }));
 	},
 
 	_disable: function() {

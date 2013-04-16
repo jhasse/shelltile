@@ -623,7 +623,6 @@ const DefaultTilingStrategy = function(ext){
 				var corner_width = current_width;
 				var corner_height =	current_height;				
 				
-				log.debug("corner_rect: " + corner + " " + [corner_x, corner_y, corner_width, corner_height]);
 				var corner_rect = new Meta.Rectangle({ x: corner_x, y: corner_y, width: corner_width, height: corner_height});
 				ret.splice(0,0,[corner_rect, win, corner]);
 				
@@ -644,7 +643,6 @@ const DefaultTilingStrategy = function(ext){
 			var currentstart = start[i];
 			corner_rects[i] = calculate_corners(below_rect, currentcorner, currentdelta, currentstart, i);
 		}
-		this.log.debug(corner_rects);
 		
 		var cursor_rect = this.get_cursor_rect();
 
