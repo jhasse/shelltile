@@ -387,6 +387,27 @@ const WindowGroup = function(first, second, type, splitPercent){
 		delete this.first;
 		delete this.second;
 	}
+	
+	this.preview_rect = function(win){
+		var preview = [[0,0,1,0.5], [0.5,0,0.5,1], [0,0.5,1,0.5], [0,0,0.5,1]]
+		
+		if(win === this.first){
+			var corner = this.type == WindowGroup.VERTICAL_GROUP ? 0 : 3;
+			
+		} else if(win === this.second){
+			var corner = this.type == WindowGroup.VERTICAL_GROUP ? 2 : 1;
+		}
+		
+		var win_rect = this.outer_rect();
+		var currentpreview = preview[corner];
+		
+		var preview_x = win_rect.x + currentpreview[0] * win_rect.width;
+		var preview_y = win_rect.y + currentpreview[1] * win_rect.height;
+		var preview_width = currentpreview[2] * win_rect.width;
+		var preview_height = currentpreview[3] * win_rect.height;
+		
+		return new Meta.Rectangle({ x: preview_x, y: preview_y, width: preview_width, height: preview_height});
+	}
 }
 WindowGroup.HORIZONTAL_GROUP = "horizontal";
 WindowGroup.VERTICAL_GROUP = "vertical";
@@ -401,20 +422,27 @@ const DefaultTilingStrategy = function(ext){
 	this.on_window_move = function(win){
 		win.unmaximize();
 		win.raise();
-
+		
+		var preview_rect = null;
 		if(!win.group){
 			var window_under = this.get_window_under(win);
 			this.log.debug("window_under: " + window_under);
+
+			
 			if(window_under){
 				
-				var groupPreview = this.get_window_group_preview(window_under, win);
-				
-				if(groupPreview) this.log.debug("preview: " + groupPreview);
+				var groupPreview = this.get_window_group_preview1(window_under, win);
+				if(groupPreview){
+					var preview_rect = groupPreview.preview_rect(win);
+					this.log.debug("preview_rect: " + preview_rect);
+				}
 			}
 		}
+		this.extension.set_preview_rect(preview_rect);
 	}
 	
 	this.on_window_moved = function(win){
+		var preview_rect = null;
 		if(win.group){
 			win.update_geometry();
 			win.raise();
@@ -431,6 +459,7 @@ const DefaultTilingStrategy = function(ext){
 				}
 			}
 		}
+		this.extension.set_preview_rect(preview_rect);
 	}
 	
 	this.on_window_resize = function(win){
@@ -509,6 +538,112 @@ const DefaultTilingStrategy = function(ext){
 		}
 		if(ret) ret.extension = this.extension;
 		return ret;
+	}
+	
+	this.get_window_group_preview1 = function(below, above){
+		
+		var corner_size = DefaultTilingStrategy.CORNER_SIZE;
+			
+		let TOP_LEFT = 0;
+		let TOP_RIGHT = 1;
+		let BOTTOM_RIGHT = 2;
+		let BOTTOM_LEFT = 3;
+		
+		var current = below;
+		var corners = [[],[],[],[]];
+		corners[TOP_LEFT].push(current);
+		corners[TOP_RIGHT].push(current);
+		corners[BOTTOM_RIGHT].push(current);
+		corners[BOTTOM_LEFT].push(current);
+		
+		var delta = [[1,1], [0, 1], [0, 0], [1, 0]];
+		var start = [[0,0], [0.5, 0], [0.5, 0.5], [0, 0.5]];
+		var groups = [["above", "below", "v"], ["below", "above", "h"], ["below", "above", "v"], ["above", "below", "h"]];
+		
+		while(current.group){
+			var parent = current.group;
+			if(parent.type == WindowGroup.HORIZONTAL_GROUP && parent.first === current){
+				corners[TOP_LEFT].push(parent);
+			} else if(parent.type == WindowGroup.VERTICAL_GROUP && parent.second === current){
+				corners[TOP_RIGHT].push(parent);
+			} else if(parent.type == WindowGroup.HORIZONTAL_GROUP && parent.second === current){
+				corners[BOTTOM_RIGHT].push(parent);
+			} else if(parent.type == WindowGroup.VERTICAL_GROUP && parent.first === current){
+				corners[BOTTOM_LEFT].push(parent);
+			}
+			current = parent;
+		}
+		
+		var calculate_corners = function(below_rect, currentcorner, currentdelta, currentstart, corner){
+						
+			var current_x = below_rect.x + below_rect.width * currentstart[0];
+			var current_y = below_rect.y + below_rect.height * currentstart[1];
+			var current_width = below_rect.width / 2;
+			var current_height = below_rect.height / 2;
+			
+			var delta_w = current_width / currentcorner.length;
+			var delta_h = current_height / currentcorner.length;			
+
+			var ret = [];
+			for(var i = currentcorner.length - 1; i>=0; i--){
+				var win = currentcorner[i];
+				
+				var corner_x = current_x;
+				var corner_y = current_y;
+				var corner_width = current_width;
+				var corner_height =	current_height;				
+				
+				var corner_rect = new Meta.Rectangle({ x: corner_x, y: corner_y, width: corner_width, height: corner_height});
+				ret.push([corner_rect, win, corner]);
+				
+				current_width -= delta_w;
+				current_height -= delta_h;
+				current_x = current_x + currentdelta[0] * delta_w;
+				current_y = current_y + currentdelta[1] * delta_h;
+			}			
+			return ret;
+		}		
+		
+		var below_rect = below.outer_rect();
+		
+		var corner_rects = [];
+		for(var i=0; i<4; i++){
+			var currentcorner = corners[i];
+			var currentdelta = delta[i];
+			var currentstart = start[i];
+			corner_rects[i] = calculate_corners(below_rect, currentcorner, currentdelta, currentstart, i);
+		}
+		
+		
+		var cursor_rect = this.get_cursor_rect();
+
+		var get_current_cursor_rect = function(){
+			
+			for(var i=0; i<corner_rects.length; i++){
+				
+				var current_corner_rects = corner_rects[i];
+				for(var j=0; j<current_corner_rects.length; j++){
+					var current_corner_rect = current_corner_rects[j];
+					if(current_corner_rect[0].contains_rect(cursor_rect)){
+						return current_corner_rect;
+					}
+				}
+			}
+			return null;
+		}
+
+		var current_cursor_rect = get_current_cursor_rect();
+		if(!current_cursor_rect) return null;
+		else {
+			var win = current_cursor_rect[1];
+			var group = groups[current_cursor_rect[2]];
+			
+			var vars = {"above": above, "below": win, "h": WindowGroup.HORIZONTAL_GROUP, "v": WindowGroup.VERTICAL_GROUP};
+			
+			var ret = new WindowGroup(vars[group[0]], vars[group[1]], vars[group[2]]);
+			ret.extension = this.extension;
+			return ret;
+		}
 	}
 	
 	this.get_cursor_rect = function(){
