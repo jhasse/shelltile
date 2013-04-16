@@ -3,7 +3,7 @@ const Lang = imports.lang;
 const Meta = imports.gi.Meta;
 const Shell = imports.gi.Shell;
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
-const Log = Extension.imports.logger.Logger.getLogger("shelltile");
+const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
 
 function Window(meta_window, ext) { this._init(meta_window, ext); }
 

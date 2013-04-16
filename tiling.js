@@ -1,7 +1,7 @@
 const Meta = imports.gi.Meta;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
-const Log = Extension.imports.logger.Logger.getLogger("shelltide");
+const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
 const Window = Extension.imports.window.Window;
 
 const WindowGroup = function(first, second, type, splitPercent){
