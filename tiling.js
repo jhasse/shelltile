@@ -451,7 +451,7 @@ const DefaultTilingStrategy = function(ext){
 			var window_under = this.get_window_under(win);
 			if(window_under){
 				
-				var group_preview = this.get_window_group_preview(window_under, win);
+				var group_preview = this.get_window_group_preview1(window_under, win);
 				if(group_preview){
 					
 					if(win.group) win.group.detach(win);
@@ -460,7 +460,7 @@ const DefaultTilingStrategy = function(ext){
 				}
 			}
 		}
-		this.extension.set_preview_rect(preview_rect);
+		this.extension.set_preview_rect(null);
 	}
 	
 	this.on_window_resize = function(win){
