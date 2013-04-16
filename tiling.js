@@ -573,7 +573,8 @@ const DefaultTilingStrategy = function(ext){
 	this.get_window_group_preview = function(below, above){
 		
 		var corner_size = DefaultTilingStrategy.CORNER_SIZE;
-			
+		var log = this.log;	
+		
 		let TOP_LEFT = 0;
 		let TOP_RIGHT = 1;
 		let BOTTOM_RIGHT = 2;
@@ -586,19 +587,17 @@ const DefaultTilingStrategy = function(ext){
 		corners[BOTTOM_RIGHT].push(current);
 		corners[BOTTOM_LEFT].push(current);
 		
-		var delta = [[1,1], [0, 1], [0, 0], [1, 0]];
+		var delta = [[0,1,0,-1], [0,0,-1,0], [0,0,0,-1], [1,0,-1,0]];
 		var start = [[0,0], [0.5, 0], [0.5, 0.5], [0, 0.5]];
 		var groups = [["above", "below", "v"], ["below", "above", "h"], ["below", "above", "v"], ["above", "below", "h"]];
 		
 		while(current.group){
 			var parent = current.group;
-			if(parent.type == WindowGroup.HORIZONTAL_GROUP && parent.first === current){
+			if(parent.type == WindowGroup.HORIZONTAL_GROUP){
 				corners[TOP_LEFT].push(parent);
-			} else if(parent.type == WindowGroup.VERTICAL_GROUP && parent.second === current){
-				corners[TOP_RIGHT].push(parent);
-			} else if(parent.type == WindowGroup.HORIZONTAL_GROUP && parent.second === current){
 				corners[BOTTOM_RIGHT].push(parent);
-			} else if(parent.type == WindowGroup.VERTICAL_GROUP && parent.first === current){
+			} else if(parent.type == WindowGroup.VERTICAL_GROUP){
+				corners[TOP_RIGHT].push(parent);
 				corners[BOTTOM_LEFT].push(parent);
 			}
 			current = parent;
@@ -615,7 +614,7 @@ const DefaultTilingStrategy = function(ext){
 			var delta_h = current_height / currentcorner.length;			
 
 			var ret = [];
-			for(var i = currentcorner.length - 1; i>=0; i--){
+			for(var i=0; i<currentcorner.length; i++){
 				var win = currentcorner[i];
 				
 				var corner_x = current_x;
@@ -623,13 +622,14 @@ const DefaultTilingStrategy = function(ext){
 				var corner_width = current_width;
 				var corner_height =	current_height;				
 				
+				log.debug("corner_rect: " + corner + " " + [corner_x, corner_y, corner_width, corner_height]);
 				var corner_rect = new Meta.Rectangle({ x: corner_x, y: corner_y, width: corner_width, height: corner_height});
-				ret.push([corner_rect, win, corner]);
+				ret.splice(0,0,[corner_rect, win, corner]);
 				
-				current_width -= delta_w;
-				current_height -= delta_h;
-				current_x = current_x + currentdelta[0] * delta_w;
-				current_y = current_y + currentdelta[1] * delta_h;
+				current_x += currentdelta[0] * delta_w;
+				current_y += currentdelta[1] * delta_h;
+				current_width += currentdelta[2] * delta_w;
+				current_height += currentdelta[3] * delta_h;				
 			}			
 			return ret;
 		}		
@@ -643,7 +643,7 @@ const DefaultTilingStrategy = function(ext){
 			var currentstart = start[i];
 			corner_rects[i] = calculate_corners(below_rect, currentcorner, currentdelta, currentstart, i);
 		}
-		
+		this.log.debug(corner_rects);
 		
 		var cursor_rect = this.get_cursor_rect();
 
