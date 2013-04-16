@@ -1,4 +1,8 @@
 const Meta = imports.gi.Meta;
+const St = imports.gi.St;
+const Main = imports.ui.main;
+const Mainloop = imports.mainloop;
+const Lang = imports.lang;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
 const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
@@ -419,52 +423,73 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.extension = ext;
 	this.log = Log.getLogger("DefaultTilingStrategy");
-	this.window_moving = null;
+	this.lastTime = null;
+	
+	this.preview = new St.BoxLayout({style_class: 'grid-preview'});
+	this.preview.add_style_pseudo_class('activate');
+	Main.uiGroup.add_actor(this.preview);
+	
+	this.ctrl = true;	
 	
 	this.on_window_move = function(win){
 		win.unmaximize();
 		win.raise();
-		this.window_moving = win;
-		
-		
-		/*var preview_rect = null;
-		if(!win.group){
-			var window_under = this.get_window_under(win);
-			this.log.debug("window_under: " + window_under);
 
+		var currTime = new Date().getTime();
+		if(!this.lastTime || (currTime - this.lastTime) > 200){ 
+			this.lastTime = currTime;
 			
-			if(window_under){
+			var preview_rect = null;
+			if(win){
+				var window_under = this.get_window_under(win);
 				
-				var groupPreview = this.get_window_group_preview1(window_under, win);
-				if(groupPreview){
-					var preview_rect = groupPreview.preview_rect(win);
-					this.log.debug("preview_rect: " + preview_rect);
+				if(window_under){
+					
+					var groupPreview = this.get_window_group_preview(window_under, win);
+					if(groupPreview){
+						var preview_rect = groupPreview.preview_rect(win);
+						groupPreview.first = null;
+						groupPreview.second = null;
+						this.log.debug("preview_rect: " + preview_rect);
+					}
 				}
 			}
+			this.update_preview(preview_rect);
 		}
-		this.extension.set_preview_rect(preview_rect);*/
 	}
 	
 	this.on_window_moved = function(win){
-		//var preview_rect = null;
+
 		if(win.group){
 			win.update_geometry();
 			win.raise();
 		} else {
-			/*var window_under = this.get_window_under(win);
+			var window_under = this.get_window_under(win);
 			if(window_under){
 				
-				var group_preview = this.get_window_group_preview1(window_under, win);
+				var group_preview = this.get_window_group_preview(window_under, win);
 				if(group_preview){
 					
 					if(win.group) win.group.detach(win);
 					group_preview.attach();
 					
 				}
-			}*/
+			}
 		}
-		//this.extension.set_preview_rect(null);
-		this.window_moving = null;
+		this.update_preview(null);
+
+	}
+	
+	this.update_preview = function(preview_rect){
+		if(preview_rect){
+			this.preview.visible = true;
+			this.preview.x = preview_rect.x;
+			this.preview.y = preview_rect.y;
+			this.preview.width = preview_rect.width;
+			this.preview.height = preview_rect.height;
+		} else {
+			this.preview.visible = false;
+		}
 	}
 	
 	this.on_window_resize = function(win){
@@ -506,7 +531,7 @@ const DefaultTilingStrategy = function(ext){
 		}
 	}
 	
-	this.get_window_group_preview = function(below, above){
+	/*this.get_window_group_preview = function(below, above){
 		
 		var corner_size = DefaultTilingStrategy.CORNER_SIZE;
 		
@@ -543,9 +568,9 @@ const DefaultTilingStrategy = function(ext){
 		}
 		if(ret) ret.extension = this.extension;
 		return ret;
-	}
+	}*/
 	
-	this.get_window_group_preview1 = function(below, above){
+	this.get_window_group_preview = function(below, above){
 		
 		var corner_size = DefaultTilingStrategy.CORNER_SIZE;
 			

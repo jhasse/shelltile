@@ -3,7 +3,6 @@ const Meta = imports.gi.Meta;
 const Gio = imports.gi.Gio;
 const Lang = imports.lang;
 const Mainloop = imports.mainloop;
-const St = imports.gi.St;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
 const ExtensionSystem = imports.ui.extensionSystem;
@@ -16,22 +15,11 @@ const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
 const Ext = function Ext(){
 	let self = this;
 	let OVERRIDE_SCHEMA = "org.gnome.shell.overrides";
-
-	self.preview = new St.BoxLayout({style_class: 'grid-preview'});
-	self.preview.add_style_pseudo_class('activate');
-	Main.uiGroup.add_actor(self.preview);
-	/*self.preview.visible = true;
-	self.preview.x = 100;
-	self.preview.y = 100;
-	self.preview.width = 100;
-	self.preview.height = 100;*/
-	
-	self.enabled = false;
-	self.dragging = false;
-	self.ctrl = true;
 	
     self.log = Log.getLogger("Ext");
     self.settings = new Gio.Settings({ schema: OVERRIDE_SCHEMA });	
+    
+    self.enabled = false;
 	
 	self.connect_and_track = function(owner, subject, name, cb) {
 		if (!owner.hasOwnProperty('_bound_signals')) {
@@ -110,23 +98,6 @@ const Ext = function Ext(){
 		}
 		return win;
 	};
-	
-	self.set_preview_rect = function(preview_rect){
-		self.preview_rect = preview_rect;
-		self.update_preview();
-	}
-	
-	self.update_preview = function(){
-		if(self.preview_rect){
-			self.preview.visible = true;
-			self.preview.x = self.preview_rect.x;
-			self.preview.y = self.preview_rect.y;
-			self.preview.width = self.preview_rect.width;
-			self.preview.height = self.preview_rect.height;
-		} else {
-			self.preview.visible = false;
-		}
-	}
 	
 	
 	self._init_workspaces = function() {
