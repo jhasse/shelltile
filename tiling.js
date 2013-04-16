@@ -419,12 +419,15 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.extension = ext;
 	this.log = Log.getLogger("DefaultTilingStrategy");
+	this.window_moving = null;
 	
 	this.on_window_move = function(win){
 		win.unmaximize();
 		win.raise();
+		this.window_moving = win;
 		
-		var preview_rect = null;
+		
+		/*var preview_rect = null;
 		if(!win.group){
 			var window_under = this.get_window_under(win);
 			this.log.debug("window_under: " + window_under);
@@ -439,16 +442,16 @@ const DefaultTilingStrategy = function(ext){
 				}
 			}
 		}
-		this.extension.set_preview_rect(preview_rect);
+		this.extension.set_preview_rect(preview_rect);*/
 	}
 	
 	this.on_window_moved = function(win){
-		var preview_rect = null;
+		//var preview_rect = null;
 		if(win.group){
 			win.update_geometry();
 			win.raise();
 		} else {
-			var window_under = this.get_window_under(win);
+			/*var window_under = this.get_window_under(win);
 			if(window_under){
 				
 				var group_preview = this.get_window_group_preview1(window_under, win);
@@ -458,9 +461,10 @@ const DefaultTilingStrategy = function(ext){
 					group_preview.attach();
 					
 				}
-			}
+			}*/
 		}
-		this.extension.set_preview_rect(null);
+		//this.extension.set_preview_rect(null);
+		this.window_moving = null;
 	}
 	
 	this.on_window_resize = function(win){
