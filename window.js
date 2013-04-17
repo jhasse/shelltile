@@ -57,6 +57,10 @@ Window.prototype = {
 		this.meta_window.unminimize();
 	}
 	
+	,showing_on_its_workspace: function(){
+		return this.meta_window.showing_on_its_workspace();
+	}
+	
 	,before_redraw: function(func) {
 		//TODO: idle seems to be the only LaterType that reliably works; but
 		// it causes a visual flash. before_redraw would be better, but that
@@ -141,6 +145,7 @@ Window.prototype = {
 
 		var window_type = this.window_type();
 		var result = Window.tileable_window_types.indexOf(window_type) != -1;
+		
 		return result;
 	}
 	

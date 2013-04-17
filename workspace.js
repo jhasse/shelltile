@@ -246,7 +246,18 @@ Workspace.prototype = {
 	},
 
 	meta_windows: function() {
-		var wins = this.meta_workspace.list_windows();
+	    var self = this;
+
+	    var wins = global.get_window_actors().map(function (act) {
+	            return act.meta_window;
+	        });
+
+	    wins = wins.filter(function (win) {
+            return win.get_workspace() === self.meta_workspace;
+        });
+	
+	    wins = global.display.sort_windows_by_stacking(wins);
+		
 		return wins;
 	}
 }
