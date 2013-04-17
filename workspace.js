@@ -156,7 +156,7 @@ Workspace.prototype = {
 				}
 				return false;
 			});
-			this.extension.connect_and_track(win, actor, event_name + '-changed', signal_handler_changed);
+			this.extension.connect_and_track(this, actor, event_name + '-changed', signal_handler_changed);
 		});
 	},
 
