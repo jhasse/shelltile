@@ -532,45 +532,6 @@ const DefaultTilingStrategy = function(ext){
 		}
 	}
 	
-	/*this.get_window_group_preview = function(below, above){
-		
-		var corner_size = DefaultTilingStrategy.CORNER_SIZE;
-		
-		var left = below.xpos();
-		var right = below.xpos() + below.width() - corner_size;
-		var top = below.ypos();
-		var bottom = below.ypos()  + below.height() - corner_size;
-		
-		var cursor_rect = this.get_cursor_rect();
-		
-		var topleft = new Meta.Rectangle({ x: left, y: top, width: corner_size, height: corner_size});
-		var topright = new Meta.Rectangle({ x: right, y: top, width: corner_size, height: corner_size});
-		var bottomleft = new Meta.Rectangle({ x: left, y: bottom, width: corner_size, height: corner_size});
-		var bottomright = new Meta.Rectangle({ x: right, y: bottom, width: corner_size, height: corner_size});
-		
-		var ret = null;
-		
-		if(topleft.contains_rect(cursor_rect)){
-			
-			ret = new WindowGroup(above, below, WindowGroup.VERTICAL_GROUP);
-			
-		} else if(topright.contains_rect(cursor_rect)){
-			
-			ret = new WindowGroup(below, above, WindowGroup.HORIZONTAL_GROUP);
-						
-		} else if(bottomleft.contains_rect(cursor_rect)){
-			
-			ret = new WindowGroup(above, below, WindowGroup.HORIZONTAL_GROUP);
-						
-		} else if(bottomright.contains_rect(cursor_rect)){
-			
-			ret = new WindowGroup(below, above, WindowGroup.VERTICAL_GROUP);
-			
-		}
-		if(ret) ret.extension = this.extension;
-		return ret;
-	}*/
-	
 	this.get_window_group_preview = function(below, above){
 		
 		var corner_size = DefaultTilingStrategy.CORNER_SIZE;
