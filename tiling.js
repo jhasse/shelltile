@@ -425,30 +425,25 @@ const DefaultTilingStrategy = function(ext){
 	this.extension = ext;
 	this.log = Log.getLogger("DefaultTilingStrategy");
 	this.lastTime = null;
+	this.lastTimeCtrlPressed = null;
 	
 	this.preview = new St.BoxLayout({style_class: 'grid-preview'});
 	this.preview.add_style_pseudo_class('activate');
 	Main.uiGroup.add_actor(this.preview);
 	
-	this.ctrl = true;
-	
-	
-	/*this.on_stage_key_pressed = function(stage, event){
-		let keysym = event.get_key_symbol();
-		if(keysym == Clutter.Control_L){
-			this.log.debug("left control");
-			
+	this.is_ctrl_pressed = function(){
+		let [x, y, mods] = global.get_pointer();
+		var ret = mods & Clutter.ModifierType.CONTROL_MASK;
+		if(ret){
+			this.lastTimeCtrlPressed = new Date().getTime();
+		} else {
+			var currTime = new Date().getTime();
+			if(this.lastTimeCtrlPressed && (currTime - this.lastTimeCtrlPressed) < 500){
+				ret = true;
+			}
 		}
+		return ret;
 	}
-	this.on_stage_key_released = function(stage, event){
-		let keysym = event.get_key_symbol();
-		if(keysym == Clutter.Control_L){
-			this.log.debug("left control released");
-			
-		}
-	}	
-	global.stage.connect('key-press-event', Lang.bind(this, this.on_stage_key_pressed));
-	global.stage.connect('key-release-event', Lang.bind(this, this.on_stage_key_released));*/
 	
 	this.on_window_move = function(win){
 		win.unmaximize();
@@ -459,9 +454,10 @@ const DefaultTilingStrategy = function(ext){
 			this.lastTime = currTime;
 			
 			var preview_rect = null;
-			if(win){
-				var window_under = this.get_window_under(win);
+			var is_ctrl_pressed = this.is_ctrl_pressed();
+			if(win && is_ctrl_pressed){
 				
+				var window_under = this.get_window_under(win);
 				if(window_under){
 					
 					var groupPreview = this.get_window_group_preview(window_under, win);
@@ -472,6 +468,7 @@ const DefaultTilingStrategy = function(ext){
 						this.log.debug("preview_rect: " + preview_rect);
 					}
 				}
+
 			}
 			this.update_preview(preview_rect);
 		}
@@ -483,16 +480,21 @@ const DefaultTilingStrategy = function(ext){
 			win.update_geometry();
 			win.raise();
 		} else {
-			var window_under = this.get_window_under(win);
-			if(window_under){
+			var is_ctrl_pressed = this.is_ctrl_pressed();
+			if(is_ctrl_pressed){
 				
-				var group_preview = this.get_window_group_preview(window_under, win);
-				if(group_preview){
+				var window_under = this.get_window_under(win);
+				if(window_under){
 					
-					if(win.group) win.group.detach(win);
-					group_preview.attach();
-					
+					var group_preview = this.get_window_group_preview(window_under, win);
+					if(group_preview){
+						
+						if(win.group) win.group.detach(win);
+						group_preview.attach();
+						
+					}
 				}
+			
 			}
 		}
 		this.update_preview(null);

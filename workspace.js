@@ -82,16 +82,19 @@ Workspace.prototype = {
 		var on_window_resized = this.break_loops(this.on_window_resized);
 		var on_window_raised = this.break_loops(this.on_window_raised);
 		var on_workspace_changed = this.break_loops(this.on_workspace_changed);
+		var on_key_press = this.on_key_press;
+		var on_key_release = this.on_key_release;
 		
 		
 		bind_to_window_change('position', move_ops, Lang.bind(this, on_window_move),  Lang.bind(this, on_window_moved));
 		bind_to_window_change('size',     resize_ops, Lang.bind(this, on_window_resize), Lang.bind(this, on_window_resized));
 		this.extension.connect_and_track(this, meta_window, 'raised', Lang.bind(this, on_window_raised));
-		this.extension.connect_and_track(this, meta_window, "workspace_changed", Lang.bind(this, on_workspace_changed));
-		
+		this.extension.connect_and_track(this, meta_window, "workspace_changed", Lang.bind(this, on_workspace_changed));	
 	},
 	
 	disconnect_window: function(win){
+		var actor = win.get_actor();
+		if(actor) this.extension.disconnect_tracked_signals(this, actor);
 		this.extension.disconnect_tracked_signals(this, win.meta_window);
 	},
 	
