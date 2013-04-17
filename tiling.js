@@ -3,6 +3,7 @@ const St = imports.gi.St;
 const Main = imports.ui.main;
 const Mainloop = imports.mainloop;
 const Lang = imports.lang;
+const Clutter = imports.gi.Clutter;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
 const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
@@ -429,7 +430,25 @@ const DefaultTilingStrategy = function(ext){
 	this.preview.add_style_pseudo_class('activate');
 	Main.uiGroup.add_actor(this.preview);
 	
-	this.ctrl = true;	
+	this.ctrl = true;
+	
+	
+	/*this.on_stage_key_pressed = function(stage, event){
+		let keysym = event.get_key_symbol();
+		if(keysym == Clutter.Control_L){
+			this.log.debug("left control");
+			
+		}
+	}
+	this.on_stage_key_released = function(stage, event){
+		let keysym = event.get_key_symbol();
+		if(keysym == Clutter.Control_L){
+			this.log.debug("left control released");
+			
+		}
+	}	
+	global.stage.connect('key-press-event', Lang.bind(this, this.on_stage_key_pressed));
+	global.stage.connect('key-release-event', Lang.bind(this, this.on_stage_key_released));*/
 	
 	this.on_window_move = function(win){
 		win.unmaximize();
