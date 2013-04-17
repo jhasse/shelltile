@@ -670,10 +670,11 @@ const DefaultTilingStrategy = function(ext){
 
 		var topmost = undefined;
 		
-		for(let i=0; i<workspace_windows.length; i++){
+		for(let i=workspace_windows.length-1; i>=0; i--){
 			let win1 =  workspace_windows[i];
 			
 			win1 = this.extension.get_window(win1, true);
+			this.log.debug("window_under: " + win1);
 			if(win1.can_be_tiled() && !win1.is_minimized() && win1.meta_window !== win.meta_window){
 			
 				let actor = win1.get_actor();
