@@ -285,13 +285,13 @@ const WindowGroup = function(first, second, type, splitPercent){
 			this.group.move_to_workspace(workspace);
 		}
 		
-		if(this.first.get_workspace && this.first.get_workspace() !== workspace){
+		if(this.first.meta_window && this.first.get_workspace() !== workspace){
 			this.first.move_to_workspace(workspace);
 		} else {
 			this.first.move_to_workspace(workspace, true);
 		}
 		
-		if(this.second.get_workspace && this.second.get_workspace() !== workspace){
+		if(this.second.meta_window && this.second.get_workspace() !== workspace){
 			this.second.move_to_workspace(workspace);
 		} else {
 			this.second.move_to_workspace(workspace, true);
