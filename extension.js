@@ -83,6 +83,13 @@ const Ext = function Ext(){
 		}
 	};
 	
+	self.remove_window = function(removed_meta){
+		if(removed_meta){
+			var id = Window.get_id(removed_meta);
+			delete self.windows[id];
+		}
+	};
+	
 	self.get_window = function get_window(meta_window, create_if_necessary) {
 		if(typeof(create_if_necessary) == 'undefined') {
 			create_if_necessary = true;
