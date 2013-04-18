@@ -237,6 +237,11 @@ Workspace.prototype = {
 		
 		Mainloop.idle_add(Lang.bind(this, function () {
 			if(this.strategy && this.strategy.on_window_remove) this.strategy.on_window_remove(win);
+			
+			if(!win.get_workspace()){
+				this.log.debug("remove_window");
+				this.extension.remove_window(win.meta_window);				
+			}
 			return false;
 		}));
 		
