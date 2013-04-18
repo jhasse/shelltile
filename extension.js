@@ -154,7 +154,7 @@ const Ext = function Ext(){
 
 	self.enable = function(){
 	    try {
-	    	self.log.debug("enabliiing");
+	    	self.log.debug("enabling ShellTile");
 		    self._reset_state();
 	
             self.enabled = true;
@@ -163,9 +163,12 @@ const Ext = function Ext(){
             
             self._init_workspaces();
             
-            self.settings.set_boolean("edge-tiling", false);
+            var edge_tiling = self.settings.get_boolean("edge-tiling");
+            if(edge_tiling === true){
+            	self.settings.set_boolean("edge-tiling", false);
+            }
             self.connect_and_track(self, self.settings, 'changed::edge-tiling', Lang.bind(this, this.on_edge_tiling_changed));
-            self.log.debug("enableeeee");
+            self.log.debug("ShellTile enabled");
         } catch(e){
             self.log.error(e);    
         }
