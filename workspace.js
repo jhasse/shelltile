@@ -98,21 +98,6 @@ Workspace.prototype = {
 		this.extension.disconnect_tracked_signals(this, win.meta_window);
 	},
 	
-	on_window_create: function(workspace, meta_window) {
-		let actor = meta_window.get_compositor_private();
-		if(!actor){
-			Mainloop.idle_add(Lang.bind(this, function () {
-				this.on_window_create(workspace, meta_window);
-				return false;
-			}));
-			return;
-		}
-
-		var win = this.extension.get_window(meta_window);
-		this.connect_window(win);
-
-	},
-	
 	break_loops: function(func){
 		return function(){
 			if(this.calling === true) return;
@@ -171,6 +156,22 @@ Workspace.prototype = {
 			win.on_move_to_workspace(this);
 		}
 	},
+
+	
+	on_window_create: function(workspace, meta_window) {
+		let actor = meta_window.get_compositor_private();
+		if(!actor){
+			Mainloop.idle_add(Lang.bind(this, function () {
+				this.on_window_create(workspace, meta_window);
+				return false;
+			}));
+			return;
+		}
+
+		var win = this.extension.get_window(meta_window);
+		this.connect_window(win);
+
+	},	
 	
 	on_window_raised: function(win){
 		win = this.extension.get_window(win);
