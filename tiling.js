@@ -503,6 +503,9 @@ const DefaultTilingStrategy = function(ext){
 	}
 	
 	this.update_preview = function(preview_rect){
+		
+		Tweener.removeTweens(this.preview);
+		
 		if(preview_rect){
 			this.preview.visible = true;
 			
@@ -516,6 +519,9 @@ const DefaultTilingStrategy = function(ext){
             		  y: preview_rect.y,
             		  width: preview_rect.width,
             		  height: preview_rect.height
+            		  /*,onComplete: function(){
+            			    Main.layoutManager._chrome.updateRegions();
+            		  }*/
                     });
 			
 			/*this.preview.x = preview_rect.x;
