@@ -4,6 +4,7 @@ const Main = imports.ui.main;
 const Mainloop = imports.mainloop;
 const Lang = imports.lang;
 const Clutter = imports.gi.Clutter;
+const Tweener = imports.ui.tweener;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
 const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
@@ -504,10 +505,23 @@ const DefaultTilingStrategy = function(ext){
 	this.update_preview = function(preview_rect){
 		if(preview_rect){
 			this.preview.visible = true;
-			this.preview.x = preview_rect.x;
+			
+            Tweener.addTween(this.preview,
+                    { 
+                      time: 0.5,
+                      opacity: 255,
+                      visible: true,
+                      transition: 'easeOutQuad',
+                      x: preview_rect.x,
+            		  y: preview_rect.y,
+            		  width: preview_rect.width,
+            		  height: preview_rect.height
+                    });
+			
+			/*this.preview.x = preview_rect.x;
 			this.preview.y = preview_rect.y;
 			this.preview.width = preview_rect.width;
-			this.preview.height = preview_rect.height;
+			this.preview.height = preview_rect.height;*/
 		} else {
 			this.preview.visible = false;
 		}
