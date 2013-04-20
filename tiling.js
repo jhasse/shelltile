@@ -430,6 +430,7 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.preview = new St.BoxLayout({style_class: 'grid-preview'});
 	this.preview.add_style_pseudo_class('activate');
+	this.preview.visible = false;
 	Main.uiGroup.add_actor(this.preview);
 	
 	this.is_ctrl_pressed = function(){
