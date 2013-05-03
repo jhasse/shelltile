@@ -469,9 +469,17 @@ const DefaultTilingStrategy = function(ext){
 						groupPreview.second = null;
 						this.log.debug("preview_rect: " + preview_rect);
 					}
+					
 				}
 
 			}
+			
+			if(!preview_rect && this.top_edge()){
+				
+				preview_rect = Window.get_maximized_bounds(win);
+				
+			}
+			
 			this.update_preview(preview_rect);
 		}
 	}
@@ -482,7 +490,10 @@ const DefaultTilingStrategy = function(ext){
 			win.update_geometry();
 			win.raise();
 		} else {
+			
 			var is_ctrl_pressed = this.is_ctrl_pressed();
+			var window_under = null;
+			
 			if(is_ctrl_pressed || this.preview.visible){
 				
 				var window_under = this.get_window_under(win);
@@ -497,6 +508,11 @@ const DefaultTilingStrategy = function(ext){
 					}
 				}
 			
+			}
+			if(!window_under &&	this.top_edge()){
+				
+				win.maximize();
+				
 			}
 		}
 		this.update_preview(null);
@@ -687,6 +703,12 @@ const DefaultTilingStrategy = function(ext){
 		}
 	}
 	
+	this.get_main_panel_rect = function(){
+		
+		return new Meta.Rectangle({ x: 0, y: 0, width: Main.panel.actor.width, height: Main.panel.actor.height});
+		
+	}
+	
 	this.get_cursor_rect = function(){
 		let [mouseX, mouseY] = global.get_pointer();
 		return new Meta.Rectangle({ x: mouseX, y: mouseY, width: 1, height: 1});
@@ -718,6 +740,14 @@ const DefaultTilingStrategy = function(ext){
 			}			
 		}
 		return topmost;
+	}
+	
+	this.top_edge = function(){
+		 
+		var main_panel_rect = this.get_main_panel_rect();
+		var cursor_rect = this.get_cursor_rect();
+		return main_panel_rect.contains_rect(cursor_rect)
+		
 	}
 	
 };

@@ -186,11 +186,12 @@ const Ext = function Ext(){
 	self.disable = function(){
         try {        
             self.enabled = false;
+            self.settings.set_boolean("edge-tiling", true);
             
             self._disconnect_workspaces();
 		    self.disconnect_tracked_signals(self);
 		    self._reset_state();
-            self.log.debug("disableeeee");
+            self.log.debug("ShellTile disabled");
 
         } catch(e){
             self.log.error(e);    
