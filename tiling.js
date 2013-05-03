@@ -505,30 +505,42 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.update_preview = function(preview_rect){
 		
-		Tweener.removeTweens(this.preview);
+		
 		
 		if(preview_rect){
-			this.preview.visible = true;
 			
-            Tweener.addTween(this.preview,
-                    { 
-                      time: 0.5,
-                      opacity: 255,
-                      visible: true,
-                      transition: 'easeOutQuad',
-                      x: preview_rect.x,
-            		  y: preview_rect.y,
-            		  width: preview_rect.width,
-            		  height: preview_rect.height
-                    });
+			if(!this.last_preview_rect || !this.last_preview_rect.equal(preview_rect)){
+				
+				this.preview.visible = true;
+				
+				Tweener.removeTweens(this.preview);
+	            Tweener.addTween(this.preview,
+	                    { 
+	                      time: 0.5,
+	                      opacity: 255,
+	                      visible: true,
+	                      transition: 'easeOutQuad',
+	                      x: preview_rect.x,
+	            		  y: preview_rect.y,
+	            		  width: preview_rect.width,
+	            		  height: preview_rect.height
+	                    });
 			
-			/*this.preview.x = preview_rect.x;
-			this.preview.y = preview_rect.y;
-			this.preview.width = preview_rect.width;
-			this.preview.height = preview_rect.height;*/
+				/*this.preview.x = preview_rect.x;
+				this.preview.y = preview_rect.y;
+				this.preview.width = preview_rect.width;
+				this.preview.height = preview_rect.height;*/
+			} else {
+				
+				this.log.debug("same rect");
+				
+			}
+			
 		} else {
+			Tweener.removeTweens(this.preview);
 			this.preview.visible = false;
 		}
+		this.last_preview_rect = preview_rect;
 	}
 	
 	this.on_window_resize = function(win){
