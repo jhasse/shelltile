@@ -483,7 +483,7 @@ const DefaultTilingStrategy = function(ext){
 			win.raise();
 		} else {
 			var is_ctrl_pressed = this.is_ctrl_pressed();
-			if(is_ctrl_pressed){
+			if(is_ctrl_pressed || this.preview.visible){
 				
 				var window_under = this.get_window_under(win);
 				if(window_under){
