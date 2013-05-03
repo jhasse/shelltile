@@ -1,3 +1,4 @@
+const GLib = imports.gi.GLib;
 
 const Logger = function(name, level){
     let self = this;
@@ -38,8 +39,13 @@ Logger.LEVEL_DEBUG = 0;
 Logger.LEVEL_INFO = 1;
 Logger.LEVEL_WARN = 2;
 Logger.LEVEL_ERROR = 3;
-//Logger.DEFAULT_LEVEL = Logger.LEVEL_DEBUG;
+
 Logger.DEFAULT_LEVEL = Logger.LEVEL_ERROR;
+if(GLib.getenv("SHELLTILE_DEBUG")){
+	
+	Logger.DEFAULT_LEVEL = Logger.LEVEL_DEBUG;
+	
+}
 
 Logger.getLogger = function(module){
     return new Logger("[" + module + "]");
