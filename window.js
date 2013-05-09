@@ -9,11 +9,7 @@ function Window(meta_window, ext) { this._init(meta_window, ext); }
 
 // This seems to be a good set, from trial and error...
 Window.tileable_window_types = [
-	Meta.WindowType.NORMAL,
-	Meta.WindowType.DIALOG,
-	Meta.WindowType.TOOLBAR,
-	Meta.WindowType.UTILITY,
-	Meta.WindowType.SPLASHSCREEN
+	Meta.WindowType.NORMAL
 ];
 
 // TODO: expose this as a preference if it gets used much
