@@ -20,6 +20,8 @@ const Ext = function Ext(){
     self.settings = new Gio.Settings({ schema: OVERRIDE_SCHEMA });	
     
     self.enabled = false;
+	self.workspaces = {};
+	self.windows = {};    
 	
 	self.connect_and_track = function(owner, subject, name, cb) {
 		if (!owner.hasOwnProperty('_bound_signals')) {
@@ -144,18 +146,10 @@ const Ext = function Ext(){
 		}
 		owner._bound_signals = bound_signals1;
 	};
-	
-	self._reset_state = function() {
-		self.enabled = false;
-		self.workspaces = {};
-		self.windows = {};
-		self._bound_keybindings = {};
-	};
 
 	self.enable = function(){
 	    try {
 	    	self.log.debug("enabling ShellTile");
-		    self._reset_state();
 	
             self.enabled = true;
             self.screen = global.screen;
@@ -188,9 +182,8 @@ const Ext = function Ext(){
             self.enabled = false;
             self.settings.set_boolean("edge-tiling", true);
             
-            self._disconnect_workspaces();
 		    self.disconnect_tracked_signals(self);
-		    self._reset_state();
+		    
             self.log.debug("ShellTile disabled");
 
         } catch(e){
