@@ -299,7 +299,6 @@ const WindowGroup = function(first, second, type, splitPercent){
 	}
 	
 	this.raise = function(ascending){
-		this.log.debug("raise " + ascending);
 		if(this.group && ascending){
 			this.group.raise(true);
 		} else {
@@ -354,7 +353,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 		return group;
 	}
 	
-	this.detach = function(win){
+	this.detach = function(win, noop){
 		
 		if(this.group){
 			
@@ -377,8 +376,10 @@ const WindowGroup = function(first, second, type, splitPercent){
 			}
 			
 			delete win.group;
-			var group = this.get_topmost_group();
-			group.update_geometry();
+			if(!noop){
+				var group = this.get_topmost_group();
+				group.update_geometry();
+			}
 			delete this.group;
 
 		} else {
@@ -386,8 +387,10 @@ const WindowGroup = function(first, second, type, splitPercent){
 			delete this.first.group;
 			delete this.second.group;
 
-			if(win === this.first) this.second.maximize_size();
-			else this.first.maximize_size();
+			if(!noop){
+				if(win === this.first) this.second.maximize_size();
+				else this.first.maximize_size();
+			}
 		}
 		
 		delete this.first;

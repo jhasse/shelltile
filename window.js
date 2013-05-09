@@ -85,7 +85,14 @@ Window.prototype = {
 	}
 	
 	,move_to_workspace: function(workspace){
+		if(this.workspace && this.workspace.meta_workspace){
+			var current_workspace = this.extension.get_workspace(this.workspace.meta_workspace);
+			if(current_workspace) current_workspace.disconnect_window(this);
+		}
+		
 		this.meta_window.change_workspace(workspace.meta_workspace);
+		workspace.disconnect_window(this);
+		workspace.connect_window(this);
 	}
 	
 	,move_resize: function(x, y, w, h) {
