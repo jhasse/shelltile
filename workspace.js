@@ -150,6 +150,13 @@ Workspace.prototype = {
 
 	on_workspace_changed: function(win, obj){
 		win = this.extension.get_window(win);
+		
+		if(!this.extension.enabled){
+			
+			if(win.group) win.group.detach(win);
+			return;
+		}
+		
 		if(win.get_workspace() === this){
 			this.log.debug("workspace_changed");
 			this.connect_window(win);
@@ -174,32 +181,44 @@ Workspace.prototype = {
 	},	
 	
 	on_window_raised: function(win){
+		if(!this.extension.enabled) return;
+		
 		win = this.extension.get_window(win);
 		if(this.strategy && this.strategy.on_window_raised) this.strategy.on_window_raised(win);
 		this.log.debug("window raised " + win);
 	},
 	
 	on_window_move:  function(win) {
+		if(!this.extension.enabled) return;
+		
 		if(this.strategy && this.strategy.on_window_move) this.strategy.on_window_move(win);
 		//this.log.debug("window move " + win.xpos() + "," + win.ypos());
 	},
 	
 	on_window_resize: function(win) {
+		if(!this.extension.enabled) return;
+		
 		if(this.strategy && this.strategy.on_window_resize) this.strategy.on_window_resize(win);
 		//this.log.debug("window resize");
 	},
 	
 	on_window_moved:  function(win) {
+		if(!this.extension.enabled) return;
+		
 		if(this.strategy && this.strategy.on_window_moved) this.strategy.on_window_moved(win);
 		this.log.debug("window moved");
 	},
 	
 	on_window_resized: function(win) {
+		if(!this.extension.enabled) return;
+		
 		if(this.strategy && this.strategy.on_window_resized) this.strategy.on_window_resized(win);
 		this.log.debug("window resized");
 	},
 
 	on_window_minimize: function(shellwm, actor) {
+		if(!this.extension.enabled) return;
+		
 		var workspace_num = actor.get_workspace()
 		if(workspace_num != this.meta_workspace.index()) return;
 		
@@ -211,6 +230,7 @@ Workspace.prototype = {
 	},	
 	
 	on_window_maximize: function(shellwm, actor) {
+		
 		this.log.debug([shellwm, actor, actor.get_workspace()]);
 		var workspace_num = actor.get_workspace()
 		this.log.debug(this);
@@ -218,11 +238,20 @@ Workspace.prototype = {
 		
 		var win = actor.get_meta_window();
 		win = this.extension.get_window(win);
+
+		if(!this.extension.enabled){
+			
+			if(win.group) win.group.detach(win);
+			return;
+		}		
+		
 		if(this.strategy && this.strategy.on_window_maximize) this.strategy.on_window_maximize(win);
 		this.log.debug("window maximized " + win);
 	},
 	
 	on_window_unmaximize: function(shellwm, actor) {
+		if(!this.extension.enabled) return;
+		
 		var workspace_num = actor.get_workspace()
 		if(!this.meta_workspace || workspace_num != this.meta_workspace.index()) return;
 
