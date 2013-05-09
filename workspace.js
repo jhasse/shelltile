@@ -61,6 +61,8 @@ Workspace.prototype = {
 			return;
 		}
 		
+		this.log.debug("connect_window: " + win);
+		
 		var actor = win.get_actor();
 		var meta_window = win.meta_window;
 		let bind_to_window_change = this.bind_to_window_change(win, actor);
@@ -93,6 +95,7 @@ Workspace.prototype = {
 	},
 	
 	disconnect_window: function(win){
+		this.log.debug("disconnect_window: " + win);
 		var actor = win.get_actor();
 		if(actor) this.extension.disconnect_tracked_signals(this, actor);
 		this.extension.disconnect_tracked_signals(this, win.meta_window);
@@ -153,19 +156,19 @@ Workspace.prototype = {
 		
 		if(!this.extension.enabled){
 			
-			if(win.group) win.group.detach(win);
+			if(win.group) win.group.detach(win, true);
 			return;
 		}
 		
 		if(win.get_workspace() === this){
 			this.log.debug("workspace_changed");
-			this.connect_window(win);
 			win.on_move_to_workspace(this);
 		}
 	},
 
 	
 	on_window_create: function(workspace, meta_window) {
+		this.log.debug("on_window_create: " + meta_window)
 		let actor = meta_window.get_compositor_private();
 		if(!actor){
 			Mainloop.idle_add(Lang.bind(this, function () {
@@ -241,7 +244,7 @@ Workspace.prototype = {
 
 		if(!this.extension.enabled){
 			
-			if(win.group) win.group.detach(win);
+			if(win.group) win.group.detach(win, true);
 			return;
 		}		
 		
@@ -269,14 +272,12 @@ Workspace.prototype = {
 			
 			if(!win.get_workspace()){
 				this.log.debug("remove_window");
+				this.disconnect_window(win);
 				this.extension.remove_window(win.meta_window);				
 			}
 			return false;
 		}));
 		
-		if(win){
-			this.disconnect_window(win);
-		}
 		this.log.debug("window removed " + meta_window);
 	},
 
