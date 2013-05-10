@@ -598,7 +598,8 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.on_window_raised = function(win){
 		if(win.group){
-			win.group.raise(true);			
+			win.group.raise(true);
+			win.raise();
 		}
 	}
 	
