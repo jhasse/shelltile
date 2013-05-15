@@ -44,16 +44,23 @@ Workspace.prototype = {
 		return "<# Workspace at idx " + this.meta_workspace.index() + ">";
 	},
 	
-	get_geometry: function(){
+	get_bounds: function(){
 		let screen = this.meta_workspace.get_screen();
 		let monitor = screen.get_current_monitor()
-		return screen.get_monitor_geometry(monitor);
-	},
-	
-	get_bounds: function(){
-		var geometry = this.get_geometry();
+		var geometry = screen.get_monitor_geometry(monitor);
+		
+		let x = geometry.x;
+		let y = geometry.y;
+		let width = geometry.width;
+		let height = geometry.height;
 		let panel_height = Main.panel.actor.height;
-		return new Meta.Rectangle({ x: geometry.x, y: geometry.y + panel_height, width: geometry.width, height: geometry.height - panel_height});
+		
+		if (monitor == Main.layoutManager.primaryIndex){
+			y += panel_height;
+			height -= panel_height;
+		}
+		
+		return new Meta.Rectangle({ x: x, y: y, width: width, height: height});
 	},
 	
 	connect_window: function(win){
