@@ -20,8 +20,9 @@ const Ext = function Ext(){
     self.settings = new Gio.Settings({ schema: OVERRIDE_SCHEMA });	
     
     self.enabled = false;
+    self.keep_maximized = true;
 	self.workspaces = {};
-	self.windows = {};    
+	self.windows = {};
 	
 	self.connect_and_track = function(owner, subject, name, cb) {
 		if (!owner.hasOwnProperty('_bound_signals')) {

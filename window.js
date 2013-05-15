@@ -181,9 +181,62 @@ Window.prototype = {
 		this.maximize();
 	}
 	
-	,update_geometry: function(){
+	,is_first_of_first: function(){
+		if(!this.group) return false;
+		else {
+			
+			var curr = this;
+			var ret = true;
+			while(curr.group){
+				ret &= curr == curr.group.first;
+				curr = curr.group;
+			}
+			return ret;
+			
+		}
+	}
+	
+	,is_second_of_second: function(){
+		if(!this.group) return false;
+		else {
+			
+			var curr = this;
+			var ret = true;
+			while(curr.group){
+				ret &= curr == curr.group.second;
+				curr = curr.group;
+			}
+			return ret;
+			
+		}
+	}	
+	
+	,update_geometry: function(changed_position, changed_size){
 		if(this.group){
-			this.group.update_geometry(this);
+			/*if(changed_size && !this.extension.keep_maximized){
+				var is_first_of_first = this.is_first_of_first();
+				var is_second_of_second = this.is_second_of_second();
+				if(is_first_of_first || is_second_of_second){
+					var group = this.group.get_topmost_group();
+					var outer_rect = group.outer_rect();
+					
+					if(is_second_of_second){
+						if(group.saved_size.width != outer_rect.width || group.saved_size.height != outer_rect.height){
+							group.save_size();
+							same_size = false;
+						}
+					} else {
+						if(group.saved_position.x != outer_rect.x || group.saved_position.y != outer_rect.y){
+							group.save_position();
+							same_size = false;
+						}
+					}
+				}
+			}*/
+			
+			var same_size = this.extension.keep_maximized || changed_size;
+			
+			this.group.update_geometry(this,same_size);
 		}
 	}
 	
