@@ -101,7 +101,7 @@ const Ext = function Ext(){
 			return null;
 		}
 		var id = Window.get_id(meta_window);
-		this.log.debug("get_window " + id);
+		if(this.log.is_debug()) this.log.debug("get_window " + id);
 		var win = self.windows[id];
 		if(typeof(win) == "undefined" && create_if_necessary) {
 			win = self.windows[id] = new Window(meta_window, self);
@@ -150,7 +150,7 @@ const Ext = function Ext(){
 
 	self.enable = function(){
 	    try {
-	    	self.log.debug("enabling ShellTile");
+	    	if(self.log.is_debug()) self.log.debug("enabling ShellTile");
 	
             self.enabled = true;
             self.screen = global.screen;
@@ -163,9 +163,9 @@ const Ext = function Ext(){
             	self.settings.set_boolean("edge-tiling", false);
             }
             self.connect_and_track(self, self.settings, 'changed::edge-tiling', Lang.bind(this, this.on_edge_tiling_changed));
-            self.log.debug("ShellTile enabled");
+            if(self.log.is_debug()) self.log.debug("ShellTile enabled");
         } catch(e){
-            self.log.error(e);    
+            if(self.log.is_error()) self.log.error(e);    
         }
 	}
 	
@@ -185,10 +185,10 @@ const Ext = function Ext(){
             
 		    self.disconnect_tracked_signals(self);
 		    
-            self.log.debug("ShellTile disabled");
+            if(self.log.is_debug()) self.log.debug("ShellTile disabled");
 
         } catch(e){
-            self.log.error(e);    
+        	if(self.log.is_error()) self.log.error(e);    
         }
 	}
 };

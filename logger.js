@@ -8,8 +8,12 @@ const Logger = function(name, level){
     }
     self.level = level;
 
+    var checkLevel = function(level){
+    	return level === undefined || self.level === undefined || level >= self.level;
+    }
+    
     self.log = function(name, message, level){
-    	if(level === undefined || self.level === undefined || level >= self.level){
+    	if(checkLevel(level)){
     		global.log("[" + name + "]" + self.base + " " + message);
     	}
     }
@@ -32,6 +36,22 @@ const Logger = function(name, level){
     
     self.getLogger = function(clazz){
         return new Logger(self.base + "[" + clazz + "]", self.level);
+    }
+    
+    self.is_debug = function(){
+    	return checkLevel(Logger.LEVEL_DEBUG);
+    }
+    
+    self.is_info = function(){
+    	return checkLevel(Logger.LEVEL_INFO);
+    }
+    
+    self.is_warn = function(){
+    	return checkLevel(Logger.LEVEL_WARN);
+    }
+    
+    self.is_error = function(){
+    	return checkLevel(Logger.LEVEL_ERROR);
     }
 }
 
