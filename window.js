@@ -194,59 +194,123 @@ Window.prototype = {
 		this.maximize();
 	}
 	
-	,is_first_of_first: function(){
-		if(!this.group) return false;
-		else {
+	,get_boundary_edges: function(group_size, current_size){
+		
+		var ret = Window.NO_EDGES;
+		
+		if(Math.abs(current_size.x  - group_size.x) <= 1){
 			
-			var curr = this;
-			var ret = true;
-			while(curr.group){
-				ret &= curr == curr.group.first;
-				curr = curr.group;
-			}
-			return ret;
+			ret |= Window.LEFT_EDGE;
 			
 		}
+		
+		if(Math.abs(current_size.y  - group_size.y) <= 1){
+			
+			ret |= Window.TOP_EDGE;
+			
+		}
+		
+		if(Math.abs( (current_size.x + current_size.width)  - (group_size.x + group_size.width) ) <= 1){
+			
+			ret |= Window.RIGHT_EDGE;
+			
+		}
+		
+		if(Math.abs( (current_size.y + current_size.height)  - (group_size.y + group_size.height) ) <= 1){
+			
+			ret |= Window.BOTTOM_EDGE;
+			
+		}
+
+		return ret;		
+		
 	}
 	
-	,is_second_of_second: function(){
-		if(!this.group) return false;
-		else {
+	,get_modified_edges: function(saved_size, current_size){
+		
+		var ret = Window.NO_EDGES;
+
+		if(Math.abs(current_size.x  - saved_size.x) > 1){
 			
-			var curr = this;
-			var ret = true;
-			while(curr.group){
-				ret &= curr == curr.group.second;
-				curr = curr.group;
-			}
-			return ret;
+			ret |= Window.LEFT_EDGE;
 			
 		}
+		
+		if(Math.abs(current_size.y  - saved_size.y) > 1){
+			
+			ret |= Window.TOP_EDGE;
+			
+		}
+		
+		if(Math.abs( (current_size.x + current_size.width)  - (saved_size.x + saved_size.width) ) > 1){
+			
+			ret |= Window.RIGHT_EDGE;
+			
+		}
+		
+		if(Math.abs( (current_size.y + current_size.height)  - (saved_size.y + saved_size.height) ) > 1){
+			
+			ret |= Window.BOTTOM_EDGE;
+			
+		}
+		
+		return ret;	
+		
+		
 	}	
 	
 	,update_geometry: function(changed_position, changed_size){
 		if(this.group){
 			
-			var same_size = this.extension.keep_maximized || changed_size;
-			
-			/*if(changed_size && !this.extension.keep_maximized){
+			var same_size = true;
 
-				var group = this.group.get_topmost_group();
-				var outer_rect = group.outer_rect();
-				var last_size = group.saved_size
+			if(!this.extension.keep_maximized){
 				
-				if(last_size.width != outer_rect.width || last_size.height != outer_rect.height){
-					group.save_size();
-					if(group.saved_position.x != outer_rect.x || group.saved_position.y != outer_rect.y){
-						group.save_position();
+				var group = this.group.get_topmost_group();
+				var group_size = group.outer_rect();
+				var current_size = this.outer_rect();
+				
+				if(changed_size){
+	
+					var boundary_edges = this.get_boundary_edges(group.saved_size, this.saved_size);
+					var modified_edges = this.get_modified_edges(this.saved_size, current_size);
+					
+					this.log.debug("boundary_edges : " + boundary_edges);
+					this.log.debug("modified_edges: " + modified_edges);
+					
+					if((boundary_edges & modified_edges) > 0){
+						group.save_bounds();
+						var saved_size = group.saved_size;
+						
+						if(boundary_edges & Window.RIGHT_EDGE){
+							saved_size.width = (current_size.x + current_size.width) - saved_size.x;
+						}
+						if(boundary_edges & Window.BOTTOM_EDGE){
+							saved_size.height = (current_size.y + current_size.height) - saved_size.y;
+						}
+						
+						same_size = false;
 					}
-					same_size = false;
+	
 				}
-
-			}*/
+				
+				if(changed_position){
+	
+					group.saved_position.x += (current_size.x - this.saved_position.x);
+					group.saved_position.y += (current_size.y - this.saved_position.y);
+					same_size = false;
+	
+				}
+			}
 			
 			
-			this.group.update_geometry(this,same_size);
+			if(same_size){
+				this.group.update_geometry(this);
+			} else {
+				group.move_resize(group.saved_position.x, group.saved_position.y, group.saved_size.width,  group.saved_size.height);
+				group.save_bounds();
+			}
+			
 		}
 	}
 	
@@ -262,6 +326,12 @@ Window.prototype = {
 	,ypos: function() { return this.outer_rect().y; }
 	,outer_rect: function() { return this.meta_window.get_outer_rect(); }
 };
+
+Window.NO_EDGES = parseInt("0000",2)
+Window.RIGHT_EDGE = parseInt("0001",2)
+Window.BOTTOM_EDGE = parseInt("0010",2)
+Window.LEFT_EDGE = parseInt("0100",2)
+Window.TOP_EDGE = parseInt("1000",2)
 
 Window.get_id = function(w) {
 	if(!w || !w.get_stable_sequence) {
