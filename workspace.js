@@ -17,7 +17,7 @@ Workspace.prototype = {
 		this.extension = ext;
 		this.strategy = strategy
 		
-		this.log.debug("this._shellwm " + this._shellwm);
+		if(this.log.is_debug()) this.log.debug("this._shellwm " + this._shellwm);
 
 		var on_window_create = this.break_loops(this.on_window_create);
 		var on_window_remove = this.break_loops(this.on_window_remove);
@@ -68,7 +68,7 @@ Workspace.prototype = {
 			return;
 		}
 		
-		this.log.debug("connect_window: " + win);
+		if(this.log.is_debug()) this.log.debug("connect_window: " + win);
 		
 		var actor = win.get_actor();
 		var meta_window = win.meta_window;
@@ -102,7 +102,7 @@ Workspace.prototype = {
 	},
 	
 	disconnect_window: function(win){
-		this.log.debug("disconnect_window: " + win);
+		if(this.log.is_debug()) this.log.debug("disconnect_window: " + win);
 		var actor = win.get_actor();
 		if(actor) this.extension.disconnect_tracked_signals(this, actor);
 		this.extension.disconnect_tracked_signals(this, win.meta_window);
@@ -168,14 +168,14 @@ Workspace.prototype = {
 		}
 		
 		if(win.get_workspace() === this){
-			this.log.debug("workspace_changed");
+			if(this.log.is_debug()) this.log.debug("workspace_changed");
 			win.on_move_to_workspace(this);
 		}
 	},
 
 	
 	on_window_create: function(workspace, meta_window) {
-		this.log.debug("on_window_create: " + meta_window)
+		if(this.log.is_debug()) this.log.debug("on_window_create: " + meta_window)
 		let actor = meta_window.get_compositor_private();
 		if(!actor){
 			Mainloop.idle_add(Lang.bind(this, function () {
@@ -195,35 +195,35 @@ Workspace.prototype = {
 		
 		win = this.extension.get_window(win);
 		if(this.strategy && this.strategy.on_window_raised) this.strategy.on_window_raised(win);
-		this.log.debug("window raised " + win);
+		if(this.log.is_debug()) this.log.debug("window raised " + win);
 	},
 	
 	on_window_move:  function(win) {
 		if(!this.extension.enabled) return;
 		
 		if(this.strategy && this.strategy.on_window_move) this.strategy.on_window_move(win);
-		//this.log.debug("window move " + win.xpos() + "," + win.ypos());
+		//if(this.log.is_debug()) this.log.debug("window move " + win.xpos() + "," + win.ypos());
 	},
 	
 	on_window_resize: function(win) {
 		if(!this.extension.enabled) return;
 		
 		if(this.strategy && this.strategy.on_window_resize) this.strategy.on_window_resize(win);
-		//this.log.debug("window resize");
+		//if(this.log.is_debug()) this.log.debug("window resize");
 	},
 	
 	on_window_moved:  function(win) {
 		if(!this.extension.enabled) return;
 		
 		if(this.strategy && this.strategy.on_window_moved) this.strategy.on_window_moved(win);
-		this.log.debug("window moved");
+		if(this.log.is_debug()) this.log.debug("window moved");
 	},
 	
 	on_window_resized: function(win) {
 		if(!this.extension.enabled) return;
 		
 		if(this.strategy && this.strategy.on_window_resized) this.strategy.on_window_resized(win);
-		this.log.debug("window resized");
+		if(this.log.is_debug()) this.log.debug("window resized");
 	},
 
 	on_window_minimize: function(shellwm, actor) {
@@ -236,14 +236,14 @@ Workspace.prototype = {
 		win = this.extension.get_window(win);
 		if(this.strategy && this.strategy.on_window_minimize) this.strategy.on_window_minimize(win);
 		
-		this.log.debug("window maximized " + win);
+		if(this.log.is_debug()) this.log.debug("window maximized " + win);
 	},	
 	
 	on_window_maximize: function(shellwm, actor) {
 		
-		this.log.debug([shellwm, actor, actor.get_workspace()]);
+		if(this.log.is_debug()) this.log.debug([shellwm, actor, actor.get_workspace()]);
 		var workspace_num = actor.get_workspace()
-		this.log.debug(this);
+		if(this.log.is_debug()) this.log.debug(this);
 		if(workspace_num != this.meta_workspace.index()) return;
 		
 		var win = actor.get_meta_window();
@@ -256,7 +256,7 @@ Workspace.prototype = {
 		}		
 		
 		if(this.strategy && this.strategy.on_window_maximize) this.strategy.on_window_maximize(win);
-		this.log.debug("window maximized " + win);
+		if(this.log.is_debug()) this.log.debug("window maximized " + win);
 	},
 	
 	on_window_unmaximize: function(shellwm, actor) {
@@ -268,7 +268,7 @@ Workspace.prototype = {
 		var win = actor.get_meta_window();
 		win = this.extension.get_window(win);
 		if(this.strategy && this.strategy.on_window_unmaximize) this.strategy.on_window_unmaximize(win);
-		this.log.debug("window unmaximized " + win);
+		if(this.log.is_debug()) this.log.debug("window unmaximized " + win);
 	},		
 
 	on_window_remove: function(workspace, meta_window) {
@@ -278,14 +278,14 @@ Workspace.prototype = {
 			if(this.strategy && this.strategy.on_window_remove) this.strategy.on_window_remove(win);
 			
 			if(!win.get_workspace()){
-				this.log.debug("remove_window");
+				if(this.log.is_debug()) this.log.debug("remove_window");
 				this.disconnect_window(win);
 				this.extension.remove_window(win.meta_window);				
 			}
 			return false;
 		}));
 		
-		this.log.debug("window removed " + meta_window);
+		if(this.log.is_debug()) this.log.debug("window removed " + meta_window);
 	},
 
 	meta_windows: function() {

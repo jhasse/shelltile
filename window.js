@@ -125,7 +125,7 @@ Window.prototype = {
 			return this.meta_window['window-type'];
 		} catch (e) {
 			//TODO: shouldn't be necessary
-			this.log.error("Failed to get window type for window " + this.meta_window + ", error was:", e);
+			if(this.log.is_error()) this.log.error("Failed to get window type for window " + this.meta_window + ", error was:", e);
 			return -1;
 		}
 	}
@@ -148,14 +148,14 @@ Window.prototype = {
 	}
 	,can_be_tiled: function() {
 		if(!this._windowTracker.is_window_interesting(this.meta_window)) {
-			// this.log.debug("uninteresting window: " + this);
+			// if(this.log.is_debug()) this.log.debug("uninteresting window: " + this);
 			return false;
 		}
 		var window_class = this.window_class();
 		var blacklisted = Window.blacklist_classes.indexOf(window_class) != -1;
 		if(blacklisted)
 		{
-			this.log.debug("window class " + window_class + " is blacklisted");
+			if(this.log.is_debug()) this.log.debug("window class " + window_class + " is blacklisted");
 			return false;
 		}
 
@@ -172,7 +172,7 @@ Window.prototype = {
 	,eq: function(other) {
 		let eq = this.id() == other.id();
 		if(eq && (this != other)) {
-			this.log.warn("Multiple wrappers for the same MetaWindow created: " + this);
+			if(this.log.is_warn()) this.log.warn("Multiple wrappers for the same MetaWindow created: " + this);
 		}
 		return eq;
 	}
@@ -275,8 +275,8 @@ Window.prototype = {
 					var boundary_edges = this.get_boundary_edges(group.saved_size, this.saved_size);
 					var modified_edges = this.get_modified_edges(this.saved_size, current_size);
 					
-					this.log.debug("boundary_edges : " + boundary_edges);
-					this.log.debug("modified_edges: " + modified_edges);
+					if(this.log.is_debug()) this.log.debug("boundary_edges : " + boundary_edges);
+					if(this.log.is_debug()) this.log.debug("modified_edges: " + modified_edges);
 					
 					if((boundary_edges & modified_edges) > 0){
 						group.save_bounds();
