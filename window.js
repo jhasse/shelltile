@@ -80,6 +80,19 @@ Window.prototype = {
 		}
 	}
 	
+	,save_bounds: function(){
+		this.save_position();
+		this.save_size();
+	}
+	
+	,save_position: function(){
+		this.saved_position = this.outer_rect();
+	}
+	
+	,save_size: function(){
+		this.saved_size = this.outer_rect();
+	}
+	
 	,move_to_workspace: function(workspace){
 		if(this.workspace && this.workspace.meta_workspace){
 			var current_workspace = this.extension.get_workspace(this.workspace.meta_workspace);
