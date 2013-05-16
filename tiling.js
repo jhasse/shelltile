@@ -45,14 +45,14 @@ const WindowGroup = function(first, second, type, splitPercent){
 	
 	this.save_position = function(){
 		this.saved_position = this.outer_rect();
-		//this.first.save_position();
-		//this.second.save_position();
+		this.first.save_position();
+		this.second.save_position();
 	}
 	
 	this.save_size = function(){
 		this.saved_size = this.outer_rect();
-		//this.first.save_size();
-		//this.second.save_size();		
+		this.first.save_size();
+		this.second.save_size();		
 	}
 	
 	this.outer_rect = function(){
@@ -126,8 +126,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 		
 	}
 	
-	this.update_geometry = function(win, same_size){
-		if(same_size === undefined) same_size = true;
+	this.update_geometry = function(win){
 		
 		if(win){
 			
@@ -140,17 +139,14 @@ const WindowGroup = function(first, second, type, splitPercent){
 				var diff = (first_rect.x + first_rect.width + DIVISION_SIZE) - second_rect.x;
 				
 				if(win === this.first){
+					
 					second_rect.x += diff;
-					if(same_size){
-						second_rect.width -= diff;
-					}
+					second_rect.width -= diff;
 					
 				} else if(win === this.second){
-					if(same_size){
-						first_rect.width -= diff;
-					} else {
-						first_rect.x -= diff;
-					}
+					
+					first_rect.width -= diff;
+
 				}
 				
 			} else if(this.type == WindowGroup.VERTICAL_GROUP){
@@ -158,16 +154,12 @@ const WindowGroup = function(first, second, type, splitPercent){
 				var diff = (first_rect.y + first_rect.height + DIVISION_SIZE) - second_rect.y;
 			
 				if(win === this.first){
+					
 					second_rect.y += diff;
-					if(same_size){
-						second_rect.height -= diff;
-					}
+					second_rect.height -= diff;
+					
 				} else if(win === this.second){
-					if(same_size){
-						first_rect.height -= diff;
-					} else {
-						first_rect.y -= diff;
-					}
+					first_rect.height -= diff;
 				}
 			}
 			
@@ -177,41 +169,35 @@ const WindowGroup = function(first, second, type, splitPercent){
 			var bounds = this.outer_rect();
 			
 			if(this.type == WindowGroup.HORIZONTAL_GROUP){
-				if(same_size) bounds.height = win_rect.height;
+				bounds.height = win_rect.height;
 				bounds.y = win_rect.y;
 			} else if(this.type == WindowGroup.VERTICAL_GROUP){
-				if(same_size) bounds.width = win_rect.width;
+				bounds.width = win_rect.width;
 				bounds.x = win_rect.x;
 			}
 			
-			if(same_size){
-				this.update_split_percent(bounds, win);			
-			}
+			
+			this.update_split_percent(bounds, win);
 			
 			this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 		
 		}
-		if(this.group) this.group.update_geometry(this, same_size);
+		if(this.group) this.group.update_geometry(this);
 		else {
 			
 			var saved_position = this.saved_position;
 			var saved_size = this.saved_size;
 			var bounds = this.outer_rect();
 			
-			if(same_size){
-				if(saved_position){
-					bounds.x = saved_position.x;
-					bounds.y = saved_position.y;
-				}
-				
-				if(saved_size){
-					bounds.width = saved_size.width;
-					bounds.height = saved_size.height;
-				}
-			} else {
-				this.save_position();
-				this.save_size();
+			if(saved_position){
+				bounds.x = saved_position.x;
+				bounds.y = saved_position.y;
 			}
+			
+			if(saved_size){
+				bounds.width = saved_size.width;
+				bounds.height = saved_size.height;
+			}			
 
 			this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 		}
@@ -340,12 +326,18 @@ const WindowGroup = function(first, second, type, splitPercent){
 		}
 	}
 	
-	this.attach = function(){
+	this.attach = function(win){
 		
 		if(this.first.group){
 			var withGroup = this.first;
 		} else {
 			var withGroup = this.second;
+		}
+		
+		if(!this.extension.keep_maximized){
+			var existing = this.first === win ? this.second : this.first;
+			if(existing.group) existing = existing.group.get_topmost_group();
+			var existing_size = existing.outer_rect();
 		}
 		
 		var prevGroup = withGroup.group;
@@ -363,13 +355,18 @@ const WindowGroup = function(first, second, type, splitPercent){
 
 
 		var group = this.get_topmost_group();
-		if(this.extension.keep_maximized){
-			group.maximize_size();
-			group.save_bounds();
-		}
-		else if(!group.saved_position) group.save_bounds();
 		
-		group.move_resize(group.saved_position.x, group.saved_position.y, group.saved_size.width, group.saved_size.height);
+		if(this.extension.keep_maximized){
+		
+			group.maximize_size();
+		
+		} else {
+
+			group.move_resize(existing_size.x, existing_size.y, existing_size.width, existing_size.height);
+
+		}
+				
+		group.save_bounds();
 		group.raise();
 		
 
@@ -536,7 +533,7 @@ const DefaultTilingStrategy = function(ext){
 					if(group_preview){
 						
 						if(win.group) win.group.detach(win);
-						group_preview.attach();
+						group_preview.attach(win);
 						
 					}
 				}
