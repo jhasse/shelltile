@@ -226,28 +226,25 @@ Window.prototype = {
 	
 	,update_geometry: function(changed_position, changed_size){
 		if(this.group){
-			/*if(changed_size && !this.extension.keep_maximized){
-				var is_first_of_first = this.is_first_of_first();
-				var is_second_of_second = this.is_second_of_second();
-				if(is_first_of_first || is_second_of_second){
-					var group = this.group.get_topmost_group();
-					var outer_rect = group.outer_rect();
-					
-					if(is_second_of_second){
-						if(group.saved_size.width != outer_rect.width || group.saved_size.height != outer_rect.height){
-							group.save_size();
-							same_size = false;
-						}
-					} else {
-						if(group.saved_position.x != outer_rect.x || group.saved_position.y != outer_rect.y){
-							group.save_position();
-							same_size = false;
-						}
-					}
-				}
-			}*/
 			
 			var same_size = this.extension.keep_maximized || changed_size;
+			
+			/*if(changed_size && !this.extension.keep_maximized){
+
+				var group = this.group.get_topmost_group();
+				var outer_rect = group.outer_rect();
+				var last_size = group.saved_size
+				
+				if(last_size.width != outer_rect.width || last_size.height != outer_rect.height){
+					group.save_size();
+					if(group.saved_position.x != outer_rect.x || group.saved_position.y != outer_rect.y){
+						group.save_position();
+					}
+					same_size = false;
+				}
+
+			}*/
+			
 			
 			this.group.update_geometry(this,same_size);
 		}
