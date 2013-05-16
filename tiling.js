@@ -177,10 +177,10 @@ const WindowGroup = function(first, second, type, splitPercent){
 			var bounds = this.outer_rect();
 			
 			if(this.type == WindowGroup.HORIZONTAL_GROUP){
-				if(!same_size) bounds.height = win_rect.height;
+				if(same_size) bounds.height = win_rect.height;
 				bounds.y = win_rect.y;
 			} else if(this.type == WindowGroup.VERTICAL_GROUP){
-				if(!same_size) bounds.width = win_rect.width;
+				if(same_size) bounds.width = win_rect.width;
 				bounds.x = win_rect.x;
 			}
 			
