@@ -189,7 +189,14 @@ Workspace.prototype = {
 			return;
 		}
 
-		var win = this.extension.get_window(meta_window);
+		let existing = true;
+		var win = this.extension.get_window(meta_window, false);
+		if(!win){
+			existing = false;
+			win = this.extension.get_window(meta_window);
+		}
+		
+		if(this.strategy && this.strategy.on_window_create) this.strategy.on_window_create(win, existing);
 		this.connect_window(win);
 
 	},	
