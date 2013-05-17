@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema path="/org/gnome/shell/extensions/shelltile/" id="org.gnome.shell.extensions.shelltile">
+    <key type="b" name="keep-group-maximized">
+        <default>true</default>
+        <summary>Keep the window group maximized</summary>
+        <description>Enforce the group to take all the available space</description>
+    </key>
+  </schema>
+</schemalist>

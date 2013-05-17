@@ -10,6 +10,7 @@ const Window = Extension.imports.window.Window;
 const Workspace = Extension.imports.workspace.Workspace;
 const DefaultTilingStrategy = Extension.imports.tiling.DefaultTilingStrategy;
 const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
+const Convenience = Extension.imports.convenience;
 
 
 const Ext = function Ext(){
@@ -17,11 +18,13 @@ const Ext = function Ext(){
 	let OVERRIDE_SCHEMA = "org.gnome.shell.overrides";
 	
     self.log = Log.getLogger("Ext");
-    self.settings = new Gio.Settings({ schema: OVERRIDE_SCHEMA });	
+    
+    self.gnome_settings = Convenience.getSettings(OVERRIDE_SCHEMA);	
+    self.settings = Convenience.getSettings();
     
     self.enabled = false;
-    self.keep_maximized = true;
-	self.workspaces = {};
+	
+    self.workspaces = {};
 	self.windows = {};
 	
 	self.connect_and_track = function(owner, subject, name, cb) {
@@ -30,6 +33,11 @@ const Ext = function Ext(){
 		}
 		owner._bound_signals.push([subject, name, subject.connect(name, cb)]);
 	};
+	
+	self.load_settings = function(){
+	    self.keep_maximized = self.settings.get_boolean("keep-group-maximized");
+	};
+	self.load_settings();
 	
 	self.current_display = function current_display() {
 		return global.screen.get_display();
@@ -158,30 +166,38 @@ const Ext = function Ext(){
             
             self._init_workspaces();
             
-            var edge_tiling = self.settings.get_boolean("edge-tiling");
+            var edge_tiling = self.gnome_settings.get_boolean("edge-tiling");
             if(edge_tiling === true){
-            	self.settings.set_boolean("edge-tiling", false);
+            	self.gnome_settings.set_boolean("edge-tiling", false);
             }
-            self.connect_and_track(self, self.settings, 'changed::edge-tiling', Lang.bind(this, this.on_edge_tiling_changed));
+
+            self.connect_and_track(self, self.gnome_settings, 'changed', Lang.bind(this, this.on_settings_changed));
+            self.connect_and_track(self, self.settings, 'changed', Lang.bind(this, this.on_settings_changed));
+
+            
             if(self.log.is_debug()) self.log.debug("ShellTile enabled");
-        } catch(e){
+        
+	    } catch(e){
             if(self.log.is_error()) self.log.error(e);    
         }
 	}
 	
-	self.on_edge_tiling_changed = function(){
-		var edge_tiling = self.settings.get_boolean("edge-tiling");
+	self.on_settings_changed = function(){
+		
+		var edge_tiling = self.gnome_settings.get_boolean("edge-tiling");
 		if(edge_tiling){
 			if(Extension.uuid){
 				//ExtensionSystem.disableExtension(Extension.uuid);
 			}
 		}
+		
+		self.load_settings();
 	}
 
 	self.disable = function(){
         try {        
             self.enabled = false;
-            self.settings.set_boolean("edge-tiling", true);
+            self.gnome_settings.set_boolean("edge-tiling", true);
             
 		    self.disconnect_tracked_signals(self);
 		    
