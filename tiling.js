@@ -25,6 +25,10 @@ const WindowGroup = function(first, second, type, splitPercent){
 		return "WindowGroup(first=" + this.first + ",second="+ this.second + ",type=" + this.type + ")";
 	}
 	
+	this.id = function(){
+		return "(" + this.first.id() + "," + this.second.id() + ")";		
+	}
+	
 	this.get_maximized_bounds = function(){
 		return Window.get_maximized_bounds(this.first);
 	}

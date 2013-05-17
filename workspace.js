@@ -39,6 +39,10 @@ Workspace.prototype = {
 		this.meta_workspace = null;
 		this.extension = null;
 	},
+	
+	id: function(){
+		return this.meta_workspace.toString();
+	},
 
 	toString: function() {
 		return "<# Workspace at idx " + this.meta_workspace.index() + ">";
