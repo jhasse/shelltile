@@ -15,6 +15,7 @@ function buildPrefsWidget() {
 	let frame = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, border_width: 10, spacing: 10});
 
 	frame.add(buildSwitcher("keep-group-maximized", "Keep the window group maximized"));
+	frame.add(buildSwitcher("maximize-new-windows", "Maximize new windows"));
 	//frame.add(buildSwitcher("enforce-primary-monitor", "Always show the switcher on the primary monitor"));
 	frame.show_all();
 

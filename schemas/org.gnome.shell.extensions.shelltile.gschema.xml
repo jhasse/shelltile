@@ -6,5 +6,10 @@
         <summary>Keep the window group maximized</summary>
         <description>Enforce the group to take all the available space</description>
     </key>
+    <key type="b" name="maximize-new-windows">
+        <default>false</default>
+        <summary>Maximize new windows</summary>
+        <description>Maximizes created windows</description>
+    </key>    
   </schema>
 </schemalist>
