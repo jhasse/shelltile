@@ -34,8 +34,46 @@ const Ext = function Ext(){
 		owner._bound_signals.push([subject, name, subject.connect(name, cb)]);
 	};
 	
+	self.maximize_grouped_windows = function(){
+		
+		let groups = {};
+		
+		for(let id in self.windows){
+			let window = self.windows[id];
+			if(window.group){
+				
+				let group = window.group.get_topmost_group();
+								
+				if(group){
+					
+					let group_id = group.id();
+					if(!groups[group_id]){
+						groups[group_id] = group;
+					}
+					
+				}
+				
+			}
+		}
+		
+		for(let group_id in groups){
+			let group = groups[group_id];
+			group.maximize_size();
+			group.save_bounds();
+		}
+		
+		if(this.log.is_debug()) this.log.debug("maximize_grouped_windows");
+	}	
+	
 	self.load_settings = function(){
-	    self.keep_maximized = self.settings.get_boolean("keep-group-maximized");
+		
+		let last_keep_maximized = self.keep_maximized;
+		self.keep_maximized = self.settings.get_boolean("keep-group-maximized");
+		
+		if(self.keep_maximized && last_keep_maximized === false){
+			self.maximize_grouped_windows();			
+		}
+		
 	};
 	self.load_settings();
 	
