@@ -2,20 +2,22 @@ const Gtk = imports.gi.Gtk;
 
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const Convenience = Extension.imports.convenience;
+const Gettext = imports.gettext.domain('shelltile');
+const _ = Gettext.gettext;
 
 const SCHEMA = "org.gnome.shell.extensions.shelltile";
 
 let settings;
 
 function init() {
+	Convenience.initTranslations();
 	settings = Convenience.getSettings();
 }
 
 function buildPrefsWidget() {
 	let frame = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, border_width: 10, spacing: 10});
 
-	frame.add(buildSwitcher("keep-group-maximized", "Keep the window group maximized"));
-	frame.add(buildSwitcher("maximize-new-windows", "Maximize new windows"));
+	frame.add(buildSwitcher("keep-group-maximized", _("Keep the window group maximized")));
 	//frame.add(buildSwitcher("enforce-primary-monitor", "Always show the switcher on the primary monitor"));
 	frame.show_all();
 
