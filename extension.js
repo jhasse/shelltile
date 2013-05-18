@@ -68,8 +68,7 @@ const Ext = function Ext(){
 	self.load_settings = function(){
 		
 		let last_keep_maximized = self.keep_maximized;
-		self.keep_maximized = self.settings.get_boolean("keep-group-maximized");
-		self.maximize_new_windows = self.settings.get_boolean("maximize-new-windows");		
+		self.keep_maximized = self.settings.get_boolean("keep-group-maximized");	
 		
 		if(self.keep_maximized && last_keep_maximized === false){
 			self.maximize_grouped_windows();			

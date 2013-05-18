@@ -196,8 +196,10 @@ Workspace.prototype = {
 			win = this.extension.get_window(meta_window);
 		}
 		
-		if(this.strategy && this.strategy.on_window_create) this.strategy.on_window_create(win, existing);
-		this.connect_window(win);
+		if(win.can_be_tiled()){
+			if(this.strategy && this.strategy.on_window_create) this.strategy.on_window_create(win, existing);
+			this.connect_window(win);
+		}
 
 	},	
 	

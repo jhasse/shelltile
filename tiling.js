@@ -638,12 +638,6 @@ const DefaultTilingStrategy = function(ext){
 		}
 	}
 	
-	this.on_window_create = function(win, existing){
-		if(!existing && this.extension.maximize_new_windows){
-			win.maximize();
-		}
-	}
-	
 	this.on_window_raised = function(win){
 		if(win.group){
 			win.group.raise(true);
