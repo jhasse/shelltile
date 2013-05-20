@@ -57,7 +57,9 @@ Workspace.prototype = {
 		let y = geometry.y;
 		let width = geometry.width;
 		let height = geometry.height;
-		let panel_height = Main.panel.actor.height;
+		
+		let panel_height = Main.panel.actor.get_parent().height;
+		
 		
 		if (monitor == Main.layoutManager.primaryIndex){
 			y += panel_height;
