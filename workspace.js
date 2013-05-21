@@ -175,6 +175,7 @@ Workspace.prototype = {
 		
 		if(win.get_workspace() === this){
 			if(this.log.is_debug()) this.log.debug("workspace_changed");
+			delete win.marked_for_remove;
 			win.on_move_to_workspace(this);
 		}
 	},
@@ -288,6 +289,7 @@ Workspace.prototype = {
 
 	on_window_remove: function(workspace, meta_window) {
 		var win = this.extension.get_window(meta_window);
+		win.marked_for_remove = true;
 		
 		Mainloop.idle_add(Lang.bind(this, function () {
 			if(this.strategy && this.strategy.on_window_remove) this.strategy.on_window_remove(win);
