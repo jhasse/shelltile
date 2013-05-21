@@ -315,6 +315,7 @@ Window.prototype = {
 	}
 	
 	,raise: function(){
+		if(this.marked_for_remove) return;
 		this.unminimize();
 		this.meta_window.raise();
 	}
