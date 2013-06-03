@@ -175,7 +175,6 @@ Workspace.prototype = {
 		
 		if(win.get_workspace() === this){
 			if(this.log.is_debug()) this.log.debug("workspace_changed");
-			delete win.marked_for_remove;
 			win.on_move_to_workspace(this);
 		}
 	},
@@ -296,12 +295,12 @@ Workspace.prototype = {
 			
 			if(!win.get_workspace()){
 				if(this.log.is_debug()) this.log.debug("remove_window");
-				this.disconnect_window(win);
 				this.extension.remove_window(win.meta_window);				
 			}
 			return false;
 		}));
 		
+		this.disconnect_window(win);
 		if(this.log.is_debug()) this.log.debug("window removed " + meta_window);
 	},
 

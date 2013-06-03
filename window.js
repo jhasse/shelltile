@@ -71,6 +71,9 @@ Window.prototype = {
 	}
 	
 	,on_move_to_workspace: function(workspace) {
+		
+		delete this.marked_for_remove;
+		
 		if(this.group){
 			this.group.move_to_workspace(workspace);
 			var group = this.group.get_topmost_group();
@@ -94,14 +97,14 @@ Window.prototype = {
 	}
 	
 	,move_to_workspace: function(workspace){
-		if(this.workspace && this.workspace.meta_workspace){
-			var current_workspace = this.extension.get_workspace(this.workspace.meta_workspace);
-			if(current_workspace) current_workspace.disconnect_window(this);
+		var current = this.get_workspace();
+		if(current){
+			current.disconnect_window(this);			
 		}
 		
 		this.meta_window.change_workspace(workspace.meta_workspace);
-		workspace.disconnect_window(this);
 		workspace.connect_window(this);
+		delete this.marked_for_remove;
 	}
 	
 	,move_resize: function(x, y, w, h) {
