@@ -95,8 +95,8 @@ const Ext = function Ext(){
 		let gap = self.settings.get_int("gap-between-windows");
 		if(this.log.is_debug()) this.log.debug("gap: " + gap + " " + self.strategy.DIVISION_SIZE);
 		
-		if(gap != self.strategy.DIVISION_SIZE){
-			self.strategy.DIVISION_SIZE = gap;
+		if(self.gap_between_windows === undefined || gap != self.gap_between_windows){
+			self.gap_between_windows = gap;
 			self.resize_grouped_windows();
 		}
 		

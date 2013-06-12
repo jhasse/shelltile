@@ -14,12 +14,17 @@ const WindowGroup = function(first, second, type, splitPercent){
 	
 	if(!splitPercent) splitPercent = 0.5;
 	
-	this.DIVISION_SIZE = 10;
 	this.first = first;
 	this.second = second;
 	this.type = type
 	this.splitPercent = splitPercent;
 	this.log = Log.getLogger("WindowGroup");
+	
+	this.gap_between_windows = function(){
+		let ret = this.extension.gap_between_windows;
+		if(ret === undefined) ret = 10;
+		return ret;
+	}
 	
 	this.toString = function(){
 		return "WindowGroup(first=" + this.first + ",second="+ this.second + ",type=" + this.type + ")";
@@ -118,11 +123,11 @@ const WindowGroup = function(first, second, type, splitPercent){
 			
 			if(this.type == WindowGroup.HORIZONTAL_GROUP){
 				if(this.log.is_debug()) this.log.debug("horizontal split changed");
-				splitPercent = 1 - ((second_rect.width + this.DIVISION_SIZE) / bounds.width);
+				splitPercent = 1 - ((second_rect.width + this.gap_between_windows()) / bounds.width);
 				
 			} else if(this.type == WindowGroup.VERTICAL_GROUP ){
 				if(this.log.is_debug()) this.log.debug("vertical split changed");
-				splitPercent = 1 - ((second_rect.height + this.DIVISION_SIZE) / bounds.height);
+				splitPercent = 1 - ((second_rect.height + this.gap_between_windows()) / bounds.height);
 			}
 			this.splitPercent = splitPercent;
 			
@@ -140,7 +145,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 			
 			if(this.type == WindowGroup.HORIZONTAL_GROUP){
 
-				var diff = (first_rect.x + first_rect.width + this.DIVISION_SIZE) - second_rect.x;
+				var diff = (first_rect.x + first_rect.width + this.gap_between_windows()) - second_rect.x;
 				
 				if(win === this.first){
 					
@@ -155,7 +160,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 				
 			} else if(this.type == WindowGroup.VERTICAL_GROUP){
 				
-				var diff = (first_rect.y + first_rect.height + this.DIVISION_SIZE) - second_rect.y;
+				var diff = (first_rect.y + first_rect.height + this.gap_between_windows()) - second_rect.y;
 			
 				if(win === this.first){
 					
@@ -225,13 +230,13 @@ const WindowGroup = function(first, second, type, splitPercent){
 		
 		if(this.type == WindowGroup.HORIZONTAL_GROUP){
 			first_width = Math.round(width * this.splitPercent);
-			second_width = width - first_width - this.DIVISION_SIZE;
-			second_x = first_x + first_width + this.DIVISION_SIZE;
+			second_width = width - first_width - this.gap_between_windows();
+			second_x = first_x + first_width + this.gap_between_windows();
 			
 		} else if(this.type == WindowGroup.VERTICAL_GROUP){
 			first_height = Math.round(height * this.splitPercent);
-			second_height = height - first_height - this.DIVISION_SIZE;
-			second_y = first_y + first_height + this.DIVISION_SIZE;
+			second_height = height - first_height - this.gap_between_windows();
+			second_y = first_y + first_height + this.gap_between_windows();
 		}
 		
 		if(this.log.is_debug()) this.log.debug("first: " + [first_x, first_y, first_width, first_height])
