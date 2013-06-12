@@ -13,8 +13,8 @@ const Window = Extension.imports.window.Window;
 const WindowGroup = function(first, second, type, splitPercent){
 	
 	if(!splitPercent) splitPercent = 0.5;
-	const DIVISION_SIZE = 10;
 	
+	this.DIVISION_SIZE = 10;
 	this.first = first;
 	this.second = second;
 	this.type = type
@@ -118,11 +118,11 @@ const WindowGroup = function(first, second, type, splitPercent){
 			
 			if(this.type == WindowGroup.HORIZONTAL_GROUP){
 				if(this.log.is_debug()) this.log.debug("horizontal split changed");
-				splitPercent = 1 - ((second_rect.width + DIVISION_SIZE) / bounds.width);
+				splitPercent = 1 - ((second_rect.width + this.DIVISION_SIZE) / bounds.width);
 				
 			} else if(this.type == WindowGroup.VERTICAL_GROUP ){
 				if(this.log.is_debug()) this.log.debug("vertical split changed");
-				splitPercent = 1 - ((second_rect.height + DIVISION_SIZE) / bounds.height);
+				splitPercent = 1 - ((second_rect.height + this.DIVISION_SIZE) / bounds.height);
 			}
 			this.splitPercent = splitPercent;
 			
@@ -140,7 +140,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 			
 			if(this.type == WindowGroup.HORIZONTAL_GROUP){
 
-				var diff = (first_rect.x + first_rect.width + DIVISION_SIZE) - second_rect.x;
+				var diff = (first_rect.x + first_rect.width + this.DIVISION_SIZE) - second_rect.x;
 				
 				if(win === this.first){
 					
@@ -155,7 +155,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 				
 			} else if(this.type == WindowGroup.VERTICAL_GROUP){
 				
-				var diff = (first_rect.y + first_rect.height + DIVISION_SIZE) - second_rect.y;
+				var diff = (first_rect.y + first_rect.height + this.DIVISION_SIZE) - second_rect.y;
 			
 				if(win === this.first){
 					
@@ -225,13 +225,13 @@ const WindowGroup = function(first, second, type, splitPercent){
 		
 		if(this.type == WindowGroup.HORIZONTAL_GROUP){
 			first_width = Math.round(width * this.splitPercent);
-			second_width = width - first_width - DIVISION_SIZE;
-			second_x = first_x + first_width + DIVISION_SIZE;
+			second_width = width - first_width - this.DIVISION_SIZE;
+			second_x = first_x + first_width + this.DIVISION_SIZE;
 			
 		} else if(this.type == WindowGroup.VERTICAL_GROUP){
 			first_height = Math.round(height * this.splitPercent);
-			second_height = height - first_height - DIVISION_SIZE;
-			second_y = first_y + first_height + DIVISION_SIZE;
+			second_height = height - first_height - this.DIVISION_SIZE;
+			second_y = first_y + first_height + this.DIVISION_SIZE;
 		}
 		
 		if(this.log.is_debug()) this.log.debug("first: " + [first_x, first_y, first_width, first_height])
@@ -341,6 +341,16 @@ const WindowGroup = function(first, second, type, splitPercent){
 			this.first.minimize();
 			this.second.minimize();
 		}
+	}
+	
+	this.reposition = function(){
+		
+		var group = this.get_topmost_group();
+		
+		var existing_size = group.outer_rect();
+
+		group.move_resize(existing_size.x, existing_size.y, existing_size.width, existing_size.height);
+		
 	}
 	
 	this.attach = function(win){

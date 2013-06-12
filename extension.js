@@ -26,6 +26,7 @@ const Ext = function Ext(){
 	
     self.workspaces = {};
 	self.windows = {};
+	self.strategy = new DefaultTilingStrategy(self);
 	
 	self.connect_and_track = function(owner, subject, name, cb) {
 		if (!owner.hasOwnProperty('_bound_signals')) {
@@ -34,8 +35,8 @@ const Ext = function Ext(){
 		owner._bound_signals.push([subject, name, subject.connect(name, cb)]);
 	};
 	
-	self.maximize_grouped_windows = function(){
-		
+	self.get_topmost_groups = function(){
+
 		let groups = {};
 		
 		for(let id in self.windows){
@@ -56,6 +57,14 @@ const Ext = function Ext(){
 			}
 		}
 		
+		return groups;
+		
+	}
+	
+	self.maximize_grouped_windows = function(){
+		
+		let groups = self.get_topmost_groups();
+		
 		for(let group_id in groups){
 			let group = groups[group_id];
 			group.maximize_size();
@@ -63,12 +72,34 @@ const Ext = function Ext(){
 		}
 		
 		if(this.log.is_debug()) this.log.debug("maximize_grouped_windows");
-	}	
+	}
+	
+	self.resize_grouped_windows = function(){
+
+		let groups = self.get_topmost_groups();
+		
+		for(let group_id in groups){
+			let group = groups[group_id];
+			group.reposition();
+		}
+		
+		if(this.log.is_debug()) this.log.debug("resize_grouped_windows");		
+		
+	}
 	
 	self.load_settings = function(){
 		
 		let last_keep_maximized = self.keep_maximized;
-		self.keep_maximized = self.settings.get_boolean("keep-group-maximized");	
+		self.keep_maximized = self.settings.get_boolean("keep-group-maximized");
+		
+		let gap = self.settings.get_int("gap-between-windows");
+		if(this.log.is_debug()) this.log.debug("gap: " + gap + " " + self.strategy.DIVISION_SIZE);
+		
+		if(gap != self.strategy.DIVISION_SIZE){
+			self.strategy.DIVISION_SIZE = gap;
+			self.resize_grouped_windows();
+		}
+		
 		
 		if(self.keep_maximized && last_keep_maximized === false){
 			self.maximize_grouped_windows();			
@@ -89,8 +120,7 @@ const Ext = function Ext(){
 		let workspace = self.workspaces[meta_workspace];
 		
     	if(typeof(workspace) == "undefined") {
-    		var strategy = new DefaultTilingStrategy(self);
-			workspace = self.workspaces[meta_workspace] = new Workspace(meta_workspace, self, strategy);
+			workspace = self.workspaces[meta_workspace] = new Workspace(meta_workspace, self, self.strategy);
 		}
 		return workspace;
 	};
