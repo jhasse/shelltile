@@ -62,6 +62,7 @@ const Ext = function Ext(){
 	}
 	
 	self.maximize_grouped_windows = function(){
+		if(!self.enabled) return;
 		
 		let groups = self.get_topmost_groups();
 		
@@ -75,6 +76,7 @@ const Ext = function Ext(){
 	}
 	
 	self.resize_grouped_windows = function(){
+		if(!self.enabled) return;
 
 		let groups = self.get_topmost_groups();
 		
