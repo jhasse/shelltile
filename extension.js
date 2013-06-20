@@ -9,6 +9,7 @@ const ExtensionSystem = imports.ui.extensionSystem;
 const Window = Extension.imports.window.Window;
 const Workspace = Extension.imports.workspace.Workspace;
 const DefaultTilingStrategy = Extension.imports.tiling.DefaultTilingStrategy;
+const OverviewModifier = Extension.imports.tiling.OverviewModifier;
 const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
 const Convenience = Extension.imports.convenience;
 
@@ -244,6 +245,7 @@ const Ext = function Ext(){
             self.connect_and_track(self, self.gnome_settings, 'changed', Lang.bind(this, this.on_settings_changed));
             self.connect_and_track(self, self.settings, 'changed', Lang.bind(this, this.on_settings_changed));
 
+            OverviewModifier.register(self);
             
             if(self.log.is_debug()) self.log.debug("ShellTile enabled");
         

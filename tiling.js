@@ -878,3 +878,15 @@ const DefaultTilingStrategy = function(ext){
 };
 
 DefaultTilingStrategy.EDGE_ZONE_WIDTH = 20;
+
+
+const OverviewModifier = function(){}
+
+OverviewModifier.register = function(extension){
+	if(OverviewModifier._registered) return;
+	
+	
+	
+	OverviewModifier._registered = true;	
+}
+
