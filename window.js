@@ -191,8 +191,20 @@ Window.prototype = {
 		return this.meta_window.get_compositor_private();
 	}
 
+	,get_maximized_bounds: function(){
+		// hack waiting for a different solution
+		this.maximize()
+		var ret = this.outer_rect();
+		this.unmaximize();
+		return ret;
+
+		//var works = this.get_workspace();
+		//var ret = works.get_bounds();
+		//return ret;	
+	}
+	
 	,maximize_size: function(){
-		var bounds = Window.get_maximized_bounds(this);
+		var bounds = this.get_maximized_bounds();
 		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 		this.maximize();
 	}
@@ -342,16 +354,4 @@ Window.get_id = function(w) {
 		Log.getLogger("shellshape.window").error("Non-window object: " + w);
 	}
 	return w.get_stable_sequence();
-}
-
-Window.get_maximized_bounds = function(win){
-	// hack waiting for a different solution
-	win.maximize()
-	var ret = win.outer_rect();
-	win.unmaximize();
-	return ret;
-	
-	//var works = win.get_workspace();
-	//var ret = works.get_bounds();
-	//return ret;
 }
