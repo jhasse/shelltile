@@ -49,43 +49,23 @@ Workspace.prototype = {
 		return "<# Workspace at idx " + this.meta_workspace.index() + ">";
 	},
 	
+	update_bounds: function(bounds){
+		this.bounds = bounds;
+	},
+	
 	get_bounds: function(win){
+		var ret = null;
 		if(this.bounds) ret = this.bounds;
 		else {
-			var ret = null;
-			
-			if(win){
-				
-				// hack waiting for a different solution
-				win.fake_maximizing = true;
-				win.maximize()
-				var ret = win.outer_rect();
-				win.unmaximize();
-				delete win.fake_maximizing;
-	
-			} else {
-			
-				let screen = this.meta_workspace.get_screen();
-				let monitor = screen.get_current_monitor()
-				var geometry = screen.get_monitor_geometry(monitor);
-				
-				let x = geometry.x;
-				let y = geometry.y;
-				let width = geometry.width;
-				let height = geometry.height;
-				
-				let panel_height = Main.panel.actor.get_parent().height;
-				
-				
-				if (monitor == Main.layoutManager.primaryIndex){
-					y += panel_height;
-					height -= panel_height;
-				}
-				
-				ret = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
-				
-			}
-			this.bounds = ret;
+			if(!win) return null;
+
+			// hack waiting for a different solution
+			win.fake_maximizing = true;
+			win.maximize()
+			ret = this.bounds;
+			win.unmaximize();
+			delete win.fake_maximizing;
+
 		}
 		return new Meta.Rectangle({ x: ret.x, y: ret.y, width: ret.width, height: ret.height});
 	},
