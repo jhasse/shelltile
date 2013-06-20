@@ -495,6 +495,7 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.preview = new St.BoxLayout({style_class: 'grid-preview'});
 	this.preview.add_style_pseudo_class('activate');
+	this.preview_for_edge_tiling = false;
 	this.preview.visible = false;
 	Main.uiGroup.add_actor(this.preview);
 	
@@ -539,12 +540,13 @@ const DefaultTilingStrategy = function(ext){
 
 			}
 			
-			if(!preview_rect){
+			var for_edge_tiling = !preview_rect;
+			if(for_edge_tiling){
 				
 				var preview_rect = this.get_edge_preview(win);
-			
 			}
 			
+			this.preview_for_edge_tiling = for_edge_tiling;
 			this.update_preview(preview_rect);
 		}
 	}
@@ -560,7 +562,7 @@ const DefaultTilingStrategy = function(ext){
 			var window_under = null;
 			var group_preview = null;
 			
-			if(is_ctrl_pressed || this.preview.visible){
+			if(is_ctrl_pressed || (!this.preview_for_edge_tiling && this.preview.visible)){
 				
 				var window_under = this.get_window_under(win);
 				if(window_under){
@@ -571,28 +573,23 @@ const DefaultTilingStrategy = function(ext){
 			
 			}
 			
-			if(!is_ctrl_pressed){
-
-				if(this.top_edge()){
-					
-					win.maximize();
-					group_preview = null;
-					
-				} else {
-					var preview_rect = this.get_edge_preview(win);
-					if(preview_rect){
-						
-						win.move_resize(preview_rect.x, preview_rect.y, preview_rect.width, preview_rect.height);			
-						group_preview = null;
-					}
-				}
-				
-			}
-			
 			if(group_preview){
 				
 				if(win.group) win.group.detach(win);
 				group_preview.attach(win);
+				
+			} else {
+				
+				if(this.top_edge()){
+					
+					win.maximize();
+					
+				} else {
+					var preview_rect = this.get_edge_preview(win);
+					if(preview_rect){
+						win.move_resize(preview_rect.x, preview_rect.y, preview_rect.width, preview_rect.height);			
+					}
+				}				
 				
 			}
 		}
