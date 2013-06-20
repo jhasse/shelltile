@@ -255,10 +255,8 @@ const Ext = function Ext(){
 	self.on_settings_changed = function(){
 		
 		var edge_tiling = self.gnome_settings.get_boolean("edge-tiling");
-		if(edge_tiling){
-			if(Extension.uuid){
-				//ExtensionSystem.disableExtension(Extension.uuid);
-			}
+		if(edge_tiling && self.enabled){
+			self.gnome_settings.set_boolean("edge-tiling", false);
 		}
 		
 		self.load_settings();
