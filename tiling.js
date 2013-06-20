@@ -447,8 +447,11 @@ const WindowGroup = function(first, second, type, splitPercent){
 			delete this.second.group;
 
 			if(!noop && this.extension.keep_maximized){
-				if(win === this.first) this.second.maximize_size();
-				else this.first.maximize_size();
+				var maxi = this.first;
+				if(win === this.first) maxi = this.second;
+				
+				maxi.maximize_size();
+				maxi.save_bounds();
 			}
 		}
 		
