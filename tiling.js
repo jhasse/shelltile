@@ -35,7 +35,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 	}
 	
 	this.get_maximized_bounds = function(){
-		return Window.get_maximized_bounds(this.first);
+		return this.first.get_maximized_bounds();
 	}
 	
 	this.get_workspace = function(){
@@ -538,7 +538,7 @@ const DefaultTilingStrategy = function(ext){
 			
 			if(!preview_rect && this.top_edge()){
 				
-				preview_rect = Window.get_maximized_bounds(win);
+				preview_rect = win.get_maximized_bounds();
 				
 			}
 			
