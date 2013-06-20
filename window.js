@@ -345,7 +345,13 @@ Window.get_id = function(w) {
 }
 
 Window.get_maximized_bounds = function(win){
-	var works = win.get_workspace();
-	var ret = works.get_bounds();
+	// hack waiting for a different solution
+	win.maximize()
+	var ret = win.outer_rect();
+	win.unmaximize();
 	return ret;
+	
+	//var works = win.get_workspace();
+	//var ret = works.get_bounds();
+	//return ret;
 }
