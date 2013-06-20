@@ -539,10 +539,10 @@ const DefaultTilingStrategy = function(ext){
 
 			}
 			
-			if(!preview_rect && this.top_edge()){
+			if(!preview_rect){
 				
-				preview_rect = win.get_maximized_bounds();
-				
+				var preview_rect = this.get_edge_preview(win);
+			
 			}
 			
 			this.update_preview(preview_rect);
@@ -558,6 +558,7 @@ const DefaultTilingStrategy = function(ext){
 			
 			var is_ctrl_pressed = this.is_ctrl_pressed();
 			var window_under = null;
+			var group_preview = null;
 			
 			if(is_ctrl_pressed || this.preview.visible){
 				
@@ -565,18 +566,33 @@ const DefaultTilingStrategy = function(ext){
 				if(window_under){
 					
 					var group_preview = this.get_window_group_preview(window_under, win);
-					if(group_preview){
-						
-						if(win.group) win.group.detach(win);
-						group_preview.attach(win);
-						
-					}
+
 				}
 			
 			}
-			if(!window_under &&	this.top_edge()){
+			
+			if(!is_ctrl_pressed){
+
+				if(this.top_edge()){
+					
+					win.maximize();
+					group_preview = null;
+					
+				} else {
+					var preview_rect = this.get_edge_preview(win);
+					if(preview_rect){
+						
+						win.move_resize(preview_rect.x, preview_rect.y, preview_rect.width, preview_rect.height);			
+						group_preview = null;
+					}
+				}
 				
-				win.maximize();
+			}
+			
+			if(group_preview){
+				
+				if(win.group) win.group.detach(win);
+				group_preview.attach(win);
 				
 			}
 		}
@@ -665,7 +681,6 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.get_window_group_preview = function(below, above){
 		
-		var corner_size = DefaultTilingStrategy.CORNER_SIZE;
 		var log = this.log;	
 		
 		let TOP_LEFT = 0;
@@ -836,6 +851,33 @@ const DefaultTilingStrategy = function(ext){
 		
 	}
 	
+	this.get_edge_preview = function(win){
+		var main_panel_rect = this.get_main_panel_rect();
+		var cursor_rect = this.get_cursor_rect();
+		var maxi = win.get_maximized_bounds();
+		var ret = null;
+		var edge_zone_width = DefaultTilingStrategy.EDGE_ZONE_WIDTH;
+		
+		if(main_panel_rect.contains_rect(cursor_rect)){
+		
+			ret = maxi;
+		
+		} else if(cursor_rect.x >=0 && cursor_rect.x < edge_zone_width){
+			
+			maxi.width = maxi.width / 2;
+			ret = maxi;
+			
+		} else if(cursor_rect.x > (maxi.x + maxi.width - edge_zone_width) && cursor_rect.x <= (maxi.x + maxi.width)){
+				
+			maxi.width = maxi.width / 2;
+			maxi.x += maxi.width;
+			ret = maxi;
+			
+		}
+		return ret;			
+		
+	}
+	
 };
 
-DefaultTilingStrategy.CORNER_SIZE = 50;
+DefaultTilingStrategy.EDGE_ZONE_WIDTH = 20;
