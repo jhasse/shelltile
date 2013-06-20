@@ -263,6 +263,7 @@ Workspace.prototype = {
 		
 		var win = actor.get_meta_window();
 		win = this.extension.get_window(win);
+		if(win.fake_maximizing) return;
 
 		if(!this.extension.enabled){
 			
@@ -282,6 +283,8 @@ Workspace.prototype = {
 
 		var win = actor.get_meta_window();
 		win = this.extension.get_window(win);
+		if(win.fake_maximizing) return;
+		
 		if(this.strategy && this.strategy.on_window_unmaximize) this.strategy.on_window_unmaximize(win);
 		if(this.log.is_debug()) this.log.debug("window unmaximized " + win);
 	},		

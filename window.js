@@ -193,9 +193,11 @@ Window.prototype = {
 
 	,get_maximized_bounds: function(){
 		// hack waiting for a different solution
+		this.fake_maximizing = true;
 		this.maximize()
 		var ret = this.outer_rect();
 		this.unmaximize();
+		delete this.fake_maximizing;
 		return ret;
 
 		//var works = this.get_workspace();
