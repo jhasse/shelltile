@@ -43,6 +43,11 @@ Window.prototype = {
 	
 	,maximize: function(){
 		this.meta_window.maximize(Meta.MaximizeFlags.VERTICAL | Meta.MaximizeFlags.HORIZONTAL);
+		var maximized_bounds = this.outer_rect();
+		var works = this.get_workspace();
+		if(works && maximized_bounds){
+			 works.update_bounds(maximized_bounds);
+		}
 	}
 	
 	,unmaximize: function(){
