@@ -9,6 +9,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Extension = ExtensionUtils.getCurrentExtension();
 const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
 const Window = Extension.imports.window.Window;
+const GSWorkspace = imports.ui.workspace.Workspace;
 
 const WindowGroup = function(first, second, type, splitPercent){
 	
@@ -880,12 +881,116 @@ const DefaultTilingStrategy = function(ext){
 DefaultTilingStrategy.EDGE_ZONE_WIDTH = 20;
 
 
-const OverviewModifier = function(){}
+const OverviewModifier = function(gsWorkspace, extension){
+	
+	this.gsWorkspace = gsWorkspace;
+	this.extension = extension;
+	this.log = Log.getLogger("OverviewModifier");
+	
+	this.computeNumWindowSlots = function(){
+		let clones = this.gsWorkspace._windows.slice();
+		
+		let groupOrder = [];
+		let groupWindowOrder = {};
+		let cloneGroup = {};
+		let clones1 = [];
+		
+		for(var i=0; i<clones.length; i++){
+			var clone = clones[i];
+			var clone_meta_window = clone.metaWindow;
+			
+			var myWindow = this.extension.get_window(clone_meta_window);
+			var windowId = myWindow.id();
+			if(this.log.is_debug()) this.log.debug(myWindow);
+			clones1.push(windowId);
+
+			if(myWindow.group){
+				var topmost_group = myWindow.group.get_topmost_group();
+				var topmost_group_id = topmost_group.id();
+				if(groupOrder.indexOf(topmost_group_id)>=0){
+					
+					groupWindowOrder[topmost_group_id].push(myWindow);
+					
+				} else {
+					
+					groupOrder.push(topmost_group_id);
+					groupWindowOrder[topmost_group_id] = [myWindow];
+					
+				}
+				cloneGroup[windowId] = topmost_group_id;
+				
+			} else {
+				
+				groupOrder.push(windowId);
+				groupWindowOrder[windowId] = [myWindow];
+				cloneGroup[windowId] = windowId;
+			}
+		}
+		
+		this.groupOrder = groupOrder;
+		this.groupWindowOrder = groupWindowOrder;
+		this.cloneGroup = cloneGroup;
+		this.clones = clones1;
+		return groupOrder.length;
+	}
+	
+	this.computeWindowSlots = function(basicWindowSlots){
+		
+		var ret = []
+		
+		for(var i=0; i<this.clones.length; i++){
+			
+			var clone = this.clones[i];
+			var cloneGroup = this.cloneGroup[clone];
+			var idx = this.groupOrder.indexOf(cloneGroup);
+			
+			var cloneSlot = basicWindowSlots[idx];
+			if(this.log.is_debug()) this.log.debug("idx: " + cloneSlot);
+			ret.push(cloneSlot);
+			
+		}
+		return ret;
+	}
+	
+	this.computeWindowLayout = function(metaWindow, slot){
+		var myWindow = this.extension.get_window(metaWindow);
+		if(this.log.is_debug()) this.log.debug("window: " + myWindow + ", slot: " + slot);
+	}
+}
 
 OverviewModifier.register = function(extension){
 	if(OverviewModifier._registered) return;
 	
+	var prevComputeAllWindowSlots = GSWorkspace.prototype._computeAllWindowSlots;
+	var prevDestroy = GSWorkspace.prototype.destroy;
+	var prevComputeWindowLayout = GSWorkspace.prototype._computeWindowLayout;
+	var prevOrderWindowsByMotionAndStartup = GSWorkspace.prototype._orderWindowsByMotionAndStartup
 	
+	GSWorkspace.prototype._computeAllWindowSlots = function(totalWindows){
+		
+		this._shellTileOverviewModifier = new OverviewModifier(this, extension);
+		var numSlots = this._shellTileOverviewModifier.computeNumWindowSlots();
+		
+		var prevComputeAllWindowSlots1 = Lang.bind(this, prevComputeAllWindowSlots);
+		var ret = prevComputeAllWindowSlots1(numSlots);
+		
+		ret = this._shellTileOverviewModifier.computeWindowSlots(ret);
+		return ret;
+	}
+	
+	GSWorkspace.prototype.destroy = function(){
+		delete this._shellTileOverviewModifier;
+		Lang.bind(this, prevDestroy)();
+	}
+	
+	GSWorkspace.prototype._computeWindowLayout = function(metaWindow, slot){
+		this._shellTileOverviewModifier.computeWindowLayout(metaWindow, slot);
+		return Lang.bind(this, prevComputeWindowLayout)(metaWindow, slot);
+	}
+	
+	GSWorkspace.prototype._orderWindowsByMotionAndStartup = function(clones, slots) {
+		return clones;
+	}
 	
 	OverviewModifier._registered = true;	
 }
