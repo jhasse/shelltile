@@ -931,6 +931,8 @@ const OverviewModifier = function(gsWorkspace, extension){
 		this.groupWindowOrder = groupWindowOrder;
 		this.cloneGroup = cloneGroup;
 		this.clones = clones1;
+		this.groupWindowLayouts = {}
+		
 		return groupOrder.length;
 	}
 	
@@ -940,21 +942,130 @@ const OverviewModifier = function(gsWorkspace, extension){
 		
 		for(var i=0; i<this.clones.length; i++){
 			
-			var clone = this.clones[i];
-			var cloneGroup = this.cloneGroup[clone];
+			var cloneId = this.clones[i];
+			
+			var cloneGroup = this.cloneGroup[cloneId];
 			var idx = this.groupOrder.indexOf(cloneGroup);
 			
 			var cloneSlot = basicWindowSlots[idx];
-			if(this.log.is_debug()) this.log.debug("idx: " + cloneSlot);
 			ret.push(cloneSlot);
 			
 		}
 		return ret;
 	}
 	
-	this.computeWindowLayout = function(metaWindow, slot){
+	this.computeWindowLayout = function(metaWindow, slot, prev){
+		
 		var myWindow = this.extension.get_window(metaWindow);
-		if(this.log.is_debug()) this.log.debug("window: " + myWindow + ", slot: " + slot);
+		
+		if(!myWindow.group){
+			return 	prev(metaWindow, slot);	
+		} else {
+			
+			var topmost_group = myWindow.group.get_topmost_group();
+			var id = topmost_group.id();
+			if(this.groupWindowLayouts[id]){
+				
+				return this.groupWindowLayouts[id][myWindow.id()];
+				
+			} else {
+			
+				var outer_rect = topmost_group.outer_rect();
+				
+				var fakeWindow = {
+						
+						get_outer_rect: function(){return outer_rect;}
+						
+						,get_workspace: function(){
+							return metaWindow.get_workspace();
+						}
+				}
+				let [x,y,scale] = prev(fakeWindow, slot);
+				
+				let width = outer_rect.width * scale;
+				let height = outer_rect.height * scale;
+				
+				var scaled_group_rect = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+				let groupWindowLayout = this.calculateGroupWindowLayouts(topmost_group, scaled_group_rect, scale);
+			
+				this.groupWindowLayouts[id] = groupWindowLayout;
+				return groupWindowLayout[myWindow.id()];
+				
+			}
+		}
+	}
+	
+	this.calculateGroupWindowLayouts =  function(topmost_group, scaled_group_rect, scale){
+		
+		var ret = {};
+		var log = this.log;
+		var scaled_gap = topmost_group.gap_between_windows() * scale;
+		
+		var calculateWindowLayout = function(group, rect){
+			
+			let first = group.first;
+			let second = group.second;
+			let x,y,width,height,x1,y1;
+			
+			if(group.type == WindowGroup.HORIZONTAL_GROUP){
+				
+				x = rect.x;
+				y = rect.y;
+				width = rect.width * group.splitPercent;
+				height = rect.height;
+				
+				var first_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+				
+				x = x + width + scaled_gap;
+				width = rect.x + rect.width - x;
+				
+				var second_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+				
+			} else {
+				
+				x = rect.x;
+				y = rect.y;
+				width = rect.width;
+				height = rect.height * group.splitPercent;
+				
+				var first_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+				
+				y = y + height + scaled_gap;
+				height = rect.y + rect.height - y;
+				
+				var second_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+				
+			}
+			
+			
+			if(first.first){
+				calculateWindowLayout(first, first_scaled);		
+			} else {
+				
+				x1 = first_scaled.x;
+				y1 = first_scaled.y;
+				ret[first.id()] = [x1,y1,scale];
+				
+			}
+			
+			if(second.first){
+			
+				calculateWindowLayout(second, second_scaled);					
+			
+			} else {
+				
+				x1 = second_scaled.x;
+				y1 = second_scaled.y;
+				
+				ret[second.id()] = [x1,y1,scale];			
+				
+			}
+			
+			
+		}
+		calculateWindowLayout(topmost_group, scaled_group_rect);
+		
+		return ret;
 	}
 }
 
@@ -984,8 +1095,8 @@ OverviewModifier.register = function(extension){
 	}
 	
 	GSWorkspace.prototype._computeWindowLayout = function(metaWindow, slot){
-		this._shellTileOverviewModifier.computeWindowLayout(metaWindow, slot);
-		return Lang.bind(this, prevComputeWindowLayout)(metaWindow, slot);
+		let prev = Lang.bind(this, prevComputeWindowLayout);		
+		return this._shellTileOverviewModifier.computeWindowLayout(metaWindow, slot, prev);
 	}
 	
 	GSWorkspace.prototype._orderWindowsByMotionAndStartup = function(clones, slots) {
