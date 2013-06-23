@@ -936,8 +936,10 @@ const OverviewModifier = function(gsWorkspace, extension){
 		return groupOrder.length;
 	}
 	
-	this.computeWindowSlots = function(basicWindowSlots){
+	this.computeWindowSlots = function(numSlots, prev){
 		
+		
+		let basicWindowSlots = prev(numSlots);
 		var ret = []
 		
 		for(var i=0; i<this.clones.length; i++){
@@ -1082,10 +1084,8 @@ OverviewModifier.register = function(extension){
 		this._shellTileOverviewModifier = new OverviewModifier(this, extension);
 		var numSlots = this._shellTileOverviewModifier.computeNumWindowSlots();
 		
-		var prevComputeAllWindowSlots1 = Lang.bind(this, prevComputeAllWindowSlots);
-		var ret = prevComputeAllWindowSlots1(numSlots);
-		
-		ret = this._shellTileOverviewModifier.computeWindowSlots(ret);
+		var prev = Lang.bind(this, prevComputeAllWindowSlots);	
+		ret = this._shellTileOverviewModifier.computeWindowSlots(numSlots, prev);
 		return ret;
 	}
 	
