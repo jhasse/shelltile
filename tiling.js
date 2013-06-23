@@ -892,6 +892,8 @@ const OverviewModifier = function(gsWorkspace, extension){
 		
 		let groupOrder = [];
 		let groupWindowOrder = {};
+		let groupedSlots = [];
+		let singleSlots = [];
 		let cloneGroup = {};
 		let clones1 = [];
 		
@@ -914,6 +916,13 @@ const OverviewModifier = function(gsWorkspace, extension){
 				} else {
 					
 					groupOrder.push(topmost_group_id);
+					
+					if(topmost_group_id != myWindow.group.id()){
+						groupedSlots.push(topmost_group_id);
+					} else {
+						singleSlots.push(topmost_group_id);						
+					}
+					
 					groupWindowOrder[topmost_group_id] = [myWindow];
 					
 				}
@@ -922,6 +931,7 @@ const OverviewModifier = function(gsWorkspace, extension){
 			} else {
 				
 				groupOrder.push(windowId);
+				singleSlots.push(windowId);
 				groupWindowOrder[windowId] = [myWindow];
 				cloneGroup[windowId] = windowId;
 			}
@@ -929,6 +939,8 @@ const OverviewModifier = function(gsWorkspace, extension){
 		
 		this.groupOrder = groupOrder;
 		this.groupWindowOrder = groupWindowOrder;
+		this.groupedSlots = groupedSlots;
+		this.singleSlots = singleSlots;
 		this.cloneGroup = cloneGroup;
 		this.clones = clones1;
 		this.groupWindowLayouts = {}
@@ -938,8 +950,136 @@ const OverviewModifier = function(gsWorkspace, extension){
 	
 	this.computeWindowSlots = function(numSlots, prev){
 		
+		if(numSlots < 4) return prev(numSlots);
+		else {
+			
+			
+			let numberOfWindows = 4 * this.groupedSlots.length + this.singleSlots.length;
+			let slots = [];
+			if(this.log.is_debug()) this.log.debug("this.clones.length : " + this.clones.length);	
+			if(this.log.is_debug()) this.log.debug("numberOfWindows : " + numberOfWindows);	
+			
+	        let gridWidth = Math.ceil(Math.sqrt(numberOfWindows));
+	        let gridHeight = Math.ceil(numberOfWindows / gridWidth);			
+
+	        
+			if(this.log.is_debug()) this.log.debug("gridWidth : " + gridWidth);	
+			if(this.log.is_debug()) this.log.debug("gridHeight : " + gridHeight);
+			
+			if(this.log.is_debug()) this.log.debug("this.groupedSlots.length : " + this.groupedSlots.length);
+			if(this.log.is_debug()) this.log.debug("this.groupedSlots.length : " +  this.singleSlots.length);
+	        
+	        var col=0;
+	        var row=0;
+	        var singleSlotIdx = 0;
+	        
+	        let xCenter, yCenter, fraction, slot, singleSlot;
+	        let groupSlot = {};
+	        
+			for(var i = 0; i<this.groupedSlots.length;i++){
+				
+				let groupedSlot = this.groupedSlots[i];
+				
+				fraction = 1.975 * (1. / gridWidth);
+		        xCenter = 1./gridWidth + col / gridWidth;
+		        yCenter = 1./gridHeight + row / gridHeight;
+		        
+		        slot = [xCenter, yCenter, fraction];
+		        if(this.log.is_debug()) this.log.debug("slot1 : " +  groupedSlot);
+		        slots.push(slot);
+		        groupSlot[groupedSlot] = slot;
+		        
+				col = col + 2;
+				
+				if(col + 1  >= gridWidth || i == (this.groupedSlots.length-1)){
+					
+					while(col < gridWidth){
+						fraction = 0.95 * (1. / gridWidth);
+				        xCenter = (0.5 / gridWidth) + col / gridWidth;
+				        yCenter = (0.5 / gridHeight) + row / gridHeight;
+				        
+				        if(singleSlotIdx < this.singleSlots.length){
+				        
+				        	singleSlot = this.singleSlots[singleSlotIdx];
+				        	slot = [xCenter, yCenter, fraction];
+				        	if(this.log.is_debug()) this.log.debug("slot2 : " +  singleSlot);
+				        	slots.push(slot);
+				        	singleSlotIdx++;
+				        	groupSlot[singleSlot] = slot;
+				        }
+				        
+				        yCenter = (0.5 / gridHeight) + (row+1) / gridHeight;
+				        
+				        if(singleSlotIdx < this.singleSlots.length){
+				        
+				        	singleSlot = this.singleSlots[singleSlotIdx];
+				        	slot = [xCenter, yCenter, fraction];
+				        	if(this.log.is_debug()) this.log.debug("slot3 : " +  singleSlot);
+				        	slots.push(slot);
+				        	singleSlotIdx++;
+				        	groupSlot[singleSlot] = slot;
+				        
+				        }
+				        col++;
+					}
+
+					col=0;
+					row=row+2;
+			        
+				}				
+				
+			}
+
+			while(row < gridHeight && singleSlotIdx < this.singleSlots.length){
+				
+				while(col < gridWidth && singleSlotIdx < this.singleSlots.length){
+					
+					fraction = 0.95 * (1. / gridWidth);
+			        xCenter = (0.5 / gridWidth) + col / gridWidth;
+			        yCenter = (0.5 / gridHeight) + row / gridHeight;
+				        
+		        	singleSlot = this.singleSlots[singleSlotIdx];
+		        	slot = [xCenter, yCenter, fraction];
+		        	if(this.log.is_debug()) this.log.debug("slot4 : " +  singleSlot);
+		        	
+		        	slots.push(slot);
+		        	singleSlotIdx++;
+		        	groupSlot[singleSlot] = slot;
+		        	
+		        	col++;
+			        
+				}
+				
+				col = 0;
+				row++;
+			}
+
+			var ret = [];
+			
+			for(var i=0; i<this.clones.length; i++){
+				
+				var cloneId = this.clones[i];
+				
+				var cloneGroup = this.cloneGroup[cloneId];
+				var cloneSlot = groupSlot[cloneGroup];
+				
+				ret.push(cloneSlot);
+				
+			}
+			
+			for(var i=0; i<ret.length; i++){
+				
+				var ret1 = ret[i];
+				if(this.log.is_debug()) this.log.debug("ret1 : " +  ret1);
+				
+			}
+			
+			
+			return ret;
+			
+		}
 		
-		let basicWindowSlots = prev(numSlots);
+		/*let basicWindowSlots = prev(numSlots);
 		var ret = []
 		
 		for(var i=0; i<this.clones.length; i++){
@@ -953,7 +1093,7 @@ const OverviewModifier = function(gsWorkspace, extension){
 			ret.push(cloneSlot);
 			
 		}
-		return ret;
+		return ret;*/
 	}
 	
 	this.computeWindowLayout = function(metaWindow, slot, prev){
