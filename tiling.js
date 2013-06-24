@@ -611,7 +611,7 @@ const DefaultTilingStrategy = function(ext){
 				Tweener.removeTweens(this.preview);
 	            Tweener.addTween(this.preview,
 	                    { 
-	                      time: 0.5,
+	                      time: 0.125,
 	                      opacity: 255,
 	                      visible: true,
 	                      transition: 'easeOutQuad',
@@ -917,11 +917,11 @@ const OverviewModifier = function(gsWorkspace, extension){
 					
 					groupOrder.push(topmost_group_id);
 					
-					if(topmost_group_id != myWindow.group.id()){
+					//if(topmost_group_id != myWindow.group.id()){
 						groupedSlots.push(topmost_group_id);
-					} else {
-						singleSlots.push(topmost_group_id);						
-					}
+					//} else {
+					//	singleSlots.push(topmost_group_id);						
+					//}
 					
 					groupWindowOrder[topmost_group_id] = [myWindow];
 					
