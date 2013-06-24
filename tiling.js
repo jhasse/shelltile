@@ -891,7 +891,7 @@ const OverviewModifier = function(gsWorkspace, extension){
 		let clones = this.gsWorkspace._windows.slice();
 		
 		let groupOrder = [];
-		let groupWindowOrder = {};
+		let groupGeometry = {};
 		let groupedSlots = [];
 		let singleSlots = [];
 		let cloneGroup = {};
@@ -909,12 +909,8 @@ const OverviewModifier = function(gsWorkspace, extension){
 			if(myWindow.group){
 				var topmost_group = myWindow.group.get_topmost_group();
 				var topmost_group_id = topmost_group.id();
-				if(groupOrder.indexOf(topmost_group_id)>=0){
-					
-					groupWindowOrder[topmost_group_id].push(myWindow);
-					
-				} else {
-					
+				if(groupOrder.indexOf(topmost_group_id) < 0){
+										
 					groupOrder.push(topmost_group_id);
 					
 					//if(topmost_group_id != myWindow.group.id()){
@@ -922,8 +918,7 @@ const OverviewModifier = function(gsWorkspace, extension){
 					//} else {
 					//	singleSlots.push(topmost_group_id);						
 					//}
-					
-					groupWindowOrder[topmost_group_id] = [myWindow];
+					groupGeometry[topmost_group_id] = topmost_group.outer_rect();
 					
 				}
 				cloneGroup[windowId] = topmost_group_id;
@@ -931,14 +926,14 @@ const OverviewModifier = function(gsWorkspace, extension){
 			} else {
 				
 				groupOrder.push(windowId);
+				groupGeometry[windowId] = myWindow.outer_rect();
 				singleSlots.push(windowId);
-				groupWindowOrder[windowId] = [myWindow];
 				cloneGroup[windowId] = windowId;
 			}
 		}
 		
 		this.groupOrder = groupOrder;
-		this.groupWindowOrder = groupWindowOrder;
+		this.groupGeometry = groupGeometry;
 		this.groupedSlots = groupedSlots;
 		this.singleSlots = singleSlots;
 		this.cloneGroup = cloneGroup;
