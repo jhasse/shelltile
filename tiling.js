@@ -950,8 +950,21 @@ const OverviewModifier = function(gsWorkspace, extension){
 	
 	this.computeWindowSlots = function(numSlots, prev){
 		
-		if(numSlots < 4) return prev(numSlots);
-		else {
+		let groupSlot = {};
+		
+		if(numSlots < 4){
+		
+			let basicWindowSlots = prev(numSlots);
+			
+			for(var i=0; i<this.groupOrder.length; i++){
+				
+				var group = this.groupOrder[i];
+				var slot = basicWindowSlots[i];
+				groupSlot[group] = slot;
+			
+			}			
+		
+		} else {
 			
 			
 			let numberOfWindows = 4 * this.groupedSlots.length + this.singleSlots.length;
@@ -974,7 +987,6 @@ const OverviewModifier = function(gsWorkspace, extension){
 	        var singleSlotIdx = 0;
 	        
 	        let xCenter, yCenter, fraction, slot, singleSlot;
-	        let groupSlot = {};
 	        
 			for(var i = 0; i<this.groupedSlots.length;i++){
 				
@@ -1053,47 +1065,24 @@ const OverviewModifier = function(gsWorkspace, extension){
 				col = 0;
 				row++;
 			}
-
-			var ret = [];
-			
-			for(var i=0; i<this.clones.length; i++){
-				
-				var cloneId = this.clones[i];
-				
-				var cloneGroup = this.cloneGroup[cloneId];
-				var cloneSlot = groupSlot[cloneGroup];
-				
-				ret.push(cloneSlot);
-				
-			}
-			
-			for(var i=0; i<ret.length; i++){
-				
-				var ret1 = ret[i];
-				if(this.log.is_debug()) this.log.debug("ret1 : " +  ret1);
-				
-			}
-			
-			
-			return ret;
 			
 		}
 		
-		/*let basicWindowSlots = prev(numSlots);
-		var ret = []
+		var ret = [];
 		
 		for(var i=0; i<this.clones.length; i++){
 			
 			var cloneId = this.clones[i];
 			
 			var cloneGroup = this.cloneGroup[cloneId];
-			var idx = this.groupOrder.indexOf(cloneGroup);
+			var cloneSlot = groupSlot[cloneGroup];
 			
-			var cloneSlot = basicWindowSlots[idx];
 			ret.push(cloneSlot);
 			
-		}
-		return ret;*/
+		}		
+		
+		return ret;
+		
 	}
 	
 	this.computeWindowLayout = function(metaWindow, slot, prev){
