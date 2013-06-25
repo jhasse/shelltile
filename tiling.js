@@ -913,11 +913,8 @@ const OverviewModifier = function(gsWorkspace, extension){
 										
 					groupOrder.push(topmost_group_id);
 					
-					//if(topmost_group_id != myWindow.group.id()){
-						groupedSlots.push(topmost_group_id);
-					//} else {
-					//	singleSlots.push(topmost_group_id);						
-					//}
+
+					groupedSlots.push(topmost_group_id);
 					groupGeometry[topmost_group_id] = topmost_group.outer_rect();
 					
 				}
