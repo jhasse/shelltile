@@ -985,7 +985,7 @@ const OverviewModifier = function(gsWorkspace, extension){
 	        var groupedSlotIdx = 0;
 	        
 	        var xCenter, yCenter, fraction, slot, geometry, colSize;
-	        var nextSlots, nextGroupedSlots, nextSingleSlots, nextSlot, nextSlotHeight, sumWidths;
+	        var nextSlots, nextGroupedSlots, nextSingleSlots, nextSlot, nextSlotHeight, nextSlotWidth, sumWidths;
 	        var rowSize = 1./gridHeight;
 	        var groupedRowSize = 1. * rowSize;
 	        var currentRowSize = groupedRowSize;
@@ -1010,9 +1010,23 @@ const OverviewModifier = function(gsWorkspace, extension){
 				}
 				
 				if(this.log.is_debug()) this.log.debug("nextSlots.length : " +  nextSlots.length);
+				if(this.log.is_debug()) this.log.debug("gridWidth1 : " +  gridWidth1);
 				if(nextSlots.length == 0) return;
 				
-				sumWidths = 0;
+				nextSlotHeight = 1. / gridHeight;
+				nextSlotWidth = 1./ gridWidth1;
+				
+				for(let j=0; j<nextSlots.length; j++){
+					let slotId = nextSlots[j];
+					geometry = this.groupGeometry[slotId];
+					colSize = nextSlotHeight / geometry.height * geometry.width;
+					if(colSize > nextSlotWidth){
+						colSize = nextSlotWidth;
+						let nextSlotHeight1 = colSize / geometry.width * geometry.height;
+						if(nextSlotHeight1 < nextSlotHeight) nextSlotHeight = nextSlotHeight1;
+					}
+				}
+				/*sumWidths = 0;
 				nextSlot = nextSlots[0];
 				geometry = this.groupGeometry[nextSlot];
 				nextSlotHeight = geometry.height;
@@ -1024,60 +1038,74 @@ const OverviewModifier = function(gsWorkspace, extension){
 					if(this.log.is_debug()) this.log.debug("sumWidths : " +  sumWidths);
 				}
 				
-				nextSlotHeight = 1. / sumWidths  * nextSlotHeight;
+				nextSlotHeight = 1. / sumWidths  * nextSlotHeight;*/
 			
 	        });
 	        calculateHeight();
 	        
 	        let calculateSlots = Lang.bind(this, function(slotsGroups){
 				
+	        	let ret = [];
 	        	for(let j=0; j<slotsGroups.length; j++){
 					
 					let slotId = slotsGroups[j];
 					geometry = this.groupGeometry[slotId];
 					
 					colSize = nextSlotHeight / geometry.height * geometry.width;
+					fraction = nextSlotHeight;
+					if(colSize > nextSlotWidth){
+						colSize = nextSlotWidth;
+						fraction = colSize;
+					}
+					
+					if(this.log.is_debug()) this.log.debug("nextSlotHeight : " +  nextSlotHeight);
 					if(this.log.is_debug()) this.log.debug("colSize : " +  colSize);
 					
-					fraction = 0.95 * nextSlotHeight;
+					//fraction = 0.95 * nextSlotHeight;
+					//fraction = colSize * 0.95;
 
 			        xCenter = colSize / 2. + col;
 			        yCenter = nextSlotHeight / 2. + row;
 			        
 			        slot = [xCenter, yCenter, fraction];
 			        if(this.log.is_debug()) this.log.debug("slot1 : " +  slot);
-			        slots.push(slot);
+			        ret.push(slot);
 			        groupSlot[slotId] = slot;
 			        
 			        col += colSize;
-				}	        	
+				}
+	        	
+	        	return ret;
+	        	
 	        });
 	        
 	        while(nextSlots.length > 0){
 	        	
 	        	let currentSlots = nextGroupedSlots;
-	        	calculateSlots(currentSlots);
+	        	let calc = calculateSlots(currentSlots);
 	        	
 	        	currentSlots = nextSingleSlots;
-	        	calculateSlots(currentSlots);			
+	        	calc = calc.concat(calculateSlots(currentSlots));			
 	        	
-				col = 0;
-				row += nextSlotHeight;
-				rowIdx++;
-				calculateHeight();
-	        }
-	        
-	        if(row > 1.){
-	        	
-	        	for(let j=0; j<slots.length; j++){
-	        		
-	        		slots[j][1] = slots[j][1] / row;
-	        		slots[j][2] = slots[j][2] / row;
-
-	        		if(this.log.is_debug()) this.log.debug("slot ret : " +  slots[j]);
+	        	for(let j=0; j<calc.length; j++){
+	        			 calc[j][0] += (1. - col) / 2.;       		
 	        	}
 	        	
+	        	slots = slots.concat(calc);
+	        	
+	        	rowIdx++;
+	        	row += nextSlotHeight;
+	        	col = 0;
+				calculateHeight();
 	        }
+	                	
+        	for(let j=0; j<slots.length; j++){
+        		
+        		slots[j][1] = slots[j][1] / row;
+        		slots[j][2] = slots[j][2] / row;
+
+        		if(this.log.is_debug()) this.log.debug("slot ret : " +  slots[j]);
+        	}
 			
 		}
 		
