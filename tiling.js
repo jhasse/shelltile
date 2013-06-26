@@ -970,11 +970,15 @@ const OverviewModifier = function(gsWorkspace, extension){
 			
 	        let gridWidth = Math.ceil(Math.sqrt(numberOfWindows));
 	        let gridHeight = Math.ceil(numberOfWindows / gridWidth);			
-	        let gridWidthBase = Math.floor(Math.sqrt(numberOfWindows));
-	        let gridWidthRest = numberOfWindows % gridHeight;
-	        
+	        let gridWidthRest = numberOfWindows % gridWidth;
+	        let gridWidthSub = 0;
+	        if(gridWidthRest > 0 && gridHeight > (gridWidth - gridWidthRest)){
+	        	gridWidthSub = gridWidth - gridWidthRest;
+	        }
+
 			if(this.log.is_debug()) this.log.debug("gridWidth : " + gridWidth);	
 			if(this.log.is_debug()) this.log.debug("gridHeight : " + gridHeight);
+			if(this.log.is_debug()) this.log.debug("gridWidthRest : " + gridWidthRest);
 			
 			if(this.log.is_debug()) this.log.debug("this.groupedSlots.length : " + this.groupedSlots.length);
 			if(this.log.is_debug()) this.log.debug("this.groupedSlots.length : " +  this.singleSlots.length);
@@ -996,11 +1000,12 @@ const OverviewModifier = function(gsWorkspace, extension){
 	        		
 	        		let groupedSlot = groupedSlots[j];
 	        		
-					fraction = currentWidth * 0.95;
+	        		fractionW = currentWidth * 0.95;
+					fractionH = currentHeight * 0.95;
 			        xCenter = currentWidth/ 2. + col;
 			        yCenter = currentHeight/ 2. + row;
 	        		
-			        slot = [xCenter, yCenter, fraction];
+			        slot = [xCenter, yCenter, fractionW, fractionH];
 			        if(log.is_debug()) log.debug("slot : " + slot);
 			        ret.push(slot);
 			        groupSlot[groupedSlot] = slot;
@@ -1015,8 +1020,10 @@ const OverviewModifier = function(gsWorkspace, extension){
 	        let calculateNextRow = Lang.bind(this, function(){
 	        
 	        	let ret = [];
-	        	let gridWidth1 = gridWidthBase;
-	        	if(rowIdx >= (gridHeight - gridWidthRest)) gridWidth1++;
+	        	let gridWidth1 = gridWidth;
+	        	if(rowIdx < gridWidthSub){
+	        		gridWidth1--;
+	        	}
 	        		        	
 	        	groupedSlots = this.groupedSlots.slice(currentGrouped, currentGrouped + gridWidth1);
 	        	currentGrouped += groupedSlots.length;
@@ -1031,8 +1038,8 @@ const OverviewModifier = function(gsWorkspace, extension){
 	        	currentWidth = 1. / gridWidth1;
 	        	
 	        	if(groupedSlots.length>0){
-	        		currentHeight = 1.5 / gridHeight;
-	        		currentWidth = 1.5 / gridWidth1;
+	        		currentHeight = (1. / gridHeight) * 1.5;
+	        		currentWidth = (1. / gridWidth1) * 1.5;
 	        	}
 	        	
 	        	addToRow(groupedSlots, ret);
@@ -1041,11 +1048,13 @@ const OverviewModifier = function(gsWorkspace, extension){
 	        	
 	        	addToRow(singleSlots, ret);
 	        	
-	        	for(let j=0; j<ret.length; j++){
-	        		
-	        		let slot1 = ret[j];
-	        		slot1[0] = slot1[0] / col;
-	        		
+	        	if(col > 1.){
+		        	for(let j=0; j<ret.length; j++){
+		        		
+		        		let slot1 = ret[j];
+		        		slot1[0] = slot1[0] / col;
+		        		slot1[2] = slot1[2] / col;
+		        	}
 	        	}
 	        	
 	        	return ret;
@@ -1072,7 +1081,7 @@ const OverviewModifier = function(gsWorkspace, extension){
 	    		
 	    		let slot1 = slots[j];
 	    		slot1[1] = slot1[1] / row;
-	    		slot1[2] = slot1[2] / row;
+	    		slot1[3] = slot1[3] / row;
 	    		
 	    	}
 			
@@ -1093,6 +1102,20 @@ const OverviewModifier = function(gsWorkspace, extension){
 		if(this.log.is_debug()) this.log.debug("ret.length : " + ret);
 		return ret;
 		
+	}
+	
+	this.getSlotGeometry = function(slot){
+		
+		let [xCenter, yCenter, fractionW, fractionH] = slot;
+			
+		let width = this._width * fractionW;
+        let height = this._height * fractionH;
+		
+        let x = this._x + xCenter * this._width - width / 2 ;
+        let y = this._y + yCenter * this._height - height / 2;
+
+        return [x, y, width, height];
+
 	}
 	
 	this.computeWindowLayout = function(metaWindow, slot, prev){
@@ -1217,7 +1240,8 @@ OverviewModifier.register = function(extension){
 	var prevDestroy = GSWorkspace.prototype.destroy;
 	var prevComputeWindowLayout = GSWorkspace.prototype._computeWindowLayout;
 	var prevOrderWindowsByMotionAndStartup = GSWorkspace.prototype._orderWindowsByMotionAndStartup
-	
+	var prevGetSlotGeometry = GSWorkspace.prototype._getSlotGeometry;
+		
 	GSWorkspace.prototype._computeAllWindowSlots = function(totalWindows){
 		
 		this._shellTileOverviewModifier = new OverviewModifier(this, extension);
@@ -1239,6 +1263,11 @@ OverviewModifier.register = function(extension){
 	
 	GSWorkspace.prototype._orderWindowsByMotionAndStartup = function(clones, slots) {
 		return clones;
+	}	
+	
+	GSWorkspace.prototype._getSlotGeometry = function(slot){
+		let prev = Lang.bind(this, prevGetSlotGeometry);
+		return Lang.bind(this, this._shellTileOverviewModifier.getSlotGeometry)(slot);
 	}
 	
 	OverviewModifier._registered = true;	
