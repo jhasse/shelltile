@@ -913,8 +913,11 @@ const OverviewModifier = function(gsWorkspace, extension){
 										
 					groupOrder.push(topmost_group_id);
 					
-
-					groupedSlots.push(topmost_group_id);
+					//if(topmost_group_id != myWindow.group.id()){
+						groupedSlots.push(topmost_group_id);
+					//} else {
+					//	singleSlots.push(topmost_group_id);						
+					//}
 					groupGeometry[topmost_group_id] = topmost_group.outer_rect();
 					
 				}
@@ -958,154 +961,105 @@ const OverviewModifier = function(gsWorkspace, extension){
 		
 		} else {
 			
-			
+			let singleWeight = 1;
+			let groupedWeight = 1;
 			let numberOfWindows = this.groupedSlots.length + this.singleSlots.length;
 			let slots = [];
 			if(this.log.is_debug()) this.log.debug("this.clones.length : " + this.clones.length);	
 			if(this.log.is_debug()) this.log.debug("numberOfWindows : " + numberOfWindows);	
 			
-	        var gridWidth = Math.ceil(Math.sqrt(numberOfWindows));
-	        var gridHeight = Math.ceil(numberOfWindows / gridWidth);
-	        var gridWidthBase = Math.floor(numberOfWindows / gridHeight);
-	        var gridWidthRest = numberOfWindows % gridHeight;
+	        let gridWidth = Math.ceil(Math.sqrt(numberOfWindows));
+	        let gridHeight = Math.ceil(numberOfWindows / gridWidth);			
 
 	        
 			if(this.log.is_debug()) this.log.debug("gridWidth : " + gridWidth);	
-			if(this.log.is_debug()) this.log.debug("gridHeight : " + gridHeight);	        
-			if(this.log.is_debug()) this.log.debug("gridWidthBase : " + gridWidthBase);	
-			if(this.log.is_debug()) this.log.debug("gridWidthRest : " + gridWidthRest);			
+			if(this.log.is_debug()) this.log.debug("gridHeight : " + gridHeight);
 			
 			if(this.log.is_debug()) this.log.debug("this.groupedSlots.length : " + this.groupedSlots.length);
 			if(this.log.is_debug()) this.log.debug("this.groupedSlots.length : " +  this.singleSlots.length);
 	        
 	        var col=0;
 	        var row=0;
-	        var rowIdx=0;
 	        var singleSlotIdx = 0;
-	        var groupedSlotIdx = 0;
 	        
-	        var xCenter, yCenter, fraction, slot, geometry, colSize;
-	        var nextSlots, nextGroupedSlots, nextSingleSlots, nextSlot, nextSlotHeight, nextSlotWidth, sumWidths;
-	        var rowSize = 1./gridHeight;
-	        var groupedRowSize = 1. * rowSize;
-	        var currentRowSize = groupedRowSize;
-	        if(this.log.is_debug()) this.log.debug("currentRowSize : " +  currentRowSize);
+	        let xCenter, yCenter, fraction, slot, singleSlot;
+	        
+			for(var i = 0; i<this.groupedSlots.length;i++){
+				
+				if(this.log.is_debug()) this.log.debug("row1 : " + row);	
+				if(this.log.is_debug()) this.log.debug("col1 : " + col);
+				
+				let groupedSlot = this.groupedSlots[i];
+				
+				fraction = (groupedWeight / gridWidth) - (0.05 / groupedWeight);
+		        xCenter = groupedWeight/ 2. / gridWidth + col / gridWidth;
+		        yCenter = groupedWeight/ 2. / gridHeight + row / gridHeight;
+		        
+		        slot = [xCenter, yCenter, fraction];
+		        if(this.log.is_debug()) this.log.debug("slot1 : " +  groupedSlot);
+		        slots.push(slot);
+		        groupSlot[groupedSlot] = slot;
+		        
+				col = col + groupedWeight;
+				
+				if(col >= gridWidth || i == (this.groupedSlots.length-1)){
+					
+					while(col < gridWidth){
+						
+						if(this.log.is_debug()) this.log.debug("row2 : " + row);	
+						if(this.log.is_debug()) this.log.debug("col2 : " + col);
 
-	        
-	        let calculateHeight = Lang.bind(this, function(){
-	        
-	        	let gridWidth1 = gridWidthBase;
-	        	if(rowIdx >= (gridHeight - gridWidthRest)) gridWidth1++; 
-	        	
-				nextSlots = this.groupedSlots.slice(groupedSlotIdx, groupedSlotIdx + gridWidth1);
-				nextGroupedSlots = nextSlots;
-				groupedSlotIdx += nextSlots.length;
-					
-				if(nextSlots.length < gridWidth1){
-					let add = this.singleSlots.slice(singleSlotIdx, singleSlotIdx + (gridWidth1 - nextSlots.length));
-					nextSingleSlots = add;
-					
-					nextSlots = nextSlots.concat(add);
-					singleSlotIdx += add.length;
-				}
-				
-				if(this.log.is_debug()) this.log.debug("nextSlots.length : " +  nextSlots.length);
-				if(this.log.is_debug()) this.log.debug("gridWidth1 : " +  gridWidth1);
-				if(nextSlots.length == 0) return;
-				
-				nextSlotHeight = 1. / gridHeight;
-				nextSlotWidth = 1./ gridWidth1;
-				
-				for(let j=0; j<nextSlots.length; j++){
-					let slotId = nextSlots[j];
-					geometry = this.groupGeometry[slotId];
-					colSize = nextSlotHeight / geometry.height * geometry.width;
-					if(colSize > nextSlotWidth){
-						colSize = nextSlotWidth;
-						let nextSlotHeight1 = colSize / geometry.width * geometry.height;
-						if(nextSlotHeight1 < nextSlotHeight) nextSlotHeight = nextSlotHeight1;
+						fraction = (singleWeight / gridWidth) - (0.05 / singleWeight);
+				        xCenter = singleWeight/ 2. / gridWidth + col / gridWidth;
+				        yCenter = groupedWeight/ 2. / gridHeight + row / gridHeight;
+				        
+				        if(singleSlotIdx < this.singleSlots.length){
+				        
+				        	singleSlot = this.singleSlots[singleSlotIdx];
+				        	slot = [xCenter, yCenter, fraction];
+				        	if(this.log.is_debug()) this.log.debug("slot2 : " +  singleSlot);
+				        	slots.push(slot);
+				        	singleSlotIdx++;
+				        	groupSlot[singleSlot] = slot;
+				        }
+				        
+				        col = col + singleWeight;
 					}
-				}
-				/*sumWidths = 0;
-				nextSlot = nextSlots[0];
-				geometry = this.groupGeometry[nextSlot];
-				nextSlotHeight = geometry.height;
-				
-				for(let j=0; j<nextSlots.length; j++){
-					nextSlot = 	nextSlots[j];
-					geometry = this.groupGeometry[nextSlot];
-					sumWidths += geometry.width / geometry.height * nextSlotHeight;
-					if(this.log.is_debug()) this.log.debug("sumWidths : " +  sumWidths);
-				}
-				
-				nextSlotHeight = 1. / sumWidths  * nextSlotHeight;*/
-			
-	        });
-	        calculateHeight();
-	        
-	        let calculateSlots = Lang.bind(this, function(slotsGroups){
-				
-	        	let ret = [];
-	        	for(let j=0; j<slotsGroups.length; j++){
-					
-					let slotId = slotsGroups[j];
-					geometry = this.groupGeometry[slotId];
-					
-					colSize = nextSlotHeight / geometry.height * geometry.width;
-					fraction = nextSlotHeight;
-					if(colSize > nextSlotWidth){
-						colSize = nextSlotWidth;
-						fraction = colSize;
-					}
-					
-					if(this.log.is_debug()) this.log.debug("nextSlotHeight : " +  nextSlotHeight);
-					if(this.log.is_debug()) this.log.debug("colSize : " +  colSize);
-					
-					//fraction = 0.95 * nextSlotHeight;
-					//fraction = colSize * 0.95;
 
-			        xCenter = colSize / 2. + col;
-			        yCenter = nextSlotHeight / 2. + row;
+					col=0;
+					row = row + groupedWeight;
 			        
-			        slot = [xCenter, yCenter, fraction];
-			        if(this.log.is_debug()) this.log.debug("slot1 : " +  slot);
-			        ret.push(slot);
-			        groupSlot[slotId] = slot;
-			        
-			        col += colSize;
-				}
-	        	
-	        	return ret;
-	        	
-	        });
-	        
-	        while(nextSlots.length > 0){
-	        	
-	        	let currentSlots = nextGroupedSlots;
-	        	let calc = calculateSlots(currentSlots);
-	        	
-	        	currentSlots = nextSingleSlots;
-	        	calc = calc.concat(calculateSlots(currentSlots));			
-	        	
-	        	for(let j=0; j<calc.length; j++){
-	        			 calc[j][0] += (1. - col) / 2.;       		
-	        	}
-	        	
-	        	slots = slots.concat(calc);
-	        	
-	        	rowIdx++;
-	        	row += nextSlotHeight;
-	        	col = 0;
-				calculateHeight();
-	        }
-	                	
-        	for(let j=0; j<slots.length; j++){
-        		
-        		slots[j][1] = slots[j][1] / row;
-        		slots[j][2] = slots[j][2] / row;
+				}				
+				
+			}
 
-        		if(this.log.is_debug()) this.log.debug("slot ret : " +  slots[j]);
-        	}
+			while(singleSlotIdx < this.singleSlots.length){
+				
+				if(this.log.is_debug()) this.log.debug("row3 : " + row);	
+				if(this.log.is_debug()) this.log.debug("col3 : " + col);
+				
+				
+				while(col < gridWidth && singleSlotIdx < this.singleSlots.length){
+					
+					fraction = (singleWeight / gridWidth) - (0.05 / singleWeight);
+			        xCenter = singleWeight/ 2. / gridWidth + col / gridWidth;
+			        yCenter = singleWeight/ 2. / gridHeight + row / gridHeight;
+				        
+		        	singleSlot = this.singleSlots[singleSlotIdx];
+		        	slot = [xCenter, yCenter, fraction];
+		        	if(this.log.is_debug()) this.log.debug("slot4 : " +  singleSlot);
+		        	
+		        	slots.push(slot);
+		        	singleSlotIdx++;
+		        	groupSlot[singleSlot] = slot;
+		        	
+		        	col = col + singleWeight;
+			        
+				}
+				
+				col = 0;
+				row = row + singleWeight;
+			}
 			
 		}
 		
@@ -1122,30 +1076,8 @@ const OverviewModifier = function(gsWorkspace, extension){
 			
 		}		
 		
-		this.slots = ret;
 		return ret;
 		
-	}
-	
-	this.getSlotGeometry = function(slot){
-		
-		let [xCenter, yCenter, fraction] = slot;
-
-		let mod = this._shellTileOverviewModifier;
-		var idx = mod.slots.indexOf(slot);
-		if(idx>=0){
-			var cloneId = mod.clones[idx];
-			var cloneGroup = mod.cloneGroup[cloneId];
-			var geometry = mod.groupGeometry[cloneGroup];
-			
-	        let height = this._height * fraction;
-	        let width = height / geometry.height * geometry.width;
-			
-	        let x = this._x + xCenter * this._width - width / 2 ;
-	        let y = this._y + yCenter * this._height - height / 2;
-
-	        return [x, y, width, height];
-		}
 	}
 	
 	this.computeWindowLayout = function(metaWindow, slot, prev){
@@ -1269,8 +1201,7 @@ OverviewModifier.register = function(extension){
 	var prevComputeAllWindowSlots = GSWorkspace.prototype._computeAllWindowSlots;
 	var prevDestroy = GSWorkspace.prototype.destroy;
 	var prevComputeWindowLayout = GSWorkspace.prototype._computeWindowLayout;
-	var prevOrderWindowsByMotionAndStartup = GSWorkspace.prototype._orderWindowsByMotionAndStartup;
-	var prevGetSlotGeometry = GSWorkspace.prototype._getSlotGeometry;
+	var prevOrderWindowsByMotionAndStartup = GSWorkspace.prototype._orderWindowsByMotionAndStartup
 	
 	GSWorkspace.prototype._computeAllWindowSlots = function(totalWindows){
 		
@@ -1294,11 +1225,6 @@ OverviewModifier.register = function(extension){
 	
 	GSWorkspace.prototype._orderWindowsByMotionAndStartup = function(clones, slots) {
 		return clones;
-	}
-	
-	GSWorkspace.prototype._getSlotGeometry = function(slot){
-		let prev = Lang.bind(this, prevGetSlotGeometry);
-		return Lang.bind(this, this._shellTileOverviewModifier.getSlotGeometry)(slot);
 	}
 	
 	OverviewModifier._registered = true;	
