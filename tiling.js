@@ -1048,7 +1048,7 @@ const OverviewModifier = function(gsWorkspace, extension){
 	        	
 	        	addToRow(singleSlots, ret);
 	        	
-	        	if(col > 1.){
+	        	if(col > 0.95){
 		        	for(let j=0; j<ret.length; j++){
 		        		
 		        		let slot1 = ret[j];
