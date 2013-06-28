@@ -1011,19 +1011,6 @@ const OverviewModifier = function(gsWorkspace, extension){
 	        	for(let j=0; j<groupedSlots.length; j++){
 	        		
 	        		let groupedSlot = groupedSlots[j];
-	        		/*let outer_rect = this.groupGeometry[groupedSlot];
-	        		
-	        		let slot_ratio = currentWidth / currentHeight;
-	        		let group_ratio = outer_rect.width / outer_rect.height;
-	        		
-	        		if(log.is_debug()) log.debug("slot_ratio : " + slot_ratio);
-	        		if(log.is_debug()) log.debug("group_ratio : " + group_ratio);
-	        		
-	        		if(group_ratio < slot_ratio){
-	        			currentWidth = currentHeight / outer_rect.height * outer_rect.width;
-	        			if(log.is_debug()) log.debug("currentHeight : " + currentHeight);
-	        			if(log.is_debug()) log.debug("currentWidth : " + currentWidth);
-	        		}*/
 	        		
 	        		fractionW = currentWidth * 0.95;
 					fractionH = currentHeight * 0.95;
