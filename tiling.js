@@ -881,11 +881,11 @@ const DefaultTilingStrategy = function(ext){
 DefaultTilingStrategy.EDGE_ZONE_WIDTH = 20;
 
 
-const OverviewModifier = function(gsWorkspace, extension){
+const OverviewModifier6 = function(gsWorkspace, extension){
 	
 	this.gsWorkspace = gsWorkspace;
 	this.extension = extension;
-	this.log = Log.getLogger("OverviewModifier");
+	this.log = Log.getLogger("OverviewModifier6");
 	
 	this.computeNumWindowSlots = function(){
 		let clones = this.gsWorkspace._windows.slice();
@@ -1253,6 +1253,8 @@ const OverviewModifier = function(gsWorkspace, extension){
 	}
 }
 
+const OverviewModifier = function(){};
+
 OverviewModifier.register = function(extension){
 	if(OverviewModifier._registered) return;
 	
@@ -1269,7 +1271,7 @@ OverviewModifier.register = function(extension){
 	
 		GSWorkspace.prototype._computeAllWindowSlots = function(totalWindows){
 			
-			this._shellTileOverviewModifier = new OverviewModifier(this, extension);
+			this._shellTileOverviewModifier = new OverviewModifier6(this, extension);
 			var numSlots = this._shellTileOverviewModifier.computeNumWindowSlots();
 			
 			var prev = Lang.bind(this, prevComputeAllWindowSlots);
