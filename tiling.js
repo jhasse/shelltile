@@ -881,11 +881,11 @@ const DefaultTilingStrategy = function(ext){
 DefaultTilingStrategy.EDGE_ZONE_WIDTH = 20;
 
 
-const OverviewModifier6 = function(gsWorkspace, extension){
+const OverviewModifier36 = function(gsWorkspace, extension){
 	
 	this.gsWorkspace = gsWorkspace;
 	this.extension = extension;
-	this.log = Log.getLogger("OverviewModifier6");
+	this.log = Log.getLogger("OverviewModifier36");
 	
 	this.computeNumWindowSlots = function(){
 		let clones = this.gsWorkspace._windows.slice();
@@ -1270,31 +1270,42 @@ OverviewModifier.register = function(extension){
 	if(version6){
 	
 		GSWorkspace.prototype._computeAllWindowSlots = function(totalWindows){
+			var prev = Lang.bind(this, prevComputeAllWindowSlots);
+			if(!extension.enabled) return prev(totalWindows);
 			
-			this._shellTileOverviewModifier = new OverviewModifier6(this, extension);
+			this._shellTileOverviewModifier = new OverviewModifier36(this, extension);
 			var numSlots = this._shellTileOverviewModifier.computeNumWindowSlots();
 			
-			var prev = Lang.bind(this, prevComputeAllWindowSlots);
 			var prevComputeWindowLayout1 = Lang.bind(this, prevComputeWindowLayout);
 			return this._shellTileOverviewModifier.computeWindowSlots(numSlots, prev, prevComputeWindowLayout1);
 		}
 		
 		GSWorkspace.prototype.destroy = function(){
+			var prev = Lang.bind(this, prevDestroy);
+			if(!extension.enabled) return prev();
+			
 			delete this._shellTileOverviewModifier;
-			Lang.bind(this, prevDestroy)();
+			return prev();
 		}
 		
 		GSWorkspace.prototype._computeWindowLayout = function(metaWindow, slot){
 			let prev = Lang.bind(this, prevComputeWindowLayout);		
+			if(!extension.enabled) return prev(metaWindow, slot);
+			
 			return this._shellTileOverviewModifier.computeWindowLayout(metaWindow, slot, prev);
 		}
 		
 		GSWorkspace.prototype._orderWindowsByMotionAndStartup = function(clones, slots) {
+			let prev = Lang.bind(this, prevOrderWindowsByMotionAndStartup);
+			if(!extension.enabled) return prev(clones, slots);
+			
 			return clones;
 		}	
 		
 		GSWorkspace.prototype._getSlotGeometry = function(slot){
 			let prev = Lang.bind(this, prevGetSlotGeometry);
+			if(!extension.enabled) return prev(slot);
+			
 			return this._shellTileOverviewModifier.getSlotGeometry(slot, this, prev);
 		}
 		
