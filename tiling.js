@@ -329,11 +329,11 @@ const WindowGroup = function(first, second, type, splitPercent){
 	this.get_windows = function(){
 		var ret = [];
 		if(this.first.get_windows){
-			ret.concat(this.first.get_windows());
+			ret = ret.concat(this.first.get_windows());
 		} else ret.push(this.first.id());
 		
 		if(this.second.get_windows){
-			ret.concat(this.second.get_windows());
+			ret = ret.concat(this.second.get_windows());
 		} else ret.push(this.second.id());
 		
 		return ret;
