@@ -129,7 +129,7 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 	        
 	        let xCenter, yCenter, fraction, slot, singleSlot;
 	        let nextSlots, groupedSlots, singleSlots, nextSlotsIds, currentGrouped = 0, currentSingle = 0;
-	        let currentHeight, currentWidth;
+	        let currentHeight, currentWidth, fractionW, fractionH;
 	        let log = this.log;
 	        
 	        let addToRow = Lang.bind(this, function(groupedSlots, ret){
