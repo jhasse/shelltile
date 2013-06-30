@@ -305,6 +305,35 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 		}
 	}
 	
+	this.orderWindowsByMotionAndStartup = function(clones, slots){
+
+		let arraySequences = {}
+		for(let j=0; j<clones.length; j++){
+			let clone = clones[j];
+			arraySequences[clone.metaWindow.get_stable_sequence()] = j;	
+		}
+        
+		clones.sort(function(w1, w2) {
+            return w2.metaWindow.get_stable_sequence() - w1.metaWindow.get_stable_sequence();
+        });
+		
+		let ret = [];
+		for(let j=0; j<clones.length; j++){
+			let clone = clones[j];
+			let arraySequence = arraySequences[clone.metaWindow.get_stable_sequence()];
+			ret.push(slots[arraySequence]);
+		}
+		
+		slots.splice(0, slots.length);
+		for(let j=0; j<ret.length; j++){
+			let slot = ret[j];
+			slots.push(slot);
+		}
+		
+		return clones;
+        
+	};
+	
 	this.calculateGroupWindowLayouts =  function(topmost_group, scaled_group_rect, scale){
 		
 		var ret = {};
@@ -424,7 +453,7 @@ OverviewModifier.register = function(extension){
 			let prev = Lang.bind(this, prevOrderWindowsByMotionAndStartup);
 			if(!extension.enabled) return prev(clones, slots);
 			
-			return clones;
+			return this._shellTileOverviewModifier.orderWindowsByMotionAndStartup(clones, slots);
 		}	
 		
 		GSWorkspace.prototype._getSlotGeometry = function(slot){
