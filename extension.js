@@ -9,7 +9,7 @@ const ExtensionSystem = imports.ui.extensionSystem;
 const Window = Extension.imports.window.Window;
 const Workspace = Extension.imports.workspace.Workspace;
 const DefaultTilingStrategy = Extension.imports.tiling.DefaultTilingStrategy;
-const OverviewModifier = Extension.imports.tiling.OverviewModifier;
+const OverviewModifier = Extension.imports.overview.OverviewModifier;
 const Log = Extension.imports.logger.Logger.getLogger("ShellTile");
 const Convenience = Extension.imports.convenience;
 
