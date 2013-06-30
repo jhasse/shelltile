@@ -250,7 +250,7 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 			ret.push(cloneSlot);
 			
 		}		
-		if(this.log.is_debug()) this.log.debug("ret.length : " + ret);
+
 		return ret;
 		
 	}
