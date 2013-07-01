@@ -408,6 +408,29 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 	}
 }
 
+function versionCompare(first, second) {
+	first = first.split('.');
+	second = second.split('.');
+	
+    for (let i = 0; i < first.length; i++) {
+    	first[i] = parseInt(first[i]);
+    }
+    
+    for (let i = 0; i < second.length; i++) {
+    	second[i] = parseInt(second[i]);
+    }
+
+
+    for (let i = 0; i < first.length; i++) {
+    	if(i >= second.length) return 1;
+        if (first[i] != second[i])
+            return first[i] - second[i];
+    }
+    if(second.length > i) return -1;
+    return 0;
+}
+
+
 const OverviewModifier = function(){};
 
 OverviewModifier.register = function(extension){
@@ -419,7 +442,7 @@ OverviewModifier.register = function(extension){
 	var prevOrderWindowsByMotionAndStartup = GSWorkspace.prototype._orderWindowsByMotionAndStartup
 	var prevGetSlotGeometry = GSWorkspace.prototype._getSlotGeometry;
 	
-	let version36 = Config.PACKAGE_VERSION >= "3.6" && Config.PACKAGE_VERSION < "3.7";
+	let version36 = versionCompare(Config.PACKAGE_VERSION, "3.6") >= 0 && versionCompare(Config.PACKAGE_VERSION, "3.7") < 0;
 	
 	if(version36){
 	
