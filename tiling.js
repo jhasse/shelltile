@@ -696,14 +696,39 @@ const DefaultTilingStrategy = function(ext){
 		var start = [[0,0], [0.5, 0], [0.5, 0.5], [0, 0.5]];
 		var groups = [["above", "below", "v"], ["below", "above", "h"], ["below", "above", "v"], ["above", "below", "h"]];
 		
+		let exclude = {};
+		
 		while(current.group){
 			var parent = current.group;
+			
+			var is_first = parent.first === current;
+			
 			if(parent.type == WindowGroup.HORIZONTAL_GROUP){
-				corners[TOP_LEFT].push(parent);
-				corners[BOTTOM_RIGHT].push(parent);
+				
+				if(!exclude[TOP_LEFT]) corners[TOP_LEFT].push(parent);
+				if(!exclude[BOTTOM_RIGHT]) corners[BOTTOM_RIGHT].push(parent);
+
+				if(is_first){
+					exclude[TOP_RIGHT] = true;
+					exclude[BOTTOM_RIGHT] = true;
+				} else {
+					exclude[TOP_LEFT] =  true;
+					exclude[BOTTOM_LEFT] =  true;
+				}
+				
 			} else if(parent.type == WindowGroup.VERTICAL_GROUP){
-				corners[TOP_RIGHT].push(parent);
-				corners[BOTTOM_LEFT].push(parent);
+				
+				
+				if(!exclude[TOP_RIGHT]) corners[TOP_RIGHT].push(parent);
+				if(!exclude[BOTTOM_LEFT]) corners[BOTTOM_LEFT].push(parent);
+				
+				if(is_first){
+					exclude[BOTTOM_LEFT] = true;
+					exclude[BOTTOM_RIGHT] = true;
+				} else {
+					exclude[TOP_LEFT] =  true;
+					exclude[TOP_RIGHT] = true;
+				}
 			}
 			current = parent;
 		}
