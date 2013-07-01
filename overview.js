@@ -422,6 +422,11 @@ OverviewModifier.register = function(extension){
 	var prevGetSlotGeometry = GSWorkspace.prototype._getSlotGeometry;
 	
 	let version36 = Util.versionCompare(Config.PACKAGE_VERSION, "3.6") >= 0 && Util.versionCompare(Config.PACKAGE_VERSION, "3.7") < 0;
+	version36 = version36 && prevComputeAllWindowSlots;
+	version36 = version36 && prevDestroy;
+	version36 = version36 && prevComputeWindowLayout;
+	version36 = version36 && prevOrderWindowsByMotionAndStartup;
+	version36 = version36 && prevGetSlotGeometry;
 	
 	if(version36){
 	
