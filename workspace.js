@@ -181,14 +181,16 @@ Workspace.prototype = {
 	},
 
 	
-	on_window_create: function(workspace, meta_window) {
+	on_window_create: function(workspace, meta_window, second_try) {
 		if(this.log.is_debug()) this.log.debug("on_window_create: " + meta_window)
 		let actor = meta_window.get_compositor_private();
 		if(!actor){
-			Mainloop.idle_add(Lang.bind(this, function () {
-				this.on_window_create(workspace, meta_window);
-				return false;
-			}));
+			if(!second_try){
+				Mainloop.idle_add(Lang.bind(this, function () {
+					this.on_window_create(workspace, meta_window, true);
+					return false;
+				}));
+			}
 			return;
 		}
 
