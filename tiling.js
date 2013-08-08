@@ -47,6 +47,22 @@ const WindowGroup = function(first, second, type, splitPercent){
 		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 	}
 	
+	this.has_maximized_size = function(){
+		
+		var bounds = this.get_maximized_bounds();
+		var current_bounds = this.outer_rect();
+		
+		var delta_x = Math.abs(bounds.x - current_bounds.x);
+		var delta_y = Math.abs(bounds.y - current_bounds.y);
+		var delta_width = Math.abs(bounds.width - current_bounds.width);
+		var delta_height = Math.abs(bounds.height - current_bounds.height);
+		
+		var max_delta = 3;
+		
+		return delta_x <= max_delta && delta_y <= max_delta && delta_width <= max_delta && delta_height <= max_delta;
+		
+	}
+	
 	this.save_bounds = function(){
 		this.save_position();
 		this.save_size();
@@ -648,6 +664,25 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.on_window_maximize = function(win){
 		if(win.group){
+			if(!this.extension.keep_maximized){
+				
+				var topmost_group = win.group.get_topmost_group();
+				
+				win.unmaximize();
+				var has_maximized_size = topmost_group.has_maximized_size();
+				if(this.log.is_debug()) this.log.debug("has_maximized_size: "  + has_maximized_size);
+				
+				if(!has_maximized_size){
+					
+					topmost_group.maximize_size();
+					return;
+					
+				} else {
+					win.maximize();
+				}
+				
+			}
+		
 			win.group.detach(win);
 			if(this.extension.keep_maximized) win.maximize_size();
 			win.raise();
