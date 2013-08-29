@@ -518,36 +518,47 @@ const DefaultTilingStrategy = function(ext){
 		win.raise();
 
 		var currTime = new Date().getTime();
-		if(!win.group && (!this.lastTime || (currTime - this.lastTime) > 200)){ 
-			this.lastTime = currTime;
+		if(!this.lastTime || (currTime - this.lastTime) > 200){
 			
-			var preview_rect = null;
-			var is_ctrl_pressed = this.is_ctrl_pressed();
-			if(win && is_ctrl_pressed){
+			if(!win.group){ 
+			
+				this.lastTime = currTime;
 				
-				var window_under = this.get_window_under(win);
-				if(window_under){
+				var preview_rect = null;
+				var is_ctrl_pressed = this.is_ctrl_pressed();
+				if(win && is_ctrl_pressed){
 					
-					var groupPreview = this.get_window_group_preview(window_under, win);
-					if(groupPreview){
-						var preview_rect = groupPreview.preview_rect(win);
-						groupPreview.first = null;
-						groupPreview.second = null;
-						if(this.log.is_debug()) this.log.debug("preview_rect: " + preview_rect);
+					var window_under = this.get_window_under(win);
+					if(window_under){
+						
+						var groupPreview = this.get_window_group_preview(window_under, win);
+						if(groupPreview){
+							var preview_rect = groupPreview.preview_rect(win);
+							groupPreview.first = null;
+							groupPreview.second = null;
+							if(this.log.is_debug()) this.log.debug("preview_rect: " + preview_rect);
+						}
+						
 					}
-					
+	
 				}
-
-			}
-			
-			var for_edge_tiling = !preview_rect;
-			if(for_edge_tiling){
 				
-				var preview_rect = this.get_edge_preview(win);
-			}
+				var for_edge_tiling = !preview_rect;
+				if(for_edge_tiling){
+					
+					var preview_rect = this.get_edge_preview(win);
+				}
+				
+				this.preview_for_edge_tiling = for_edge_tiling;
+				this.update_preview(preview_rect);
+		
+			} else if(win.group && this.is_ctrl_pressed()){
 			
-			this.preview_for_edge_tiling = for_edge_tiling;
-			this.update_preview(preview_rect);
+				win.group.detach(win);
+				win.raise();
+				
+			}
+		
 		}
 	}
 	
@@ -648,9 +659,22 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.on_window_maximize = function(win){
 		if(win.group){
-			win.group.detach(win);
-			if(this.extension.keep_maximized) win.maximize_size();
-			win.raise();
+			
+			if(this.is_ctrl_pressed()){
+				
+				var topmost_group = win.group.get_topmost_group();
+				win.unmaximize();
+				
+				topmost_group.maximize_size();
+				win.raise();
+				
+			} else {
+			
+				win.group.detach(win);
+				if(this.extension.keep_maximized) win.maximize_size();
+				win.raise();
+			
+			}
 		}
 	}
 	
