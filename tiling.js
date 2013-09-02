@@ -47,6 +47,43 @@ const WindowGroup = function(first, second, type, splitPercent){
 		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 	}
 	
+	this.switch_maximized = function(){
+		
+		if(this._last_bounds){
+			this.unmaximize();			
+		} else {
+			this.maximize();			
+		}
+		
+	}
+	
+	this.maximize = function(){
+		
+		this.forget_last_bounds();
+		this._last_bounds = this.outer_rect();
+		this.maximize_size();
+		this.save_bounds();
+	}
+	
+	this.unmaximize = function(){
+		
+		if(this._last_bounds){
+			
+			var bounds = this._last_bounds;			
+			this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
+			this.save_bounds();
+
+		}
+		this.forget_last_bounds();
+	}
+	
+	this.forget_last_bounds = function(){
+		if(this.first.forget_last_bounds) this.first.forget_last_bounds();
+		if(this.second.forget_last_bounds) this.second.forget_last_bounds();
+		
+		if(this._last_bounds) delete this._last_bounds;
+	}
+	
 	this.save_bounds = function(){
 		this.save_position();
 		this.save_size();
@@ -660,12 +697,12 @@ const DefaultTilingStrategy = function(ext){
 	this.on_window_maximize = function(win){
 		if(win.group){
 			
-			if(this.is_ctrl_pressed()){
+			if(this.is_ctrl_pressed() && !this.extension.keep_maximized){
 				
 				var topmost_group = win.group.get_topmost_group();
 				win.unmaximize();
 				
-				topmost_group.maximize_size();
+				topmost_group.switch_maximized();
 				win.raise();
 				
 			} else {
