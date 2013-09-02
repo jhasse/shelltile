@@ -323,6 +323,7 @@ Window.prototype = {
 			} else {
 				group.move_resize(group.saved_position.x, group.saved_position.y, group.saved_size.width,  group.saved_size.height);
 				group.save_bounds();
+				group.forget_last_bounds();
 			}
 			
 		}
