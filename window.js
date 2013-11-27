@@ -44,9 +44,10 @@ Window.prototype = {
 	,maximize: function(){
 		this.meta_window.maximize(Meta.MaximizeFlags.VERTICAL | Meta.MaximizeFlags.HORIZONTAL);
 		var maximized_bounds = this.outer_rect();
+		var monitor = this.get_monitor();
 		var works = this.get_workspace();
 		if(works && maximized_bounds){
-			 works.update_bounds(maximized_bounds);
+			 works.update_bounds(monitor, maximized_bounds);
 		}
 	}
 	
@@ -163,7 +164,7 @@ Window.prototype = {
 		var blacklisted = Window.blacklist_classes.indexOf(window_class) != -1;
 		if(blacklisted)
 		{
-			if(this.log.is_debug()) this.log.debug("window class " + window_class + " is blacklisted");
+			//if(this.log.is_debug()) this.log.debug("window class " + window_class + " is blacklisted");
 			return false;
 		}
 
@@ -289,8 +290,8 @@ Window.prototype = {
 					var boundary_edges = this.get_boundary_edges(group.saved_size, this.saved_size);
 					var modified_edges = this.get_modified_edges(this.saved_size, current_size);
 					
-					if(this.log.is_debug()) this.log.debug("boundary_edges : " + boundary_edges);
-					if(this.log.is_debug()) this.log.debug("modified_edges: " + modified_edges);
+					//if(this.log.is_debug()) this.log.debug("boundary_edges : " + boundary_edges);
+					//if(this.log.is_debug()) this.log.debug("modified_edges: " + modified_edges);
 					
 					if((boundary_edges & modified_edges) > 0){
 						group.save_bounds();
@@ -340,7 +341,8 @@ Window.prototype = {
 	,height: function() { return this.outer_rect().height; }
 	,xpos: function() { return this.outer_rect().x; }
 	,ypos: function() { return this.outer_rect().y; }
-	,outer_rect: function() { return this.meta_window.get_outer_rect(); }
+	,outer_rect: function() { return this.meta_window.get_outer_rect();}
+	,get_monitor: function() { return this.meta_window.get_monitor();}
 };
 
 Window.NO_EDGES = parseInt("0000",2)
