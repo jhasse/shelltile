@@ -354,24 +354,6 @@ const WindowGroup = function(first, second, type, splitPercent){
 		}
 	}
 	
-	this.move_to_monitor = function(idx, descending){
-		if(!descending && this.group){
-			this.group.move_to_monitor(idx);
-		}
-		
-		if(this.first.meta_window && this.first.get_monitor() !== idx){
-			this.first.move_to_monitor(idx);
-		} else {
-			this.first.move_to_monitor(idx, true);
-		}
-		
-		if(this.second.meta_window && this.second.get_monitor() !== idx){
-			this.second.move_to_monitor(idx);
-		} else {
-			this.second.move_to_monitor(idx, true);
-		}
-	}	
-	
 	this.raise = function(ascending){
 		if(this.group && ascending){
 			this.group.raise(true);
