@@ -197,7 +197,7 @@ const Ext = function Ext(){
 
 		self.connect_and_track(self, self.screen, 'workspace-added', function(screen, i) { _init_workspace(i); });
 		self.connect_and_track(self, self.screen, 'workspace-removed', self.on_remove_workspace);
-
+		
 		for (var i = 0; i < self.screen.n_workspaces; i++) {
 			_init_workspace(i);
 		}
@@ -244,6 +244,7 @@ const Ext = function Ext(){
 
             self.connect_and_track(self, self.gnome_settings, 'changed', Lang.bind(this, this.on_settings_changed));
             self.connect_and_track(self, self.settings, 'changed', Lang.bind(this, this.on_settings_changed));
+    		self.connect_and_track(self, self.screen, 'window-entered-monitor', Lang.bind(this, this.window_entered_monitor));
 
             OverviewModifier.register(self);
             
@@ -252,6 +253,12 @@ const Ext = function Ext(){
 	    } catch(e){
             if(self.log.is_error()) self.log.error(e);    
         }
+	}
+	
+	self.window_entered_monitor = function(metaScreen, monitorIndex, metaWin){
+		
+		var win = self.get_window(metaWin);
+		win.on_move_to_monitor(metaScreen, monitorIndex);
 	}
 	
 	self.on_settings_changed = function(){
