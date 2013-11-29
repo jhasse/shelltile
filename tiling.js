@@ -360,7 +360,7 @@ const WindowGroup = function(first, second, type, splitPercent){
 		}
 		
 		if(this.first.meta_window && this.first.get_monitor() !== idx){
-			this.first.move_to_workspace(workspace);
+			this.first.move_to_monitor(idx);
 		} else {
 			this.first.move_to_monitor(idx, true);
 		}
