@@ -89,18 +89,6 @@ Window.prototype = {
 		}
 	}
 	
-	,on_move_to_monitor: function(metaScreen, monitorIndex){
-		delete this.marked_for_remove;
-		
-		if(this.group){
-			this.group.move_to_monitor(monitorIndex);
-			var group = this.group.get_topmost_group();
-			group.maximize_size();
-			group.raise();
-			group.save_bounds();			
-		}
-	}
-	
 	,save_bounds: function(){
 		this.save_position();
 		this.save_size();
@@ -124,11 +112,6 @@ Window.prototype = {
 		workspace.connect_window(this);
 		delete this.marked_for_remove;
 	}
-	
-	,move_to_monitor: function(idx){
-		this.meta_window.move_to_monitor(idx);
-		delete this.marked_for_remove;
-	}	
 	
 	,move_resize: function(x, y, w, h) {
 		this.meta_window.unmaximize(Meta.MaximizeFlags.VERTICAL | Meta.MaximizeFlags.HORIZONTAL);
