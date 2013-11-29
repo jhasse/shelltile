@@ -285,7 +285,6 @@ Window.prototype = {
 				//var group_size = group.outer_rect();
 				var current_size = this.outer_rect();
 				
-				
 				if(changed_size){
 	
 					var boundary_edges = this.get_boundary_edges(group.saved_size, this.saved_size);
@@ -297,6 +296,7 @@ Window.prototype = {
 					if((boundary_edges & modified_edges) > 0){
 						//group.save_bounds();
 						var saved_size = group.saved_size;
+						var saved_position = group.saved_position;
 						
 						if(boundary_edges & Window.RIGHT_EDGE || boundary_edges & Window.LEFT_EDGE){
 							saved_size.width = saved_size.width + (current_size.width - this.saved_size.width);
@@ -305,10 +305,10 @@ Window.prototype = {
 							saved_size.height = saved_size.height + (current_size.height - this.saved_size.height);
 						}
 						if(boundary_edges & Window.TOP_EDGE){
-							//saved_size.y = current_size.y;
+							saved_position.y = current_size.y;
 						}
 						if(boundary_edges & Window.LEFT_EDGE){
-							//saved_size.x = current_size.x;
+							saved_position.x = current_size.x;
 						}
 						
 						same_size = false;
