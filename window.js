@@ -282,8 +282,9 @@ Window.prototype = {
 			if(!this.extension.keep_maximized){
 				
 				var group = this.group.get_topmost_group();
-				var group_size = group.outer_rect();
+				//var group_size = group.outer_rect();
 				var current_size = this.outer_rect();
+				
 				
 				if(changed_size){
 	
@@ -294,14 +295,20 @@ Window.prototype = {
 					//if(this.log.is_debug()) this.log.debug("modified_edges: " + modified_edges);
 					
 					if((boundary_edges & modified_edges) > 0){
-						group.save_bounds();
+						//group.save_bounds();
 						var saved_size = group.saved_size;
 						
-						if(boundary_edges & Window.RIGHT_EDGE){
-							saved_size.width = (current_size.x + current_size.width) - saved_size.x;
+						if(boundary_edges & Window.RIGHT_EDGE || boundary_edges & Window.LEFT_EDGE){
+							saved_size.width = saved_size.width + (current_size.width - this.saved_size.width);
 						}
-						if(boundary_edges & Window.BOTTOM_EDGE){
-							saved_size.height = (current_size.y + current_size.height) - saved_size.y;
+						if(boundary_edges & Window.BOTTOM_EDGE || boundary_edges & Window.TOP_EDGE){
+							saved_size.height = saved_size.height + (current_size.height - this.saved_size.height);
+						}
+						if(boundary_edges & Window.TOP_EDGE){
+							//saved_size.y = current_size.y;
+						}
+						if(boundary_edges & Window.LEFT_EDGE){
+							//saved_size.x = current_size.x;
 						}
 						
 						same_size = false;
