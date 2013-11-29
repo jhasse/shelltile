@@ -294,7 +294,7 @@ Window.prototype = {
 					//if(this.log.is_debug()) this.log.debug("modified_edges: " + modified_edges);
 					
 					if((boundary_edges & modified_edges) > 0){
-						//group.save_bounds();
+
 						var saved_size = group.saved_size;
 						var saved_position = group.saved_position;
 						
