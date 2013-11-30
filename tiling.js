@@ -901,7 +901,7 @@ const DefaultTilingStrategy = function(ext){
 			
 			win1 = this.extension.get_window(win1, true);
 			//if(this.log.is_debug()) this.log.debug("window_under: " + win1);
-			if(win1.can_be_tiled() && !win1.is_minimized() && win1.meta_window !== win.meta_window){
+			if(win1.can_be_tiled() && !win1.is_minimized() && win1.id() != win.id()){
 
 				if(win1.outer_rect().contains_rect(cursor_rect)){
 					
