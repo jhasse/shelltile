@@ -947,6 +947,8 @@ const DefaultTilingStrategy = function(ext){
 	this.get_edge_preview = function(win){
 		var main_panel_rect = this.get_main_panel_rect();
 		var cursor_rect = this.get_cursor_rect();
+		var monitor = global.screen.get_current_monitor();
+		var monitor_geometry = global.screen.get_monitor_geometry(monitor);
 		var maxi = win.get_maximized_bounds();
 		var ret = null;
 		var edge_zone_width = DefaultTilingStrategy.EDGE_ZONE_WIDTH;	
@@ -955,7 +957,7 @@ const DefaultTilingStrategy = function(ext){
 		
 			ret = maxi;
 		
-		} else if(cursor_rect.x >=0 && cursor_rect.x < edge_zone_width){
+		} else if(cursor_rect.x >=monitor_geometry.x && cursor_rect.x < monitor_geometry.x + edge_zone_width){
 			
 			maxi.width = maxi.width / 2;
 			ret = maxi;
