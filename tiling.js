@@ -960,6 +960,7 @@ const DefaultTilingStrategy = function(ext){
 		} else if(cursor_rect.x >=monitor_geometry.x && cursor_rect.x < monitor_geometry.x + edge_zone_width){
 			
 			maxi.width = maxi.width / 2;
+			maxi.x = monitor_geometry.x;
 			ret = maxi;
 			
 		} else if(cursor_rect.x > (maxi.x + maxi.width - edge_zone_width) && cursor_rect.x <= (maxi.x + maxi.width)){
