@@ -953,7 +953,7 @@ const DefaultTilingStrategy = function(ext){
 		var ret = null;
 		var edge_zone_width = DefaultTilingStrategy.EDGE_ZONE_WIDTH;	
 
-		if(cursor_rect.y < main_panel_rect.height){
+		if(cursor_rect.y >= monitor_geometry.y && cursor_rect.y < monitor_geometry.y + main_panel_rect.height){
 		
 			ret = maxi;
 		
