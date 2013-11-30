@@ -55,7 +55,7 @@ Workspace.prototype = {
 	
 	get_bounds: function(win){
 		var ret = null;
-		var monitor = win.get_monitor();
+		var monitor = global.screen.get_current_monitor();
 		if(this.bounds[monitor]) ret = this.bounds[monitor];
 		else {
 			if(!win) return null;
