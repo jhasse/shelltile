@@ -73,7 +73,7 @@ const Ext = function Ext(){
 			group.save_bounds();
 		}
 		
-		if(this.log.is_debug()) this.log.debug("maximize_grouped_windows");
+		//if(this.log.is_debug()) this.log.debug("maximize_grouped_windows");
 	}
 	
 	self.resize_grouped_windows = function(){
@@ -86,7 +86,7 @@ const Ext = function Ext(){
 			group.reposition();
 		}
 		
-		if(this.log.is_debug()) this.log.debug("resize_grouped_windows");		
+		//if(this.log.is_debug()) this.log.debug("resize_grouped_windows");		
 		
 	}
 	
@@ -96,7 +96,7 @@ const Ext = function Ext(){
 		self.keep_maximized = self.settings.get_boolean("keep-group-maximized");
 		
 		let gap = self.settings.get_int("gap-between-windows");
-		if(this.log.is_debug()) this.log.debug("gap: " + gap + " " + self.strategy.DIVISION_SIZE);
+		//if(this.log.is_debug()) this.log.debug("gap: " + gap + " " + self.strategy.DIVISION_SIZE);
 		
 		if(self.gap_between_windows === undefined || gap != self.gap_between_windows){
 			self.gap_between_windows = gap;
@@ -180,7 +180,7 @@ const Ext = function Ext(){
 			return null;
 		}
 		var id = Window.get_id(meta_window);
-		if(this.log.is_debug()) this.log.debug("get_window " + id);
+		//if(this.log.is_debug()) this.log.debug("get_window " + id);
 		var win = self.windows[id];
 		if(typeof(win) == "undefined" && create_if_necessary) {
 			win = self.windows[id] = new Window(meta_window, self);
@@ -229,7 +229,7 @@ const Ext = function Ext(){
 
 	self.enable = function(){
 	    try {
-	    	if(self.log.is_debug()) self.log.debug("enabling ShellTile");
+	    	//if(self.log.is_debug()) self.log.debug("enabling ShellTile");
 	
             self.enabled = true;
             self.screen = global.screen;
@@ -248,7 +248,7 @@ const Ext = function Ext(){
 
             OverviewModifier.register(self);
             
-            if(self.log.is_debug()) self.log.debug("ShellTile enabled");
+            //if(self.log.is_debug()) self.log.debug("ShellTile enabled");
         
 	    } catch(e){
             if(self.log.is_error()) self.log.error(e);    
@@ -278,7 +278,7 @@ const Ext = function Ext(){
             
 		    self.disconnect_tracked_signals(self);
 		    
-            if(self.log.is_debug()) self.log.debug("ShellTile disabled");
+            //if(self.log.is_debug()) self.log.debug("ShellTile disabled");
 
         } catch(e){
         	if(self.log.is_error()) self.log.error(e);    

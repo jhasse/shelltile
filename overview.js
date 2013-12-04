@@ -30,7 +30,7 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 			
 			var myWindow = this.extension.get_window(clone_meta_window);
 			var windowId = myWindow.id();
-			if(this.log.is_debug()) this.log.debug(myWindow);
+			//if(this.log.is_debug()) this.log.debug(myWindow);
 			clones1.push(windowId);
 
 			if(myWindow.group){
@@ -104,8 +104,8 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 			let groupedWeight = 1.5;
 			let numberOfWindows = this.groupedSlots.length + this.singleSlots.length;
 			let slots = [];
-			if(this.log.is_debug()) this.log.debug("this.clones.length : " + this.clones.length);	
-			if(this.log.is_debug()) this.log.debug("numberOfWindows : " + numberOfWindows);	
+			//if(this.log.is_debug()) this.log.debug("this.clones.length : " + this.clones.length);	
+			//if(this.log.is_debug()) this.log.debug("numberOfWindows : " + numberOfWindows);	
 			
 	        let gridWidth = Math.ceil(Math.sqrt(numberOfWindows));
 	        let gridHeight = Math.ceil(numberOfWindows / gridWidth);			
@@ -115,12 +115,12 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 	        	gridWidthSub = gridWidth - gridWidthRest;
 	        }
 
-			if(this.log.is_debug()) this.log.debug("gridWidth : " + gridWidth);	
-			if(this.log.is_debug()) this.log.debug("gridHeight : " + gridHeight);
-			if(this.log.is_debug()) this.log.debug("gridWidthRest : " + gridWidthRest);
+			//if(this.log.is_debug()) this.log.debug("gridWidth : " + gridWidth);	
+			//if(this.log.is_debug()) this.log.debug("gridHeight : " + gridHeight);
+			//if(this.log.is_debug()) this.log.debug("gridWidthRest : " + gridWidthRest);
 			
-			if(this.log.is_debug()) this.log.debug("this.groupedSlots.length : " + this.groupedSlots.length);
-			if(this.log.is_debug()) this.log.debug("this.groupedSlots.length : " +  this.singleSlots.length);
+			//if(this.log.is_debug()) this.log.debug("this.groupedSlots.length : " + this.groupedSlots.length);
+			//if(this.log.is_debug()) this.log.debug("this.groupedSlots.length : " +  this.singleSlots.length);
 	        
 	        var col=0;
 	        var row=0;
@@ -145,7 +145,7 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 			        yCenter = currentHeight/ 2. + row;
 	        		
 			        slot = [xCenter, yCenter, fractionW, fractionH];
-			        if(log.is_debug()) log.debug("slot : " + slot);
+			        //if(log.is_debug()) log.debug("slot : " + slot);
 			        ret.push(slot);
 			        groupSlot[groupedSlot] = slot;
 			        
@@ -170,8 +170,8 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 	        	singleSlots = this.singleSlots.slice(currentSingle, currentSingle + (gridWidth1 - groupedSlots.length));
 	        	currentSingle += singleSlots.length;
 	        	
-	        	 if(log.is_debug()) log.debug("groupedSlots : " + groupedSlots);
-	        	 if(log.is_debug()) log.debug("singleSlots : " + singleSlots);
+	        	 //if(log.is_debug()) log.debug("groupedSlots : " + groupedSlots);
+	        	 //if(log.is_debug()) log.debug("singleSlots : " + singleSlots);
 	        	
 	        	currentHeight = singleWeight / gridHeight;
 	        	currentWidth = singleWeight / gridWidth1;
@@ -206,7 +206,7 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 	        	for(let j=0; j<ret.length; j++){
 	        		
 	        		let slot1 = ret[j];
-	        		if(log.is_debug()) log.debug("slot1 : " + slot1);
+	        		//if(log.is_debug()) log.debug("slot1 : " + slot1);
 	        	}
 	        	
 	        	return ret;
