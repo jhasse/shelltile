@@ -951,19 +951,23 @@ const DefaultTilingStrategy = function(ext){
 		var monitor_geometry = global.screen.get_monitor_geometry(monitor);
 		var maxi = win.get_maximized_bounds();
 		var ret = null;
-		var edge_zone_width = DefaultTilingStrategy.EDGE_ZONE_WIDTH;	
-
-		if(cursor_rect.y >= monitor_geometry.y && cursor_rect.y < monitor_geometry.y + main_panel_rect.height){
+		var edge_zone_width = DefaultTilingStrategy.EDGE_ZONE_WIDTH;
+		
+		var top_zone = new Meta.Rectangle({ x: monitor_geometry.x, y: monitor_geometry.y, width: monitor_geometry.width, height: main_panel_rect.height});
+		var left_zone = new Meta.Rectangle({ x: monitor_geometry.x, y: monitor_geometry.y, width: edge_zone_width, height: monitor_geometry.height});
+		var right_zone = new Meta.Rectangle({ x: monitor_geometry.x + monitor_geometry.width - edge_zone_width, y: monitor_geometry.y, width: edge_zone_width, height: monitor_geometry.height});
+		
+		if(top_zone.contains_rect(cursor_rect)){
 		
 			ret = maxi;
 		
-		} else if(cursor_rect.x >=monitor_geometry.x && cursor_rect.x < monitor_geometry.x + edge_zone_width){
+		} else if(left_zone.contains_rect(cursor_rect)){
 			
 			maxi.width = maxi.width / 2;
 			maxi.x = monitor_geometry.x;
 			ret = maxi;
 			
-		} else if(cursor_rect.x > (maxi.x + maxi.width - edge_zone_width) && cursor_rect.x <= (maxi.x + maxi.width)){
+		} else if(right_zone.contains_rect(cursor_rect)){
 				
 			maxi.width = maxi.width / 2;
 			maxi.x += maxi.width;
