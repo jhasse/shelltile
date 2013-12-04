@@ -16,7 +16,6 @@ Workspace.prototype = {
 		this.meta_workspace = meta_workspace;
 		this.extension = ext;
 		this.strategy = strategy
-		this.bounds = {};
 		
 		//if(this.log.is_debug()) this.log.debug("this._shellwm " + this._shellwm);
 
@@ -47,28 +46,6 @@ Workspace.prototype = {
 
 	toString: function() {
 		return "<# Workspace at idx " + this.meta_workspace.index() + ">";
-	},
-	
-	update_bounds: function(monitor, bounds){
-		this.bounds[monitor] = bounds;
-	},
-	
-	get_bounds: function(win){
-		var ret = null;
-		var monitor = global.screen.get_current_monitor();
-		if(this.bounds[monitor]) ret = this.bounds[monitor];
-		else {
-			if(!win) return null;
-
-			// hack waiting for a different solution
-			win.fake_maximizing = true;
-			win.maximize()
-			ret = this.bounds[monitor];
-			win.unmaximize();
-			delete win.fake_maximizing;
-
-		}
-		return new Meta.Rectangle({ x: ret.x, y: ret.y, width: ret.width, height: ret.height});
 	},
 	
 	connect_window: function(win){
