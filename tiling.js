@@ -887,7 +887,7 @@ const DefaultTilingStrategy = function(ext){
 		
 		var cursor_rect = this.get_cursor_rect();
 		var cursor_monitor = this.get_cursor_monitor();
-		this.log.debug("cursor_monitor: " + cursor_monitor);
+		//if(this.log.is_debug()) this.log.debug("cursor_monitor: " + cursor_monitor);
 
 		var topmost = undefined;
 		var current_group = undefined;
@@ -896,7 +896,7 @@ const DefaultTilingStrategy = function(ext){
 		for(let i=workspace_windows.length-1; i>=0; i--){
 			let win1 =  workspace_windows[i];
 			let win1_monitor = win1.get_monitor();
-			this.log.debug("win1_monitor: " + win1_monitor);
+			//if(this.log.is_debug()) this.log.debug("win1_monitor: " + win1_monitor);
 			if(win1_monitor != cursor_monitor) continue;
 			
 			win1 = this.extension.get_window(win1, true);
