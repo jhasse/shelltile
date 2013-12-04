@@ -46,9 +46,6 @@ Window.prototype = {
 		var maximized_bounds = this.outer_rect();
 		var monitor = this.get_monitor();
 		var works = this.get_workspace();
-		if(works && maximized_bounds){
-			 works.update_bounds(monitor, maximized_bounds);
-		}
 	}
 	
 	,unmaximize: function(){
@@ -207,9 +204,9 @@ Window.prototype = {
 	}
 
 	,get_maximized_bounds: function(){
-		var works = this.get_workspace();
-		var ret = works.get_bounds(this);
-		return ret;	
+		var monitor = global.screen.get_current_monitor();
+		var ret = global.gdk_screen.get_monitor_workarea(monitor);
+		return new Meta.Rectangle({ x: ret.x, y: ret.y, width: ret.width, height: ret.height});
 	}
 	
 	,maximize_size: function(){
