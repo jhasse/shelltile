@@ -29,6 +29,8 @@ const Ext = function Ext(){
 	self.windows = {};
 	self.strategy = new DefaultTilingStrategy(self);
 	
+	self._shellwm =  global.window_manager;
+	
 	self.connect_and_track = function(owner, subject, name, cb) {
 		if (!owner.hasOwnProperty('_bound_signals')) {
 			owner._bound_signals = [];
@@ -109,7 +111,6 @@ const Ext = function Ext(){
 		}
 		
 	};
-	self.load_settings();
 	
 	self.current_display = function current_display() {
 		return global.screen.get_display();
@@ -234,20 +235,32 @@ const Ext = function Ext(){
             self.enabled = true;
             self.screen = global.screen;
             let screen = self.screen;
-            
-            self._init_workspaces();
-            
+
             var edge_tiling = self.gnome_settings.get_boolean("edge-tiling");
             if(edge_tiling === true){
             	self.gnome_settings.set_boolean("edge-tiling", false);
             }
-
-            self.connect_and_track(self, self.gnome_settings, 'changed', Lang.bind(this, this.on_settings_changed));
-            self.connect_and_track(self, self.settings, 'changed', Lang.bind(this, this.on_settings_changed));
-    		self.connect_and_track(self, self.screen, 'window-entered-monitor', Lang.bind(this, this.window_entered_monitor));
-
-            OverviewModifier.register(self);
             
+            self.load_settings();
+            
+            if(!self.initialized){
+            	self.initialized = true;
+	            self._init_workspaces();		
+	            
+	            var on_window_maximize = this.break_loops(this.on_window_maximize);
+	    		var on_window_unmaximize = this.break_loops(this.on_window_unmaximize);
+	    		var on_window_minimize = this.break_loops(this.on_window_minimize);
+	
+	            self.connect_and_track(self, self.gnome_settings, 'changed', Lang.bind(this, this.on_settings_changed));
+	            self.connect_and_track(self, self.settings, 'changed', Lang.bind(this, this.on_settings_changed));
+	    		self.connect_and_track(self, self.screen, 'window-entered-monitor', Lang.bind(this, this.window_entered_monitor));
+	    		
+	    		self.connect_and_track(self, self._shellwm, 'maximize', Lang.bind(self, on_window_maximize));
+	    		self.connect_and_track(self, self._shellwm, 'unmaximize', Lang.bind(self, on_window_unmaximize));
+	    		self.connect_and_track(self, self._shellwm, 'minimize', Lang.bind(self, on_window_minimize));    		
+	
+	            OverviewModifier.register(self);
+            }
             //if(self.log.is_debug()) self.log.debug("ShellTile enabled");
         
 	    } catch(e){
@@ -256,12 +269,14 @@ const Ext = function Ext(){
 	}
 	
 	self.window_entered_monitor = function(metaScreen, monitorIndex, metaWin){
+		if(!this.enabled) return;
 		
 		var win = self.get_window(metaWin);
 		win.on_move_to_monitor(metaScreen, monitorIndex);
 	}
 	
 	self.on_settings_changed = function(){
+		if(!this.enabled) return;
 		
 		var edge_tiling = self.gnome_settings.get_boolean("edge-tiling");
 		if(edge_tiling && self.enabled){
@@ -270,13 +285,195 @@ const Ext = function Ext(){
 		
 		self.load_settings();
 	}
+	
+	self.on_window_minimize = function(shellwm, actor) {
+		if(!this.enabled) return;
+		
+		var win = actor.get_meta_window();
+		win = this.get_window(win);
+		if(this.strategy && this.strategy.on_window_minimize) this.strategy.on_window_minimize(win);
+		
+		//if(this.log.is_debug()) this.log.debug("window maximized " + win);
+	}
+	
+	self.on_window_maximize = function(shellwm, actor) {
+		
+		//if(this.log.is_debug()) this.log.debug([shellwm, actor, actor.get_workspace()]);
+		
+		var win = actor.get_meta_window();
+		win = this.get_window(win);
+
+		if(!this.enabled){
+			
+			if(win.group) win.group.detach(win, true);
+			return;
+		}		
+		
+		if(this.strategy && this.strategy.on_window_maximize) this.strategy.on_window_maximize(win);
+		//if(this.log.is_debug()) this.log.debug("window maximized " + win);
+	}
+	
+	self.on_window_unmaximize = function(shellwm, actor) {
+		if(!this.enabled) return;
+		
+		var win = actor.get_meta_window();
+		win = this.get_window(win);
+		
+		if(this.strategy && this.strategy.on_window_unmaximize) this.strategy.on_window_unmaximize(win);
+		//if(this.log.is_debug()) this.log.debug("window unmaximized " + win);
+	}
+	
+	self.on_workspace_changed = function(win, obj){
+		win = this.get_window(win);
+		
+		if(!this.enabled){
+			
+			if(win.group) win.group.detach(win, true);
+			return;
+		}
+		
+		var workspace = win.get_workspace();
+		if(this.log.is_debug()) this.log.debug("workspace_changed");
+		win.on_move_to_workspace(workspace);
+	}
+	
+	self.on_window_raised = function(win){
+		if(!this.enabled) return;
+		
+		win = this.get_window(win);
+		if(this.strategy && this.strategy.on_window_raised) this.strategy.on_window_raised(win);
+		//if(this.log.is_debug()) this.log.debug("window raised " + win);
+	}
+	
+	self.on_window_move = function(win) {
+		if(!this.enabled) return;
+		
+		if(this.strategy && this.strategy.on_window_move) this.strategy.on_window_move(win);
+		//if(this.log.is_debug()) this.log.debug("window move " + win.xpos() + "," + win.ypos());
+	}
+	
+	self.on_window_resize = function(win) {
+		if(!this.enabled) return;
+		
+		if(this.strategy && this.strategy.on_window_resize) this.strategy.on_window_resize(win);
+		//if(this.log.is_debug()) this.log.debug("window resize");
+	}
+	
+	self.on_window_moved = function(win) {
+		if(!this.enabled) return;
+		
+		if(this.strategy && this.strategy.on_window_moved) this.strategy.on_window_moved(win);
+		//if(this.log.is_debug()) this.log.debug("window moved");
+	}
+	
+	self.on_window_resized = function(win) {
+		if(!this.enabled) return;
+		
+		if(this.strategy && this.strategy.on_window_resized) this.strategy.on_window_resized(win);
+		//if(this.log.is_debug()) this.log.debug("window resized");
+	}	
+
+	self.break_loops = function(func){
+		return function(){
+			if(this.calling === true) return;
+			
+			this.calling = true;
+			try {
+				func.apply(this, arguments);
+			} finally {
+				this.calling = false;
+			}
+		}
+	}	
+	
+	self.bind_to_window_change = function(win, actor){
+		return Lang.bind(this, function(event_name, relevant_grabs, cb, cb_final) {
+	
+			let change_pending = false;
+			
+			let signal_handler_idle = Lang.bind(this, function() {
+				let grab_op = global.screen.get_display().get_grab_op();
+	
+				if(relevant_grabs.indexOf(grab_op) == -1) {
+	
+					if(grab_op == Meta.GrabOp.NONE && change_pending) {
+						change_pending = false;
+						if(cb_final) cb_final(win);
+					}
+	
+				} else {
+					// try again
+					Mainloop.idle_add(signal_handler_idle);
+				}				
+				return false;
+			});
+			
+			let signal_handler_changed = Lang.bind(this, function() {
+				let grab_op = global.screen.get_display().get_grab_op();
+				if(relevant_grabs.indexOf(grab_op) != -1) {
+	
+					change_pending = true;
+					if(cb) cb(win);
+					Mainloop.idle_add(signal_handler_idle);
+	
+				}
+				return false;
+			});
+			this.connect_and_track(this, actor, event_name + '-changed', signal_handler_changed);
+		});
+	}	
+	
+	self.disconnect_window = function(win){
+		//if(this.log.is_debug()) this.log.debug("disconnect_window: " + win);
+		var actor = win.get_actor();
+		if(actor) this.disconnect_tracked_signals(this, actor);
+		this.disconnect_tracked_signals(this, win.meta_window);
+		delete win._connected;
+	}
+	
+	self.connect_window = function(win){
+		if(!win.can_be_tiled() || win._connected) {
+			return;
+		}
+		
+		//if(this.log.is_debug()) this.log.debug("connect_window: " + win);
+		
+		var actor = win.get_actor();
+		var meta_window = win.meta_window;
+		let bind_to_window_change = this.bind_to_window_change(win, actor);
+
+		let move_ops = [Meta.GrabOp.MOVING];
+		let resize_ops = [
+				Meta.GrabOp.RESIZING_SE,
+				Meta.GrabOp.RESIZING_S,
+				Meta.GrabOp.RESIZING_SW,
+				Meta.GrabOp.RESIZING_N,
+				Meta.GrabOp.RESIZING_NE,
+				Meta.GrabOp.RESIZING_NW,
+				Meta.GrabOp.RESIZING_W,
+				Meta.GrabOp.RESIZING_E
+		];
+		var on_window_move = this.break_loops(this.on_window_move);
+		var on_window_moved = this.break_loops(this.on_window_moved);
+		var on_window_resize = this.break_loops(this.on_window_resize);
+		var on_window_resized = this.break_loops(this.on_window_resized);
+		var on_window_raised = this.break_loops(this.on_window_raised);
+		var on_workspace_changed = this.break_loops(this.on_workspace_changed);
+		var on_key_press = this.on_key_press;
+		var on_key_release = this.on_key_release;
+		
+		
+		bind_to_window_change('position', move_ops, Lang.bind(this, on_window_move),  Lang.bind(this, on_window_moved));
+		bind_to_window_change('size',     resize_ops, Lang.bind(this, on_window_resize), Lang.bind(this, on_window_resized));
+		this.connect_and_track(this, meta_window, 'raised', Lang.bind(this, on_window_raised));
+		this.connect_and_track(this, meta_window, "workspace_changed", Lang.bind(this, on_workspace_changed));
+		win._connected = true;
+	}	
 
 	self.disable = function(){
         try {        
             self.enabled = false;
             self.gnome_settings.set_boolean("edge-tiling", true);
-            
-		    self.disconnect_tracked_signals(self);
 		    
             //if(self.log.is_debug()) self.log.debug("ShellTile disabled");
 
