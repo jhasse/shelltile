@@ -250,10 +250,12 @@ const Ext = function Ext(){
 	            var on_window_maximize = this.break_loops(this.on_window_maximize);
 	    		var on_window_unmaximize = this.break_loops(this.on_window_unmaximize);
 	    		var on_window_minimize = this.break_loops(this.on_window_minimize);
+	    		var on_window_create = this.break_loops(this.on_window_create);
 	
 	            self.connect_and_track(self, self.gnome_settings, 'changed', Lang.bind(this, this.on_settings_changed));
 	            self.connect_and_track(self, self.settings, 'changed', Lang.bind(this, this.on_settings_changed));
 	    		self.connect_and_track(self, self.screen, 'window-entered-monitor', Lang.bind(this, this.window_entered_monitor));
+	    		self.connect_and_track(self, global.display, 'window_created', Lang.bind(this, on_window_create));
 	    		
 	    		self.connect_and_track(self, self._shellwm, 'maximize', Lang.bind(self, on_window_maximize));
 	    		self.connect_and_track(self, self._shellwm, 'unmaximize', Lang.bind(self, on_window_unmaximize));
@@ -266,6 +268,50 @@ const Ext = function Ext(){
 	    } catch(e){
             if(self.log.is_error()) self.log.error(e);    
         }
+	}
+	
+	self.on_window_create = function(display, meta_window, second_try){
+		if(this.log.is_debug()) this.log.debug("window_created: " + meta_window);
+		let actor = meta_window.get_compositor_private();
+		if(!actor){
+			if(!second_try){
+				Mainloop.idle_add(Lang.bind(this, function () {
+					this.on_window_create(display, meta_window, true);
+					return false;
+				}));
+			}
+			return;
+		}		
+		
+		let existing = true;
+		var win = this.get_window(meta_window, false);
+		if(!win){
+			existing = false;
+			win = this.get_window(meta_window);
+		}
+		
+		if(win.can_be_tiled()){
+			if(this.strategy && this.strategy.on_window_create) this.strategy.on_window_create(win, existing);
+			this.connect_window(win, actor);
+		}		
+	}
+	
+	self.on_window_remove = function(win) {
+		if(this.log.is_debug()) this.log.debug("window removed " + win);
+		win = this.get_window(win);
+		win.marked_for_remove = true;
+		
+		Mainloop.idle_add(Lang.bind(this, function () {
+			
+			if(win.marked_for_remove){
+				if(this.strategy && this.strategy.on_window_remove) this.strategy.on_window_remove(win);
+				this.disconnect_window(win);
+				this.remove_window(win.meta_window);				
+			}
+			return false;
+		}));
+		
+		//if(this.log.is_debug()) this.log.debug("window removed " + win);
 	}
 	
 	self.window_entered_monitor = function(metaScreen, monitorIndex, metaWin){
@@ -441,6 +487,9 @@ const Ext = function Ext(){
 		var actor = win.get_actor();
 		var meta_window = win.meta_window;
 		let bind_to_window_change = this.bind_to_window_change(win, actor);
+		
+		var on_window_remove = this.break_loops(this.on_window_remove);
+		this.connect_and_track(this, meta_window, 'unmanaged', Lang.bind(this, on_window_remove));
 
 		let move_ops = [Meta.GrabOp.MOVING];
 		let resize_ops = [
