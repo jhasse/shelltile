@@ -104,13 +104,7 @@ Window.prototype = {
 	}
 	
 	,move_to_workspace: function(workspace){
-		var current = this.get_workspace();
-		if(current){
-			current.disconnect_window(this);			
-		}
-		
 		this.meta_window.change_workspace(workspace.meta_workspace);
-		workspace.connect_window(this);
 		delete this.marked_for_remove;
 	}
 	
