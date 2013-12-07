@@ -271,7 +271,7 @@ const Ext = function Ext(){
 	}
 	
 	self.on_window_create = function(display, meta_window, second_try){
-		if(this.log.is_debug()) this.log.debug("window_created: " + meta_window);
+		//if(this.log.is_debug()) this.log.debug("window_created: " + meta_window);
 		let actor = meta_window.get_compositor_private();
 		if(!actor){
 			if(!second_try){
@@ -297,7 +297,7 @@ const Ext = function Ext(){
 	}
 	
 	self.on_window_remove = function(win) {
-		if(this.log.is_debug()) this.log.debug("window removed " + win);
+		//if(this.log.is_debug()) this.log.debug("window removed " + win);
 		win = this.get_window(win);
 		win.marked_for_remove = true;
 		
@@ -379,7 +379,7 @@ const Ext = function Ext(){
 		}
 		
 		var workspace = win.get_workspace();
-		if(this.log.is_debug()) this.log.debug("workspace_changed");
+		//if(this.log.is_debug()) this.log.debug("workspace_changed");
 		win.on_move_to_workspace(workspace);
 	}
 	
