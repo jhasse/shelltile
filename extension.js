@@ -458,9 +458,11 @@ const Ext = function Ext(){
 				let grab_op = global.screen.get_display().get_grab_op();
 				if(relevant_grabs.indexOf(grab_op) != -1) {
 	
-					change_pending = true;
 					if(cb) cb(win);
-					Mainloop.idle_add(signal_handler_idle);
+					if(!change_pending){
+						Mainloop.idle_add(signal_handler_idle);
+					}
+					change_pending = true;
 	
 				}
 				return false;
