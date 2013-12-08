@@ -591,8 +591,10 @@ const DefaultTilingStrategy = function(ext){
 		
 			} else if(win.group && this.is_ctrl_pressed()){
 			
+				this.extension._automatic_change = true;
 				win.group.detach(win);
 				win.raise();
+				delete this.extension._automatic_change;				
 				
 			}
 		
