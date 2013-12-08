@@ -456,7 +456,7 @@ const Ext = function Ext(){
 			
 			let signal_handler_changed = Lang.bind(this, function() {
 				let grab_op = global.screen.get_display().get_grab_op();
-				if(relevant_grabs.indexOf(grab_op) != -1) {
+				if(!this._automatic_change && relevant_grabs.indexOf(grab_op) != -1) {
 	
 					if(cb) cb(win);
 					if(!change_pending){
