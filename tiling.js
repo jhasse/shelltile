@@ -517,6 +517,16 @@ const WindowGroup = function(first, second, type, splitPercent){
 		
 		return new Meta.Rectangle({ x: preview_x, y: preview_y, width: preview_width, height: preview_height});
 	}
+	
+	this.top_left_window = function(){
+		if(this.type == WindowGroup.HORIZONTAL_GROUP){
+			if(this.first.top_left_window) return this.first.top_left_window();
+			else return this.first;
+		} else {
+			if(this.first.top_left_window) return this.first.top_left_window();
+			else return this.first;
+		}
+	}
 }
 WindowGroup.HORIZONTAL_GROUP = "horizontal";
 WindowGroup.VERTICAL_GROUP = "vertical";
