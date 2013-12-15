@@ -8,21 +8,18 @@ const Meta = imports.gi.Meta;
 const GSWorkspace = imports.ui.workspace.Workspace;
 const WindowGroup = Extension.imports.tiling.WindowGroup;
 
-const OverviewModifier36 = function(gsWorkspace, extension){
+
+const OverviewModifierBase = function(){
 	
-	this.gsWorkspace = gsWorkspace;
-	this.extension = extension;
-	this.log = Log.getLogger("OverviewModifier36");
-	
-	this.computeNumWindowSlots = function(){
-		let clones = this.gsWorkspace._windows.slice();
-		
+	this.computeGroupData = function(clones){
 		let groupOrder = [];
 		let groupGeometry = {};
 		let groupedSlots = [];
 		let singleSlots = [];
 		let cloneGroup = {};
+		let cloneGroupObject = {};
 		let clones1 = [];
+		let idClone = {};
 		
 		for(var i=0; i<clones.length; i++){
 			var clone = clones[i];
@@ -32,10 +29,13 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 			var windowId = myWindow.id();
 			//if(this.log.is_debug()) this.log.debug(myWindow);
 			clones1.push(windowId);
+			idClone[windowId] = clone;
 
 			if(myWindow.group){
 				var topmost_group = myWindow.group.get_topmost_group();
 				var topmost_group_id = topmost_group.id();
+				cloneGroupObject[topmost_group_id] = topmost_group;
+				
 				if(groupOrder.indexOf(topmost_group_id) < 0){
 										
 					groupOrder.push(topmost_group_id);
@@ -61,10 +61,99 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 		this.groupedSlots = groupedSlots;
 		this.singleSlots = singleSlots;
 		this.cloneGroup = cloneGroup;
+		this.cloneGroupObject = cloneGroupObject;
 		this.clones = clones1;
-		this.groupWindowLayouts = {}
+		this.idClone = idClone;
+		this.groupWindowLayouts = {}		
 		
-		return groupOrder.length;
+	}
+
+	this.calculateGroupWindowLayouts =  function(topmost_group, scaled_group_rect, scale){
+		
+		var ret = {};
+		var log = this.log;
+		var scaled_gap = topmost_group.gap_between_windows() * scale;
+		
+		var calculateWindowLayout = function(group, rect){
+			
+			let first = group.first;
+			let second = group.second;
+			let x,y,width,height,x1,y1;
+			
+			if(group.type == WindowGroup.HORIZONTAL_GROUP){
+				
+				x = rect.x;
+				y = rect.y;
+				width = rect.width * group.splitPercent;
+				height = rect.height;
+				
+				var first_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+				
+				x = x + width + scaled_gap;
+				width = rect.x + rect.width - x;
+				
+				var second_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+				
+			} else {
+				
+				x = rect.x;
+				y = rect.y;
+				width = rect.width;
+				height = rect.height * group.splitPercent;
+				
+				var first_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+				
+				y = y + height + scaled_gap;
+				height = rect.y + rect.height - y;
+				
+				var second_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+				
+			}
+			
+			
+			if(first.first){
+				calculateWindowLayout(first, first_scaled);		
+			} else {
+				
+				x1 = first_scaled.x;
+				y1 = first_scaled.y;
+				ret[first.id()] = [x1,y1,scale];
+				
+			}
+			
+			if(second.first){
+			
+				calculateWindowLayout(second, second_scaled);					
+			
+			} else {
+				
+				x1 = second_scaled.x;
+				y1 = second_scaled.y;
+				
+				ret[second.id()] = [x1,y1,scale];			
+				
+			}
+			
+			
+		}
+		calculateWindowLayout(topmost_group, scaled_group_rect);
+		
+		return ret;
+	}	
+	
+}
+
+const OverviewModifier36 = function(gsWorkspace, extension){
+	
+	this.gsWorkspace = gsWorkspace;
+	this.extension = extension;
+	this.log = Log.getLogger("OverviewModifier36");
+	
+	this.computeNumWindowSlots = function(){
+		let clones = this.gsWorkspace._windows.slice();
+		
+		this.computeGroupData(clones);		
+		return this.groupOrder.length;
 	}
 	
 	this._prevComputeWindowLayout = function(prevComputeWindowLayout, outer_rect, workspace, slot){
@@ -335,80 +424,120 @@ const OverviewModifier36 = function(gsWorkspace, extension){
         
 	};
 	
-	this.calculateGroupWindowLayouts =  function(topmost_group, scaled_group_rect, scale){
+}
+OverviewModifier36.prototype = new OverviewModifierBase();
+
+const OverviewModifier38 = function(extension){
+	
+	this.extension = extension;
+	this.log = Log.getLogger("OverviewModifier38");
+	
+	this.computeWindowSlots = function(windows, prev){
 		
-		var ret = {};
-		var log = this.log;
-		var scaled_gap = topmost_group.gap_between_windows() * scale;
+		this.computeGroupData(windows);
 		
-		var calculateWindowLayout = function(group, rect){
+		var windows1 = [];
+		var windowIds1 = [];
+		
+		//this.log.debug(this.groupedSlots);
+
+		for(var i=0; i<this.singleSlots.length; i++){
 			
-			let first = group.first;
-			let second = group.second;
-			let x,y,width,height,x1,y1;
+			var singleSlot = this.singleSlots[i];
+			//if(this.log.is_debug()) this.log.debug("singleSlot: " + singleSlot);
+
+			var clone = this.idClone[singleSlot];
+
+			//if(this.log.is_debug()) this.log.debug("clone.actor.x" + clone.actor.x);
+			//if(this.log.is_debug()) this.log.debug("clone.actor.y" + clone.actor.y);
+			//if(this.log.is_debug()) this.log.debug("clone.actor.width" + clone.actor.width);
+			//if(this.log.is_debug()) this.log.debug("clone.actor.height" + clone.actor.height);
 			
-			if(group.type == WindowGroup.HORIZONTAL_GROUP){
+			windows1.push(clone);
+			windowIds1.push(singleSlot);
+		}
+
+		for(var i=0; i<this.groupedSlots.length; i++){
+			
+			var groupedSlot = this.groupedSlots[i];
+			var clone = {actor: {}};
+			var cloneGroupObject = this.cloneGroupObject[groupedSlot];
+			var top_left_window = cloneGroupObject.top_left_window();
+			
+			var geometry = this.groupGeometry[groupedSlot];
+			clone.actor.x = geometry.x;
+			clone.actor.y = geometry.y;
+			clone.actor.width = geometry.width;
+			clone.actor.height = geometry.height;
+			
+			clone.metaWindow = top_left_window.meta_window;			
+			clone.realWindow = top_left_window.get_actor();
+			
+			windows1.push(clone);
+			windowIds1.push(groupedSlot);
+		}
+
+		var ret = prev(windows1);
+		if(this.log.is_debug()) this.log.debug("ret" + ret);
+		
+		var idRet = {};
+		for(var i=0; i<windowIds1.length; i++){
+			idRet[windowIds1[i]] = ret[i];			
+		}
+		
+		var ret1 = [];
+		
+		for(var i=0; i<this.clones.length; i++){
+			
+			var cloneId = this.clones[i];
+			var clone = this.idClone[cloneId];
+			var myWindow = this.extension.get_window(clone.metaWindow);
+			if(this.log.is_debug()) this.log.debug("cloneId" + cloneId);
+			if(this.log.is_debug()) this.log.debug("clone" + clone);
+			
+			var isGroup = this.cloneGroup[cloneId] != cloneId && myWindow.group;
+			
+			if(isGroup){
+				var groupId = this.cloneGroup[cloneId];
+				var ret2 = idRet[groupId].slice();
+				this.log.debug(ret2);
 				
-				x = rect.x;
-				y = rect.y;
-				width = rect.width * group.splitPercent;
-				height = rect.height;
+				if(!this.groupWindowLayouts[groupId]){
+					
+					var groupGeometry = this.groupGeometry[groupId];
+					let [x, y, scale, clone] = ret2;
+					let width = groupGeometry.width * scale, height = groupGeometry.height * scale;
+					
+					var scaled_group_rect = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+					var topmost_group = myWindow.group.get_topmost_group();
+					
+					this.groupWindowLayouts[groupId] = this.calculateGroupWindowLayouts(topmost_group, scaled_group_rect, scale);
+					
+				}
 				
-				var first_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+				var groupWindowLayouts = this.groupWindowLayouts[groupId];
+				var windowLayout = groupWindowLayouts[cloneId];
 				
-				x = x + width + scaled_gap;
-				width = rect.x + rect.width - x;
-				
-				var second_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+				ret2[0] = windowLayout[0];
+				ret2[1] = windowLayout[1];
+				ret2[3] = clone;
 				
 			} else {
-				
-				x = rect.x;
-				y = rect.y;
-				width = rect.width;
-				height = rect.height * group.splitPercent;
-				
-				var first_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
-				
-				y = y + height + scaled_gap;
-				height = rect.y + rect.height - y;
-				
-				var second_scaled = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
-				
+			
+				var ret2 = idRet[cloneId].slice();
+			
 			}
 			
-			
-			if(first.first){
-				calculateWindowLayout(first, first_scaled);		
-			} else {
-				
-				x1 = first_scaled.x;
-				y1 = first_scaled.y;
-				ret[first.id()] = [x1,y1,scale];
-				
-			}
-			
-			if(second.first){
-			
-				calculateWindowLayout(second, second_scaled);					
-			
-			} else {
-				
-				x1 = second_scaled.x;
-				y1 = second_scaled.y;
-				
-				ret[second.id()] = [x1,y1,scale];			
-				
-			}
-			
+			ret1.push(ret2);
 			
 		}
-		calculateWindowLayout(topmost_group, scaled_group_rect);
 		
-		return ret;
+		return ret1;
+		
 	}
+	
 }
-
+OverviewModifier38.prototype = new OverviewModifierBase();
 
 const OverviewModifier = function(){};
 
@@ -427,6 +556,9 @@ OverviewModifier.register = function(extension){
 	version36 = version36 && prevComputeWindowLayout;
 	version36 = version36 && prevOrderWindowsByMotionAndStartup;
 	version36 = version36 && prevGetSlotGeometry;
+	
+	let version38 = Util.versionCompare(Config.PACKAGE_VERSION, "3.7") >= 0 && Util.versionCompare(Config.PACKAGE_VERSION, "3.9") < 0;
+	version38 = version38 && prevComputeAllWindowSlots;
 	
 	if(version36){
 	
@@ -468,6 +600,16 @@ OverviewModifier.register = function(extension){
 			if(!extension.enabled) return prev(slot);
 			
 			return this._shellTileOverviewModifier.getSlotGeometry(slot, this, prev);
+		}
+		
+	} else if(version38){
+		
+		GSWorkspace.prototype._computeAllWindowSlots = function(windows){
+			var prev = Lang.bind(this, prevComputeAllWindowSlots);
+			if(!extension.enabled) return prev(windows);
+			
+			this._shellTileOverviewModifier = new OverviewModifier38(extension);
+			return this._shellTileOverviewModifier.computeWindowSlots(windows, prev);
 		}
 		
 	}
