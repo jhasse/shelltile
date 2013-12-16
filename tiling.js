@@ -65,6 +65,10 @@ const WindowGroup = function(first, second, type, splitPercent){
 		this.save_bounds();
 	}
 	
+	this.is_maximized = function(){
+		return false;
+	}
+	
 	this.unmaximize = function(){
 		
 		if(this._last_bounds){
@@ -104,6 +108,9 @@ const WindowGroup = function(first, second, type, splitPercent){
 	this.outer_rect = function(){
 		var first_rect = this.first.outer_rect();
 		var second_rect = this.second.outer_rect();
+		if(this.first.is_maximized()) return second_rect;
+		else if(this.second.is_maximized()) return first_rect;
+		
 		var xleft = first_rect.x < second_rect.x ? first_rect.x : second_rect.x;
 		var yleft = first_rect.y < second_rect.y ? first_rect.y : second_rect.y;
 		
@@ -358,8 +365,8 @@ const WindowGroup = function(first, second, type, splitPercent){
 		if(this.group && ascending){
 			this.group.raise(true);
 		} else {
-			this.first.raise();
-			this.second.raise();
+			if(!this.first.is_maximized()) this.first.raise();
+			if(!this.second.is_maximized()) this.second.raise();
 		}
 	}
 	
@@ -380,9 +387,18 @@ const WindowGroup = function(first, second, type, splitPercent){
 		if(this.group && ascending){
 			this.group.minimize(true);
 		} else {	
-			this.first.minimize();
-			this.second.minimize();
+			if(!this.first.is_maximized()) this.first.minimize();
+			if(!this.second.is_maximized()) this.second.minimize();
 		}
+	}
+	
+	this.unminimize = function(ascending){
+		if(this.group && ascending){
+			this.group.unminimize(true);
+		} else {	
+			if(!this.first.is_maximized()) this.first.unminimize();
+			if(!this.second.is_maximized()) this.second.unminimize();
+		}		
 	}
 	
 	this.reposition = function(){
@@ -539,6 +555,7 @@ const DefaultTilingStrategy = function(ext){
 	this.log = Log.getLogger("DefaultTilingStrategy");
 	this.lastTime = null;
 	this.lastTimeCtrlPressed = null;
+	this.lastTimeShiftPressed = null;
 	
 	this.preview = new St.BoxLayout({style_class: 'grid-preview'});
 	this.preview.add_style_pseudo_class('activate');
@@ -559,6 +576,20 @@ const DefaultTilingStrategy = function(ext){
 		}
 		return ret;
 	}
+	
+	this.is_shift_pressed = function(){
+		let [x, y, mods] = global.get_pointer();
+		var ret = mods & Clutter.ModifierType.SHIFT_MASK;
+		if(ret){
+			this.lastTimeShiftPressed = new Date().getTime();
+		} else {
+			var currTime = new Date().getTime();
+			if(this.lastTimeShiftPressed && (currTime - this.lastTimeShiftPressed) < 500){
+				ret = true;
+			}
+		}
+		return ret;
+	}	
 	
 	this.on_window_move = function(win){
 		win.unmaximize();
@@ -709,22 +740,33 @@ const DefaultTilingStrategy = function(ext){
 	this.on_window_maximize = function(win){
 		if(win.group){
 			
-			if(this.is_ctrl_pressed() && !this.extension.keep_maximized){
+			var ctrl_pressed = this.is_ctrl_pressed();
+			
+			if(ctrl_pressed){
 				
-				var topmost_group = win.group.get_topmost_group();
-				win.unmaximize();
+				if(this.is_shift_pressed()){
+					
+					var topmost_group = win.group.get_topmost_group();
+					win.unmaximize();
+					topmost_group.switch_maximized();
 				
-				topmost_group.switch_maximized();
-				win.raise();
+				}
 				
 			} else {
-			
+				
 				win.group.detach(win);
 				if(this.extension.keep_maximized) win.maximize_size();
-				win.raise();
-			
+				
 			}
+			win.raise();
+			
 		}
+	}
+	
+	this.on_window_unmaximize = function(win){
+		if(win.group){
+			win.group.unminimize(true);
+		}				
 	}
 	
 	this.on_window_remove = function(win){
@@ -737,13 +779,13 @@ const DefaultTilingStrategy = function(ext){
 	}
 	
 	this.on_window_minimize = function(win){
-		if(win.group){
+		if(win.group && !win.is_maximized()){
 			win.group.minimize(true);			
 		}
 	}
 	
 	this.on_window_raised = function(win){
-		if(win.group){
+		if(win.group && !win.is_maximized()){
 			win.group.raise(true);
 			win.raise();
 		}

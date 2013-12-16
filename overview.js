@@ -31,7 +31,7 @@ const OverviewModifierBase = function(){
 			clones1.push(windowId);
 			idClone[windowId] = clone;
 
-			if(myWindow.group){
+			if(myWindow.group && !myWindow.is_maximized()){
 				var topmost_group = myWindow.group.get_topmost_group();
 				var topmost_group_id = topmost_group.id();
 				cloneGroupObject[topmost_group_id] = topmost_group;
@@ -367,7 +367,7 @@ const OverviewModifier36 = function(gsWorkspace, extension){
 		
 		var myWindow = this.extension.get_window(metaWindow);
 		
-		if(!myWindow.group){
+		if(!myWindow.group || myWindow.is_maximized()){
 			return 	prev(metaWindow, slot);	
 		} else {
 			

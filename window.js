@@ -37,6 +37,11 @@ Window.prototype = {
 	,is_minimized: function() {
 		return this.meta_window.minimized;
 	}
+	
+	,is_maximized: function(){
+		return this.meta_window.maximized_horizontally || this.meta_window.maximized_vertically;	
+	}
+	
 	,minimize: function() {
 		this.meta_window.minimize();
 	}
