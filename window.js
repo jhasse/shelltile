@@ -95,6 +95,9 @@ Window.prototype = {
 	
 	,on_move_to_monitor: function(metaScreen, monitorIndex){
 		delete this.marked_for_remove;
+		if(this.group){
+			this.update_geometry(true,false);
+		}
 	}
 	
 	,save_bounds: function(){

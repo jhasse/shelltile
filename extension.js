@@ -251,10 +251,11 @@ const Ext = function Ext(){
 	    		var on_window_unmaximize = this.break_loops(this.on_window_unmaximize);
 	    		var on_window_minimize = this.break_loops(this.on_window_minimize);
 	    		var on_window_create = this.break_loops(this.on_window_create);
+	    		var on_window_entered_monitor = this.break_loops(this.window_entered_monitor);
 	
 	            self.connect_and_track(self, self.gnome_settings, 'changed', Lang.bind(this, this.on_settings_changed));
 	            self.connect_and_track(self, self.settings, 'changed', Lang.bind(this, this.on_settings_changed));
-	    		self.connect_and_track(self, self.screen, 'window-entered-monitor', Lang.bind(this, this.window_entered_monitor));
+	    		self.connect_and_track(self, self.screen, 'window-entered-monitor', Lang.bind(this, on_window_entered_monitor));
 	    		self.connect_and_track(self, global.display, 'window_created', Lang.bind(this, on_window_create));
 	    		
 	    		self.connect_and_track(self, self._shellwm, 'maximize', Lang.bind(self, on_window_maximize));
