@@ -471,7 +471,6 @@ const OverviewModifier38 = function(extension){
 			clone.actor.width = geometry.width;
 			clone.actor.height = geometry.height;
 			
-			clone._fake = true;
 			clone._ids = cloneGroupObject.ids();
 			//clone.metaWindow = top_left_window.meta_window;			
 			clone.realWindow = top_left_window.get_actor();
@@ -492,9 +491,11 @@ const OverviewModifier38 = function(extension){
 					
 					var id1 = ret11._ids[j];
 					var clone = this.idClone[id1];
-					var myW = this.extension.get_window(clone.metaWindow);
-					if(!myW.is_maximized())
-						idRet[''+id1] = ret[i];					
+					if(clone){
+						var myW = this.extension.get_window(clone.metaWindow);
+						if(!myW.is_maximized())
+							idRet[''+id1] = ret[i];
+					}
 				}				
 			} else {
 				idRet[''+ret11._id] = ret[i];				
