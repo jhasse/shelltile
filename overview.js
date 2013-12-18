@@ -515,7 +515,6 @@ const OverviewModifier38 = function(extension){
 			if(isGroup){
 				var groupId = this.cloneGroup[cloneId];
 				var ret2 = idRet[cloneId].slice();
-				this.log.debug(ret2);
 				
 				if(!this.groupWindowLayouts[groupId]){
 					
