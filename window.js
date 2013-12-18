@@ -85,7 +85,9 @@ Window.prototype = {
 		if(this.group){
 			this.group.move_to_workspace(workspace);
 			var group = this.group.get_topmost_group();
-			group.maximize_size();
+			if(this.extension.keep_maximized){
+				group.maximize_size();
+			}
 			group.raise();
 			group.save_bounds();			
 		}
@@ -119,8 +121,13 @@ Window.prototype = {
 	}	
 	
 	,move_resize: function(x, y, w, h) {
-		this.meta_window.unmaximize(Meta.MaximizeFlags.VERTICAL | Meta.MaximizeFlags.HORIZONTAL);
 		this.meta_window.move_resize_frame(true, x, y, w, h);
+		if(this.is_maximized()){
+			this.saved_position.x = x;
+			this.saved_position.y = y;
+			this.saved_size.width = w;
+			this.saved_size.height = h;
+		}
 	}
 	
 	,get_title: function() {
@@ -322,9 +329,12 @@ Window.prototype = {
 				}
 				
 				if(changed_position){
-	
-					group.saved_position.x += (current_size.x - this.saved_position.x);
-					group.saved_position.y += (current_size.y - this.saved_position.y);
+						
+					var delta_x = (current_size.x - this.saved_position.x);
+					var delta_y = (current_size.y - this.saved_position.y);
+			
+					group.saved_position.x += delta_x;
+					group.saved_position.y += delta_y;
 					same_size = false;
 	
 				}
@@ -353,7 +363,18 @@ Window.prototype = {
 	,height: function() { return this.outer_rect().height; }
 	,xpos: function() { return this.outer_rect().x; }
 	,ypos: function() { return this.outer_rect().y; }
-	,outer_rect: function() { return this.meta_window.get_outer_rect();}
+	,outer_rect: function() { 
+		if(this.is_maximized() && this.saved_size){
+			var ret = this.saved_size;
+			if(this.saved_position){
+				ret.x = this.saved_position.x;
+				ret.y = this.saved_position.y;
+			}
+			return ret;
+		} else {
+			return this.meta_window.get_outer_rect();
+		}
+	}
 	,get_monitor: function() { return this.meta_window.get_monitor();}
 };
 
