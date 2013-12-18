@@ -34,6 +34,17 @@ const WindowGroup = function(first, second, type, splitPercent){
 		return "(" + this.first.id() + "," + this.second.id() + ")";		
 	}
 	
+	this.ids = function(){
+		var ret = [];
+		if(this.first.ids) ret = ret.concat(this.first.ids());
+		else ret.push(this.first.id());
+		
+		if(this.second.ids) ret = ret.concat(this.second.ids());
+		else ret.push(this.second.id());
+		
+		return ret;
+	}	
+	
 	this.get_maximized_bounds = function(){
 		return this.first.get_maximized_bounds();
 	}
@@ -105,11 +116,13 @@ const WindowGroup = function(first, second, type, splitPercent){
 		this.second.save_size();		
 	}
 	
-	this.outer_rect = function(){
+	this.outer_rect = function(for_preview){
 		var first_rect = this.first.outer_rect();
 		var second_rect = this.second.outer_rect();
-		if(this.first.is_maximized()) return second_rect;
-		else if(this.second.is_maximized()) return first_rect;
+		if(for_preview){
+			if(this.first.is_maximized()) return second_rect;
+			else if(this.second.is_maximized()) return first_rect;
+		}
 		
 		var xleft = first_rect.x < second_rect.x ? first_rect.x : second_rect.x;
 		var yleft = first_rect.y < second_rect.y ? first_rect.y : second_rect.y;
@@ -667,7 +680,13 @@ const DefaultTilingStrategy = function(ext){
 			if(group_preview){
 				
 				if(win.group) win.group.detach(win);
+				var is_maximized = window_under.is_maximized();
+				window_under.unmaximize();
 				group_preview.attach(win);
+				if(is_maximized){
+					var topmost = group_preview.get_topmost_group();
+					topmost.maximize_size();
+				}
 				
 			} else {
 				
@@ -765,7 +784,9 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.on_window_unmaximize = function(win){
 		if(win.group){
-			win.group.unminimize(true);
+			var topmost_group = win.group.get_topmost_group();
+			topmost_group.unminimize(true);
+			topmost_group.reposition();
 		}				
 	}
 	
@@ -785,6 +806,7 @@ const DefaultTilingStrategy = function(ext){
 	}
 	
 	this.on_window_raised = function(win){
+		this.log.debug("raised:" + win.id());
 		if(win.group && !win.is_maximized()){
 			win.group.raise(true);
 			win.raise();
