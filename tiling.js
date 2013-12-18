@@ -806,7 +806,7 @@ const DefaultTilingStrategy = function(ext){
 	}
 	
 	this.on_window_raised = function(win){
-		this.log.debug("raised:" + win.id());
+		//if(this.log.is_debug()) this.log.debug("raised:" + win.id());
 		if(win.group && !win.is_maximized()){
 			win.group.raise(true);
 			win.raise();
