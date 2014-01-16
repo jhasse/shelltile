@@ -220,8 +220,8 @@ Window.prototype = {
 	
 	,maximize_size: function(){
 		var bounds = this.get_maximized_bounds();
-		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 		this.maximize();
+		this.move_resize(bounds.x, bounds.y, bounds.width, bounds.height);
 	}
 	
 	,get_boundary_edges: function(group_size, current_size){
