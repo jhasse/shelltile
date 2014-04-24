@@ -690,16 +690,11 @@ const DefaultTilingStrategy = function(ext){
 				
 			} else {
 				
-				if(this.top_edge()){
-					
-					win.maximize();
-					
-				} else {
-					var preview_rect = this.get_edge_preview(win);
-					if(preview_rect){
-						win.move_resize(preview_rect.x, preview_rect.y, preview_rect.width, preview_rect.height);			
-					}
-				}				
+				var preview_rect = this.get_edge_preview(win);
+				if(preview_rect){
+					if(preview_rect.maximize) win.maximize();
+					else win.move_resize(preview_rect.x, preview_rect.y, preview_rect.width, preview_rect.height);			
+				}
 				
 			}
 		}
@@ -1030,26 +1025,109 @@ const DefaultTilingStrategy = function(ext){
 		var edge_zone_width = DefaultTilingStrategy.EDGE_ZONE_WIDTH;
 		
 		var top_zone = new Meta.Rectangle({ x: monitor_geometry.x, y: monitor_geometry.y, width: monitor_geometry.width, height: main_panel_rect.height});
+		var bottom_zone = new Meta.Rectangle({ x: monitor_geometry.x, y: monitor_geometry.y + monitor_geometry.height - main_panel_rect.height, width: monitor_geometry.width, height: main_panel_rect.height});
 		var left_zone = new Meta.Rectangle({ x: monitor_geometry.x, y: monitor_geometry.y, width: edge_zone_width, height: monitor_geometry.height});
 		var right_zone = new Meta.Rectangle({ x: monitor_geometry.x + monitor_geometry.width - edge_zone_width, y: monitor_geometry.y, width: edge_zone_width, height: monitor_geometry.height});
 		
-		if(top_zone.contains_rect(cursor_rect)){
+		var is_top = top_zone.contains_rect(cursor_rect);
+		var is_bottom = bottom_zone.contains_rect(cursor_rect);
+		var is_left = left_zone.contains_rect(cursor_rect);
+		var is_right = right_zone.contains_rect(cursor_rect);
+		var is_top_or_bottom = is_top || is_bottom;
+		var is_left_or_right = is_left || is_right;
 		
-			ret = maxi;
-		
-		} else if(left_zone.contains_rect(cursor_rect)){
+		var percent = null;
+		if(is_top_or_bottom){
 			
-			maxi.width = maxi.width / 2;
-			maxi.x = monitor_geometry.x;
-			ret = maxi;
+			var percent = (cursor_rect.x - monitor_geometry.x) / monitor_geometry.width;
 			
-		} else if(right_zone.contains_rect(cursor_rect)){
-				
-			maxi.width = maxi.width / 2;
-			maxi.x += maxi.width;
-			ret = maxi;
+		} else if(is_left_or_right){
+			
+			var percent = (cursor_rect.y - monitor_geometry.y) / monitor_geometry.height;			
 			
 		}
+		
+		if(percent){
+			
+			ret = maxi;
+			var half_perc = Math.abs(percent - 0.5);
+			
+			if(is_top_or_bottom){				
+				
+				if(half_perc >= 0.4){
+					
+					ret.width = ret.width / 2;
+					ret.height = ret.height / 2;
+					
+					if(percent >= 0.9){
+						ret.x += ret.width;
+					}
+					
+					if(is_bottom){
+						ret.y += ret.height;
+					}
+					
+				} else if(half_perc >= 0.2 && half_perc < 0.4){
+					
+					ret.height = ret.height / 2;
+					
+					if(is_bottom){
+						ret.y += ret.height;
+					}
+				
+				} else if(half_perc < 0.2){
+					
+					if(is_bottom){
+						ret.height = ret.height / 2;
+						ret.y += ret.height;
+					} else {
+						
+						ret.maximize = true;
+						
+					}
+					
+				}
+				
+				
+			} else if(is_left_or_right){
+				
+				if(half_perc >= 0.4){
+					
+					ret.width = ret.width / 2;
+					ret.height = ret.height / 2;
+					
+					if(percent >= 0.9){
+						ret.y += ret.height;
+					}
+					
+					if(is_right){
+						ret.x += ret.width;
+					}
+					
+				} else if(half_perc >= 0.2 && half_perc < 0.4){
+					
+					ret.width = ret.width / 2;
+					
+					if(is_right){
+						ret.x += ret.width;
+					}
+				
+				} else if(half_perc < 0.2){
+					
+					ret.width = ret.width / 2;
+
+					if(is_right){
+						ret.x += ret.width;
+					}
+					
+				}
+				
+				
+			}
+			
+			
+		}
+		
 		return ret;			
 		
 	}
