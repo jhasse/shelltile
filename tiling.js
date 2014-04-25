@@ -652,11 +652,32 @@ const DefaultTilingStrategy = function(ext){
 				
 			}
 		
+		} else {
+			
+			if(!this.__timeout){
+				
+				var me = this;
+				var remaining = this.lastTime + 200 - currTime + 10;
+				
+				me.__timeout = Mainloop.timeout_add(remaining, function(){
+					
+					me.on_window_move(win);
+					delete me.__timeout;
+					
+				});
+				
+			}
+			
 		}
 	}
 	
 	this.on_window_moved = function(win){
 
+		if(this.__timeout){
+			Mainloop.source_remove(this.__timeout);
+			delete this.__timeout;
+		}
+		
 		if(win.group){
 			win.update_geometry(true, false);
 			win.raise();
