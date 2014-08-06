@@ -67,6 +67,123 @@ const OverviewModifierBase = function(){
 		this.groupWindowLayouts = {}		
 		
 	}
+	
+	this.simplifyWindows = function(windows){
+		
+		this.computeGroupData(windows);
+		
+		var windows1 = [];
+		var windowIds1 = [];
+		
+		//this.log.debug(this.groupedSlots);
+
+		for(var i=0; i<this.singleSlots.length; i++){
+			
+			var singleSlot = this.singleSlots[i];
+			//if(this.log.is_debug()) this.log.debug("singleSlot: " + singleSlot);
+
+			var clone = this.idClone[singleSlot];
+			clone._id = ''+singleSlot;
+			//if(this.log.is_debug()) this.log.debug("clone.actor.x" + clone.actor.x);
+			//if(this.log.is_debug()) this.log.debug("clone.actor.y" + clone.actor.y);
+			//if(this.log.is_debug()) this.log.debug("clone.actor.width" + clone.actor.width);
+			//if(this.log.is_debug()) this.log.debug("clone.actor.height" + clone.actor.height);
+			
+			windows1.push(clone);
+			windowIds1.push('' + singleSlot);
+		}
+
+		for(var i=0; i<this.groupedSlots.length; i++){
+			
+			var groupedSlot = this.groupedSlots[i];
+			var clone = {actor: {}};
+			var cloneGroupObject = this.cloneGroupObject[groupedSlot];
+			var top_left_window = cloneGroupObject.top_left_window();
+			var top_left_clone = this.idClone[top_left_window.id()];
+			
+			var geometry = this.groupGeometry[groupedSlot];
+			clone.actor.x = geometry.x;
+			clone.actor.y = geometry.y;
+			clone.actor.width = geometry.width;
+			clone.actor.height = geometry.height;
+			
+			clone._ids = cloneGroupObject.ids();
+			//clone.metaWindow = top_left_window.meta_window;			
+			clone.realWindow = top_left_window.get_actor();
+			//clone.overlay = top_left_clone.overlay;
+			
+			windows1.push(clone);
+			windowIds1.push('' + groupedSlot);
+		}		
+		
+		return  [windows1, windowIds1];
+	}
+	
+	this.explodeSlots = function(ret){
+		
+		var idRet = {};
+		for(var i=0; i<ret.length; i++){
+			var ret11 = ret[i][3];
+			if(ret11._ids){
+				for(var j=0; j<ret11._ids.length; j++){
+					
+					var id1 = ret11._ids[j];
+					var clone = this.idClone[id1];
+					if(clone){
+						var myW = this.extension.get_window(clone.metaWindow);
+						if(!myW.is_maximized())
+							idRet[''+id1] = ret[i];
+					}
+				}				
+			} else {
+				idRet[''+ret11._id] = ret[i];				
+			}	
+		}
+		
+		var ret1 = [];
+		
+		for(var i=0; i<this.clones.length; i++){
+			
+			var cloneId = '' + this.clones[i];
+			var clone = this.idClone[cloneId];
+			var myWindow = this.extension.get_window(clone.metaWindow);
+			
+			var isGroup = this.cloneGroup[cloneId] != cloneId && myWindow.group;
+			
+			if(isGroup){
+				var groupId = this.cloneGroup[cloneId];
+				var ret2 = idRet[cloneId].slice();
+				
+				if(!this.groupWindowLayouts[groupId]){
+					
+					var groupGeometry = this.groupGeometry[groupId];
+					let [x, y, scale, clone2] = ret2;
+					let width = groupGeometry.width * scale, height = groupGeometry.height * scale;
+					
+					var scaled_group_rect = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
+					var topmost_group = myWindow.group.get_topmost_group();
+					
+					this.groupWindowLayouts[groupId] = this.calculateGroupWindowLayouts(topmost_group, scaled_group_rect, scale);
+					
+				}
+				
+				var groupWindowLayouts = this.groupWindowLayouts[groupId];
+				var windowLayout = groupWindowLayouts[cloneId];
+				
+				ret2[0] = windowLayout[0];
+				ret2[1] = windowLayout[1];
+				ret2[3] = clone;
+				
+			} else {
+		
+				var ret2 = idRet[cloneId].slice();
+			
+			}
+			ret1.push(ret2);
+			
+		}
+		return ret1;
+	}
 
 	this.calculateGroupWindowLayouts =  function(topmost_group, scaled_group_rect, scale){
 		
@@ -434,124 +551,43 @@ const OverviewModifier38 = function(extension){
 	
 	this.computeWindowSlots = function(windows, prev){
 		
-		this.computeGroupData(windows);
-		
-		var windows1 = [];
-		var windowIds1 = [];
-		
-		//this.log.debug(this.groupedSlots);
+		let [windows1, windowsIds1] = this.simplifyWindows(windows);
 
-		for(var i=0; i<this.singleSlots.length; i++){
-			
-			var singleSlot = this.singleSlots[i];
-			//if(this.log.is_debug()) this.log.debug("singleSlot: " + singleSlot);
-
-			var clone = this.idClone[singleSlot];
-			clone._id = ''+singleSlot;
-			//if(this.log.is_debug()) this.log.debug("clone.actor.x" + clone.actor.x);
-			//if(this.log.is_debug()) this.log.debug("clone.actor.y" + clone.actor.y);
-			//if(this.log.is_debug()) this.log.debug("clone.actor.width" + clone.actor.width);
-			//if(this.log.is_debug()) this.log.debug("clone.actor.height" + clone.actor.height);
-			
-			windows1.push(clone);
-			windowIds1.push('' + singleSlot);
-		}
-
-		for(var i=0; i<this.groupedSlots.length; i++){
-			
-			var groupedSlot = this.groupedSlots[i];
-			var clone = {actor: {}};
-			var cloneGroupObject = this.cloneGroupObject[groupedSlot];
-			var top_left_window = cloneGroupObject.top_left_window();
-			var top_left_clone = this.idClone[top_left_window.id()];
-			
-			var geometry = this.groupGeometry[groupedSlot];
-			clone.actor.x = geometry.x;
-			clone.actor.y = geometry.y;
-			clone.actor.width = geometry.width;
-			clone.actor.height = geometry.height;
-			
-			clone._ids = cloneGroupObject.ids();
-			//clone.metaWindow = top_left_window.meta_window;			
-			clone.realWindow = top_left_window.get_actor();
-			//clone.overlay = top_left_clone.overlay;
-			
-			windows1.push(clone);
-			windowIds1.push('' + groupedSlot);
-		}
-
-		var ret = prev(windows1);
-		//if(this.log.is_debug()) this.log.debug("ret" + ret);
+		var slots = prev(windows1);
 		
-		var idRet = {};
-		for(var i=0; i<ret.length; i++){
-			var ret11 = ret[i][3];
-			if(ret11._ids){
-				for(var j=0; j<ret11._ids.length; j++){
-					
-					var id1 = ret11._ids[j];
-					var clone = this.idClone[id1];
-					if(clone){
-						var myW = this.extension.get_window(clone.metaWindow);
-						if(!myW.is_maximized())
-							idRet[''+id1] = ret[i];
-					}
-				}				
-			} else {
-				idRet[''+ret11._id] = ret[i];				
-			}	
-		}
-		
-		var ret1 = [];
-		
-		for(var i=0; i<this.clones.length; i++){
-			
-			var cloneId = '' + this.clones[i];
-			var clone = this.idClone[cloneId];
-			var myWindow = this.extension.get_window(clone.metaWindow);
-			
-			var isGroup = this.cloneGroup[cloneId] != cloneId && myWindow.group;
-			
-			if(isGroup){
-				var groupId = this.cloneGroup[cloneId];
-				var ret2 = idRet[cloneId].slice();
-				
-				if(!this.groupWindowLayouts[groupId]){
-					
-					var groupGeometry = this.groupGeometry[groupId];
-					let [x, y, scale, clone2] = ret2;
-					let width = groupGeometry.width * scale, height = groupGeometry.height * scale;
-					
-					var scaled_group_rect = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
-					var topmost_group = myWindow.group.get_topmost_group();
-					
-					this.groupWindowLayouts[groupId] = this.calculateGroupWindowLayouts(topmost_group, scaled_group_rect, scale);
-					
-				}
-				
-				var groupWindowLayouts = this.groupWindowLayouts[groupId];
-				var windowLayout = groupWindowLayouts[cloneId];
-				
-				ret2[0] = windowLayout[0];
-				ret2[1] = windowLayout[1];
-				ret2[3] = clone;
-				
-			} else {
-			
-				var ret2 = idRet[cloneId].slice();
-			
-			}
-			
-			ret1.push(ret2);
-			
-		}
-		
-		return ret1;
+		return this.explodeSlots(slots);
 		
 	}
 	
 }
 OverviewModifier38.prototype = new OverviewModifierBase();
+
+const OverviewModifier310 = function(extension){
+	
+	this.extension = extension;
+	this.log = Log.getLogger("OverviewModifier310");
+	
+	this.computeLayout = function(windows, prev){
+		
+		var me = this;
+		let [windows1, windowsIds1] = this.simplifyWindows(windows);
+
+		var layout = prev(windows1);
+		
+		var prevComputeWindowSlots = layout.strategy.computeWindowSlots;
+		layout.strategy.computeWindowSlots = function(layout, area){
+			
+			var prevC = Lang.bind(this, prevComputeWindowSlots);
+			var slots = prevC(layout, area);
+			return me.explodeSlots(slots);
+		}
+		
+		return layout;
+		
+	}
+	
+}
+OverviewModifier310.prototype = new OverviewModifierBase();
 
 const OverviewModifier = function(){};
 
@@ -563,6 +599,7 @@ OverviewModifier.register = function(extension){
 	var prevComputeWindowLayout = GSWorkspace.prototype._computeWindowLayout;
 	var prevOrderWindowsByMotionAndStartup = GSWorkspace.prototype._orderWindowsByMotionAndStartup
 	var prevGetSlotGeometry = GSWorkspace.prototype._getSlotGeometry;
+	var prevComputeLayout = GSWorkspace.prototype._computeLayout;
 	
 	let version36 = Util.versionCompare(Config.PACKAGE_VERSION, "3.6") >= 0 && Util.versionCompare(Config.PACKAGE_VERSION, "3.7") < 0;
 	version36 = version36 && prevComputeAllWindowSlots;
@@ -573,6 +610,9 @@ OverviewModifier.register = function(extension){
 	
 	let version38 = Util.versionCompare(Config.PACKAGE_VERSION, "3.7") >= 0 && Util.versionCompare(Config.PACKAGE_VERSION, "3.9") < 0;
 	version38 = version38 && prevComputeAllWindowSlots;
+	
+	let version310 = Util.versionCompare(Config.PACKAGE_VERSION, "3.9") >= 0;
+	version310 = version310 && prevComputeLayout;
 	
 	if(version36){
 	
@@ -624,6 +664,16 @@ OverviewModifier.register = function(extension){
 			
 			this._shellTileOverviewModifier = new OverviewModifier38(extension);
 			return this._shellTileOverviewModifier.computeWindowSlots(windows, prev);
+		}
+		
+	} else if(version310){
+		
+		GSWorkspace.prototype._computeLayout = function(windows){
+			var prev = Lang.bind(this, prevComputeLayout);
+			if(!extension.enabled) return prev(windows);
+			
+			this._shellTileOverviewModifier = new OverviewModifier310(extension);
+			return this._shellTileOverviewModifier.computeLayout(windows, prev);	
 		}
 		
 	}
