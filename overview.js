@@ -64,7 +64,8 @@ const OverviewModifierBase = function(){
 		this.cloneGroupObject = cloneGroupObject;
 		this.clones = clones1;
 		this.idClone = idClone;
-		this.groupWindowLayouts = {}		
+		this.groupWindowLayouts = {};
+		this.lastGroupPosition = {};		
 		
 	}
 	
@@ -75,7 +76,7 @@ const OverviewModifierBase = function(){
 		var windows1 = [];
 		var windowIds1 = [];
 		
-		//this.log.debug(this.groupedSlots);
+		if(this.log.is_debug()) this.log.debug("simplifyWindows");
 
 		for(var i=0; i<this.singleSlots.length; i++){
 			
@@ -120,7 +121,9 @@ const OverviewModifierBase = function(){
 	}
 	
 	this.explodeSlots = function(ret){
-		
+	
+		if(this.log.is_debug()) this.log.debug("explodeSlots");
+	
 		var idRet = {};
 		for(var i=0; i<ret.length; i++){
 			var ret11 = ret[i][3];
@@ -153,23 +156,30 @@ const OverviewModifierBase = function(){
 			if(isGroup){
 				var groupId = this.cloneGroup[cloneId];
 				var ret2 = idRet[cloneId].slice();
+				let [x, y, scale, clone2] = ret2;
 				
-				if(!this.groupWindowLayouts[groupId]){
+				var update = !this.groupWindowLayouts[groupId] || !this.lastGroupPosition[groupId];
+				if(!update){
+					var ret_last = this.lastGroupPosition[groupId];
+					update = ret_last[0] != x || ret_last[1] != y || ret_last[2] != scale;
+				}
+	
+				if(update){
 					
 					var groupGeometry = this.groupGeometry[groupId];
-					let [x, y, scale, clone2] = ret2;
 					let width = groupGeometry.width * scale, height = groupGeometry.height * scale;
 					
 					var scaled_group_rect = new Meta.Rectangle({ x: x, y: y, width: width, height: height});
 					var topmost_group = myWindow.group.get_topmost_group();
 					
 					this.groupWindowLayouts[groupId] = this.calculateGroupWindowLayouts(topmost_group, scaled_group_rect, scale);
-					
+					this.lastGroupPosition[groupId] = ret2;
 				}
 				
 				var groupWindowLayouts = this.groupWindowLayouts[groupId];
 				var windowLayout = groupWindowLayouts[cloneId];
-				
+				this.log.debug("slot: " + windowLayout);			
+	
 				ret2[0] = windowLayout[0];
 				ret2[1] = windowLayout[1];
 				ret2[3] = clone;
