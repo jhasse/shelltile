@@ -303,7 +303,6 @@ const Ext = function Ext(){
 		win.marked_for_remove = true;
 		
 		Mainloop.idle_add(Lang.bind(this, function () {
-			
 			if(win.marked_for_remove){
 				if(this.strategy && this.strategy.on_window_remove) this.strategy.on_window_remove(win);
 				this.disconnect_window(win);
@@ -379,9 +378,10 @@ const Ext = function Ext(){
 			return;
 		}
 		
-		var workspace = win.get_workspace();
 		//if(this.log.is_debug()) this.log.debug("workspace_changed");
-		win.on_move_to_workspace(workspace);
+		var workspace = win.get_workspace();
+		//if(this.log.is_debug()) this.log.debug("end workspace_changed");
+		if(win && workspace) win.on_move_to_workspace(workspace);
 	}
 	
 	self.on_window_raised = function(win){
@@ -468,12 +468,12 @@ const Ext = function Ext(){
 				}
 				return false;
 			});
-			this.connect_and_track(this, actor, event_name + '-changed', signal_handler_changed);
+			this.connect_and_track(this, actor.get_meta_window(), event_name + '-changed', signal_handler_changed);
 		});
 	}	
 	
 	self.disconnect_window = function(win){
-		//if(this.log.is_debug()) this.log.debug("disconnect_window: " + win);
+		//if(this.log.is_debug()) this.log.debug("disconnect_window");
 		var actor = win.get_actor();
 		if(actor) this.disconnect_tracked_signals(this, actor);
 		this.disconnect_tracked_signals(this, win.meta_window);

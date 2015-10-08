@@ -107,6 +107,10 @@ const OverviewModifierBase = function(){
 			clone.actor.y = geometry.y;
 			clone.actor.width = geometry.width;
 			clone.actor.height = geometry.height;
+			clone.x = geometry.x;
+			clone.y = geometry.y;
+			clone.width = geometry.width;
+			clone.height = geometry.height;			
 			
 			clone._ids = cloneGroupObject.ids();
 			//clone.metaWindow = top_left_window.meta_window;			
@@ -165,7 +169,6 @@ const OverviewModifierBase = function(){
 				}
 	
 				if(update){
-					
 					var groupGeometry = this.groupGeometry[groupId];
 					let width = groupGeometry.width * scale, height = groupGeometry.height * scale;
 					
@@ -178,7 +181,7 @@ const OverviewModifierBase = function(){
 				
 				var groupWindowLayouts = this.groupWindowLayouts[groupId];
 				var windowLayout = groupWindowLayouts[cloneId];
-				this.log.debug("slot: " + windowLayout);			
+				//if(this.log.is_debug()) this.log.debug("slot: " + windowLayout);			
 	
 				ret2[0] = windowLayout[0];
 				ret2[1] = windowLayout[1];
@@ -192,6 +195,7 @@ const OverviewModifierBase = function(){
 			ret1.push(ret2);
 			
 		}
+		if(this.log.is_debug()) this.log.debug("explodeSlots end");
 		return ret1;
 	}
 
@@ -589,6 +593,7 @@ const OverviewModifier310 = function(extension){
 			
 			var prevC = Lang.bind(this, prevComputeWindowSlots);
 			var slots = prevC(layout, area);
+			
 			return me.explodeSlots(slots);
 		}
 		
