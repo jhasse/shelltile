@@ -114,6 +114,7 @@ Window.prototype = {
 	}
 	
 	,move_to_workspace: function(workspace){
+		if(!workspace) return;
 		this.meta_window.change_workspace(workspace.meta_workspace);
 		delete this.marked_for_remove;
 	}
@@ -171,8 +172,8 @@ Window.prototype = {
 			!(this.floating_window() || this.on_all_workspaces());
 	}
 	,can_be_tiled: function() {
-		if(!this._windowTracker.is_window_interesting(this.meta_window)) {
-			// if(this.log.is_debug()) this.log.debug("uninteresting window: " + this);
+		if(this.meta_window.is_skip_taskbar()) {
+			if(this.log.is_debug()) this.log.debug("uninteresting window: " + this);
 			return false;
 		}
 		var window_class = this.window_class();
