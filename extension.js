@@ -468,7 +468,11 @@ const Ext = function Ext(){
 				}
 				return false;
 			});
-			this.connect_and_track(this, actor.get_meta_window(), event_name + '-changed', signal_handler_changed);
+			try {
+				this.connect_and_track(this, actor, event_name + '-changed', signal_handler_changed);
+			} catch(e){
+				this.connect_and_track(this, actor.get_meta_window(), event_name + '-changed', signal_handler_changed);
+			}
 		});
 	}	
 	

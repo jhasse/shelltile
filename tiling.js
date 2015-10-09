@@ -766,6 +766,9 @@ const DefaultTilingStrategy = function(ext){
 	this.on_window_resize = function(win){
 		win.raise();
 		
+		/*
+		 * not yet, causees flickering on some types of windows like nautilus 
+		
 		var currTime = new Date().getTime();
 		if(!this.lastTime || (currTime - this.lastTime) > 200){
 			
@@ -793,6 +796,7 @@ const DefaultTilingStrategy = function(ext){
 			}
 			
 		}
+		*/
 	}
 	
 	this.on_window_resized = function(win){
