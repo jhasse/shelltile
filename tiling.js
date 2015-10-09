@@ -765,6 +765,34 @@ const DefaultTilingStrategy = function(ext){
 	
 	this.on_window_resize = function(win){
 		win.raise();
+		
+		var currTime = new Date().getTime();
+		if(!this.lastTime || (currTime - this.lastTime) > 200){
+			
+			if(win.group){ 
+			
+				this.lastTime = currTime;
+				win.update_geometry(false, true);
+		
+			}
+		
+		} else {
+			
+			if(!this.__timeout){
+				var me = this;
+				
+				var remaining = this.lastTime + 200 - currTime + 10;
+				
+				me.__timeout = Mainloop.timeout_add(remaining, function(){
+					
+					me.on_window_resize(win);
+					delete me.__timeout;
+					
+				});
+				
+			}
+			
+		}
 	}
 	
 	this.on_window_resized = function(win){
