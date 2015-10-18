@@ -376,7 +376,11 @@ Window.prototype = {
 			}
 			return ret;
 		} else {
-			return this.meta_window.get_outer_rect();
+			if(this.meta_window.get_frame_rect) return this.meta_window.get_frame_rect();
+			else {
+				// removed in 3.16
+				return this.meta_window.get_outer_rect();
+			}
 		}
 	}
 	,get_monitor: function() { return this.meta_window.get_monitor();}
