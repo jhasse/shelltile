@@ -418,6 +418,20 @@ const Ext = function Ext(){
 		
 		if(this.strategy && this.strategy.on_window_resized) this.strategy.on_window_resized(win);
 		//if(this.log.is_debug()) this.log.debug("window resized");
+	}
+	
+	self.on_window_drag_begin = function(win) {
+		if(!this.enabled) return;
+		
+		if(this.strategy && this.strategy.on_window_drag_begin) this.strategy.on_window_drag_begin(win);
+		//if(this.log.is_debug()) this.log.debug("window drag begin");
+	}	
+	
+	self.on_window_drag_end = function(win) {
+		if(!this.enabled) return;
+		
+		if(this.strategy && this.strategy.on_window_drag_end) this.strategy.on_window_drag_end(win);
+		//if(this.log.is_debug()) this.log.debug("window drag end");
 	}	
 
 	self.break_loops = function(func){
@@ -469,6 +483,7 @@ const Ext = function Ext(){
 				return false;
 			});
 			try {
+				// from 3.12 up
 				this.connect_and_track(this, actor, event_name + '-changed', signal_handler_changed);
 			} catch(e){
 				this.connect_and_track(this, actor.get_meta_window(), event_name + '-changed', signal_handler_changed);
@@ -521,6 +536,8 @@ const Ext = function Ext(){
 		
 		bind_to_window_change('position', move_ops, Lang.bind(this, on_window_move),  Lang.bind(this, on_window_moved));
 		bind_to_window_change('size',     resize_ops, Lang.bind(this, on_window_resize), Lang.bind(this, on_window_resized));
+		//this.connect_and_track(this, meta_window, 'drag-begin', Lang.bind(this, on_window_drag_begin));
+		//this.connect_and_track(this, meta_window, 'drag-end', Lang.bind(this, on_window_drag_end));
 		this.connect_and_track(this, meta_window, 'raised', Lang.bind(this, on_window_raised));
 		this.connect_and_track(this, meta_window, "workspace_changed", Lang.bind(this, on_workspace_changed));
 		win._connected = true;

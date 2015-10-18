@@ -605,6 +605,7 @@ const DefaultTilingStrategy = function(ext){
 	}	
 	
 	this.on_window_move = function(win){
+		//if(!win._dragging) return;
 		win.unmaximize();
 		win.raise();
 
@@ -797,6 +798,15 @@ const DefaultTilingStrategy = function(ext){
 			
 		}
 		*/
+	}
+
+	
+	this.on_window_drag_begin = function(win){
+		win._dragging = true; 
+	}
+	
+	this.on_window_drag_end = function(win){
+		delete win._dragging;
 	}
 	
 	this.on_window_resized = function(win){
